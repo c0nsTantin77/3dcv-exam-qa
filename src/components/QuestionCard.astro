@@ -1,0 +1,251 @@
+---
+import type { QuestionData } from "../content.config";
+import { renderQuestion, renderAnswer, mdInline } from "../lib/md";
+import { url } from "../lib/paths";
+import { kindOf, examOf, EXAM_NAMES } from "../lib/exams";
+
+interface Props {
+  q: QuestionData;
+  anchor: string;
+  qnum?: string;
+}
+const { q, anchor, qnum = "" } = Astro.props;
+
+const isAi = q.type === "ai";
+const isMc = q.type === "mc" || (isAi && Array.isArray(q.options));
+const calc = q.calc ?? [];
+const isCalc = !isMc && calc.length > 0;
+const fmtLabel = isMc ? "Multiple choice" : isCalc ? "Calculation" : "Open";
+
+function freqBadge(f: number): { cls: string; label: string } {
+  if (f >= 6) return { cls: "freq-hot", label: `🔥 ${f}×` };
+  if (f >= 3) return { cls: "freq-mid", label: `🔥 ${f}×` };
+  if (f >= 1) return { cls: "freq-low", label: `${f}×` };
+  return { cls: "freq-ai", label: "practice" };
+}
+const fb = freqBadge(q.freq);
+
+const typeLabel = { mc: "Multiple Choice", open: "Open", ai: "AI" }[q.type];
+const typeCls = { mc: "t-mc", open: "t-open", ai: "t-ai" }[q.type];
+
+const LETTERS = "ABCDEFGH";
+const qHtml = renderQuestion(q.q);
+const answerHtml = renderAnswer(q.answer);
+const extendHtml = q.extend ? renderAnswer(q.extend) : "";
+
+const options = (q.options ?? []).map((o, i) => ({
+  letter: LETTERS[i],
+  correct: o.correct,
+  textHtml: mdInline(o.text),
+}));
+const correctLetters = options.filter((o) => o.correct).map((o) => o.letter);
+const correctLine = correctLetters.length
+  ? correctLetters.join(", ")
+  : "none (all options are false)";
+
+const tags = q.tags ?? [];
+
+// Source chips carry the examiner: a "primary" chip means the paper was written
+// by the current examiner (Cremers) and is therefore the highest-value revision.
+const srcChips = q.sources.map((s) => ({
+  text: s,
+  kind: kindOf(s),
+  title: EXAM_NAMES[examOf(s) ?? ""] ?? undefined,
+}));
+const fromPrimary = srcChips.some((s) => s.kind === "primary");
+---
+
+<details
+  class="q"
+  id={anchor}
+  data-type={q.type}
+  data-freq={q.freq}
+  data-primary={fromPrimary ? "1" : undefined}
+>
+  <summary>
+    <div class="q-head">
+      {qnum && <span class="q-num">{qnum}</span>}
+      {
+        isAi ? (
+          <>
+            <span class="qtype t-ai">AI-generated</span>
+            <span class="fmt-badge">{fmtLabel}</span>
+          </>
+        ) : (
+          <>
+            <span class={`qtype ${typeCls}`}>{typeLabel}</span>
+            <span class={`badge ${fb.cls}`} title="Times this point appears across exams">
+              {fb.label}
+            </span>
+            {fromPrimary && (
+              <span class="examiner-badge" title="Written by the current examiner, Prof. Cremers">
+                ★ Cremers
+              </span>
+            )}
+            <span class="q-src">
+              {srcChips.map((s) => (
+                <span class={s.kind === "ai" ? "src-ai" : `src src-${s.kind}`} title={s.title}>
+                  {s.text}
+                </span>
+              ))}
+            </span>
+          </>
+        )
+      }
+    </div>
+    <div class="q-text" set:html={qHtml} />
+  </summary>
+  <div class="q-body">
+    {
+      q.figure && (
+        <figure class="q-figure">
+          <img src={url(`/figures/${q.figure.src}`)} alt={q.figure.alt ?? ""} loading="lazy" />
+          {q.figure.caption && <figcaption set:html={mdInline(q.figure.caption)} />}
+        </figure>
+      )
+    }
+    {
+      isMc ? (
+        <div class="quiz">
+          <p class="quiz-hint">
+            Select the options you think are correct (it may be none), then check.
+          </p>
+          <ul class="options interactive">
+            {options.map((o) => (
+              <li class="opt">
+                <label>
+                  <input type="checkbox" data-correct={String(o.correct)} />
+                  <span class="opt-letter">{o.letter}</span>
+                  <span class="opt-text" set:html={o.textHtml} />
+                  <span class="opt-mark" aria-hidden="true" />
+                </label>
+              </li>
+            ))}
+          </ul>
+          <div class="quiz-actions">
+            <button type="button" class="check-btn">
+              Check answer
+            </button>
+            <button type="button" class="reset-btn" hidden>
+              Try again
+            </button>
+          </div>
+          <div class="reveal" hidden>
+            <div class="verdict" role="status" />
+            <div class="correct-line">
+              ✅ Correct: <b>{correctLine}</b>
+            </div>
+            <div class="answer">
+              <div class="answer-label">Answer</div>
+              <Fragment set:html={answerHtml} />
+            </div>
+            {extendHtml && (
+              <div class="extend">
+                <div class="extend-label">💡 Extended memory</div>
+                <Fragment set:html={extendHtml} />
+              </div>
+            )}
+          </div>
+        </div>
+      ) : isCalc ? (
+        <div class="selftest calc">
+          <p class="quiz-hint">
+            Compute and enter the value{calc.length > 1 ? "s" : ""}, then check.
+          </p>
+          <div class="calc-fields">
+            {calc.map((c) => (
+              <label class="calc-field">
+                {c.label && <span class="calc-label">{c.label}</span>}
+                <input
+                  type="text"
+                  class="calc-in"
+                  autocomplete="off"
+                  inputmode="text"
+                  data-val={String(c.value)}
+                  data-tol={String(c.tol ?? 0)}
+                />
+                <span class="calc-mark" aria-hidden="true" />
+              </label>
+            ))}
+          </div>
+          <div class="quiz-actions">
+            <button type="button" class="check-btn reveal-btn">Check</button>
+            <button type="button" class="reset-btn self-again" hidden>Try again</button>
+          </div>
+          <div class="open-reveal" hidden>
+            <div class="answer">
+              <div class="answer-label">Answer</div>
+              <Fragment set:html={answerHtml} />
+            </div>
+            {extendHtml && (
+              <div class="extend">
+                <div class="extend-label">💡 Extended memory</div>
+                <Fragment set:html={extendHtml} />
+              </div>
+            )}
+            <div class="self-assess" hidden>
+              <span class="self-assess-q">How did you do?</span>
+              <button type="button" class="self-btn got-btn">✓ Got it</button>
+              <button type="button" class="self-btn miss-btn">✗ Missed → wrong book</button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div class="selftest">
+          <p class="quiz-hint">Try it first — write your answer, then reveal to compare.</p>
+          <textarea class="self-area" rows="3" placeholder="Write your answer (optional)…"></textarea>
+          <div class="quiz-actions">
+            <button type="button" class="check-btn reveal-btn">Show answer</button>
+            <button type="button" class="reset-btn self-again" hidden>Try again</button>
+          </div>
+          <div class="open-reveal" hidden>
+            <div class="answer">
+              <div class="answer-label">Answer</div>
+              <Fragment set:html={answerHtml} />
+            </div>
+            {extendHtml && (
+              <div class="extend">
+                <div class="extend-label">💡 Extended memory</div>
+                <Fragment set:html={extendHtml} />
+              </div>
+            )}
+            <div class="self-assess" hidden>
+              <span class="self-assess-q">How did you do?</span>
+              <button type="button" class="self-btn got-btn">✓ Got it</button>
+              <button type="button" class="self-btn miss-btn">✗ Missed → wrong book</button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    {
+      tags.length > 0 && (
+        <div class="tags">
+          {tags.map((t) => (
+            <a class="tag" href={`${url("/tags")}?t=${encodeURIComponent(t)}`}>
+              {t}
+            </a>
+          ))}
+        </div>
+      )
+    }
+    <div class="study">
+      <label class="study-rev"><input type="checkbox" class="rev-box" /> Reviewed</label>
+      <button type="button" class="wrong-btn">★ Wrong book</button>
+      <button type="button" class="note-btn">📝 Note</button>
+      <button type="button" class="srs-due" hidden></button>
+      <div class="note-wrap" hidden>
+        <textarea
+          class="note-area"
+          rows="3"
+          maxlength="1000"
+          placeholder="Your notes — Markdown & $math$ supported…"></textarea>
+        <div class="note-foot">
+          <span class="note-md-hint">Markdown &amp; <span class="mono">$math$</span></span>
+          <span class="note-count">0 / 1000</span>
+        </div>
+        <div class="note-preview md-note" hidden></div>
+      </div>
+    </div>
+  </div>
+</details>

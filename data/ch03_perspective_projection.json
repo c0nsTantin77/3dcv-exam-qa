@@ -1,0 +1,962 @@
+{
+  "id": "ch03",
+  "roman": "III",
+  "title": "Perspective Projection",
+  "blurb": "The pinhole camera, intrinsic and extrinsic parameters, computing pixel coordinates by hand, projective geometry and preimage/coimage, spherical projection and radial distortion — the chapter with the most arithmetic on the exam paper.",
+  "knowledge_points": [
+    {
+      "id": "pinhole-model",
+      "title": "The Pinhole Camera and Perspective Projection",
+      "recap": "**Ideal perspective projection.** A 3D point in camera coordinates $\\tilde X=(X,Y,Z)^\\top$ maps to the image plane at distance $f$ by\n$$\\pi(\\tilde X)=\\Big(\\frac{X}{Z},\\frac{Y}{Z}\\Big)^\\top,\\qquad x=f\\frac{X}{Z},\\ \\ y=f\\frac{Y}{Z}.$$\n**Not linear in Euclidean coordinates.** The division by the depth $Z$ makes the map non-linear — this is the answer the marking scheme wants, explicitly. In **homogeneous (4D projective)** coordinates it *does* become linear:\n$$\\lambda\\begin{pmatrix}u\\\\v\\\\1\\end{pmatrix}=K\\,\\Pi_0\\,g\\begin{pmatrix}X\\\\Y\\\\Z\\\\1\\end{pmatrix},\\qquad \\Pi_0=\\begin{pmatrix}1&0&0&0\\\\0&1&0&0\\\\0&0&1&0\\end{pmatrix},$$\nwith the scale factor $\\lambda=Z$ (the depth) read off from the third row.\n**What perspective projection preserves and destroys.** It maps **straight lines to straight lines** (a line's preimage is a plane through the origin, which cuts the image plane in a line) — but it does **not** preserve parallelism (parallel lines meet at a vanishing point), nor angles, lengths or ratios.\n**Scale ambiguity.** Scaling a point $\\tilde X\\mapsto\\alpha\\tilde X$ leaves the pixel unchanged: $\\frac{f\\cdot\\alpha X}{\\alpha Z}+o_x=\\frac{fX}{Z}+o_x$. An object twice as large at twice the distance is indistinguishable — a single image determines only the **ray**, never the depth. This is the root of the scale ambiguity in two-view reconstruction.\n**Visibility.** A point is only imaged if it is **in front** of the camera ($Z>0$ with the optical axis along $+z$) **and** its pixel falls inside the sensor. Occlusion matters too: two opaque objects on the same ray project to the same pixel, and only the nearer one is seen.\n**Intrinsics vs extrinsics.** Intrinsics ($K$) are determined by the lens and sensor (focal length, pixel size, principal point, skew) — **not** by where the camera is. Extrinsics ($R,T$) are determined only by the camera's position and orientation.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 3.5"
+          ],
+          "q": "Which of the following statements about perspective projection are true, assuming an ideal pinhole camera model (i.e. ignoring lens distortion)?",
+          "answer": "**True.** Perspective projection is linear **in 4D homogeneous space** (that is the whole point of homogeneous coordinates); it **preserves straight lines**; and the **extrinsic** parameters are determined only by the camera's position and orientation.\n**False.** It is **not** linear in 3D Euclidean space — the division by $Z$ breaks linearity. It does **not** preserve parallel lines — parallels meet at a vanishing point. The **intrinsics** are not determined by the lens alone: the pixel size/aspect and the principal point come from the sensor and its alignment as well.",
+          "extend": "Lines survive, parallelism does not. Remember the railway-track picture.",
+          "options": [
+            {
+              "text": "Perspective projection in 3D Euclidean space is a linear transformation.",
+              "correct": false
+            },
+            {
+              "text": "Perspective projection in 4D homogeneous space is a linear transformation.",
+              "correct": true
+            },
+            {
+              "text": "Perspective projection preserves parallel lines.",
+              "correct": false
+            },
+            {
+              "text": "Perspective projection preserves straight lines.",
+              "correct": true
+            },
+            {
+              "text": "The intrinsic parameters of a digital camera are only determined by the lens.",
+              "correct": false
+            },
+            {
+              "text": "The extrinsic parameters of a digital camera are only determined by the camera's position and orientation.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Perspective projection",
+            "Homogeneous coordinates",
+            "Intrinsics",
+            "Extrinsics"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 3.5"
+          ],
+          "q": "Is perspective projection a linear mapping in Euclidean 3D coordinates? Justify your answer.",
+          "answer": "**No, perspective projection is not a linear mapping.**\n**Reason.** It involves a **division by the depth** (the $z$-coordinate) of the point: $u=f\\tfrac{X}{Z}+o_x$, $v=f\\tfrac{Y}{Z}+o_y$. That division introduces a non-linear relationship between the 3D coordinates and the 2D pixel coordinates — e.g. $\\pi(\\tilde X_1+\\tilde X_2)\\neq\\pi(\\tilde X_1)+\\pi(\\tilde X_2)$.",
+          "extend": "The marking scheme explicitly wants \"division by $z$\". Mentioning homogeneous coordinates or the 4th dimension earns nothing here — the question asks about **Euclidean** space.",
+          "tags": [
+            "Perspective projection",
+            "Linearity"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX03 2"
+          ],
+          "q": "Working in camera coordinates with $K=\\begin{pmatrix}f&0&o_x\\\\0&f&o_y\\\\0&0&1\\end{pmatrix}$: (a) starting from $\\lambda(u,v,1)^\\top=K\\tilde X$, compute $\\lambda$ and show this is equivalent to $u=\\tfrac{fX}{Z}+o_x$, $v=\\tfrac{fY}{Z}+o_y$. (b) Explain the classic ambiguity that an object cannot be distinguished from one twice as big and twice as far away. (c) For $f=540$, $o_x=320$, $o_y=240$, compute the pixel coordinates of $\\tilde X=(60,100,180)^\\top$ and decide whether it lies inside a $640\\times480$ image.",
+          "answer": "**(a)** $\\lambda\\begin{pmatrix}u\\\\v\\\\1\\end{pmatrix}=\\begin{pmatrix}fX+o_xZ\\\\fY+o_yZ\\\\Z\\end{pmatrix}$. The third row gives $\\lambda=Z$, hence $u=\\tfrac{fX+o_xZ}{Z}=\\tfrac{fX}{Z}+o_x$ and likewise $v=\\tfrac{fY}{Z}+o_y$.\n**(b)** Scaling $\\tilde X\\to2\\tilde X$ gives $u=\\tfrac{f\\cdot2X}{2Z}+o_x=\\tfrac{fX}{Z}+o_x$ — identical pixel coordinates. Perspective projection maps every point on a ray through the origin to the same pixel, so a single image cannot recover depth.\n**(c)** $u=\\tfrac{540\\cdot60}{180}+320=180+320=500$, $v=\\tfrac{540\\cdot100}{180}+240=300+240=540$. Since $v=540>480$, the point lies **outside** the image.",
+          "extend": "$\\lambda=Z$ always — the homogeneous scale factor of a pinhole projection *is* the depth.",
+          "tags": [
+            "Perspective projection",
+            "Intrinsics",
+            "Scale ambiguity"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 2f"
+          ],
+          "q": "A canonically oriented camera $C_1$ captures an image of the world $X$. Another camera $C_2$ captures the world, but the world is transformed by a matrix $g$ before being captured by $C_2$. In which coordinate system is the world $X$ defined?",
+          "answer": "In the **coordinate system of camera $C_1$**.\n**Why.** The world points are projected by $C_1$ **without** any transformation being applied first — so world coordinates and $C_1$ camera coordinates must coincide. The motion $g$ describes the change of frame from $C_1$ to $C_2$.",
+          "options": [
+            {
+              "text": "Coordinate system of camera $C_1$",
+              "correct": true
+            },
+            {
+              "text": "Coordinate system of camera $C_2$",
+              "correct": false
+            },
+            {
+              "text": "In a coordinate system orthogonal to both $C_1$ and $C_2$",
+              "correct": false
+            },
+            {
+              "text": "In the coordinate systems of both $C_1$ and $C_2$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Extrinsics",
+            "Coordinate frames"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intrinsics",
+      "title": "The Intrinsic Parameter Matrix",
+      "recap": "**The matrix.** With no skew,\n$$K=\\begin{pmatrix}f_x&0&o_x\\\\0&f_y&o_y\\\\0&0&1\\end{pmatrix},\\qquad u=f_x\\frac{X}{Z}+o_x,\\quad v=f_y\\frac{Y}{Z}+o_y.$$\nIn full generality $K=\\begin{pmatrix}fs_x&fs_\\theta&o_x\\\\0&fs_y&o_y\\\\0&0&1\\end{pmatrix}$: $f$ the focal length, $s_x,s_y$ the pixel scaling, $s_\\theta$ the skew, $(o_x,o_y)$ the principal point.\n**Sensor size from $K$.** If the optical axis passes through the image centre then $(o_x,o_y)$ *is* the centre, so the sensor is about $2o_x\\times2o_y$ pixels. $o=(350,250)$ ⇒ $700\\times500$; $o=(320,240)$ ⇒ $640\\times480$. Aspect ratio $=2o_x:2o_y=o_x:o_y$.\n**Field of view.** $f$ and FOV move **oppositely**: a *narrower* FOV (more zoom, magnifying distant objects) means a **larger** focal length, so $K$'s $f_x,f_y$ grow while $(o_x,o_y)$ stays put. Halving the resolution halves **everything**: $K'=\\operatorname{diag}(\\tfrac12,\\tfrac12,1)K$, i.e. $f$ and $o$ are both halved.\n**Rotating the image by $90^\\circ$ clockwise** (with $x$ right, $y$ down) means $(u,v)\\mapsto(H-1-v,\\ u)$ in pixels, which pre-multiplies $K$ by the corresponding $2\\times2$ rotation and re-maps the principal point. For $K=\\begin{pmatrix}200&0&640\\\\0&200&480\\\\0&0&1\\end{pmatrix}$ the result is $K''=\\begin{pmatrix}0&-200&480\\\\200&0&640\\\\0&0&1\\end{pmatrix}$ — the two focal entries swap into the off-diagonal with **one** sign flip, and the principal-point entries swap.\n**Calibrating $K$ from correspondences.** Write $\\lambda_i(u_i,v_i,1)^\\top=K\\Pi_0X_i$ per point. The third row gives $\\lambda_i=Z_i$ immediately, then each point yields two linear equations $f_xX_i+o_xZ_i=u_iZ_i$ and $f_yY_i+o_yZ_i=v_iZ_i$. Two points therefore determine the four unknowns $f_x,f_y,o_x,o_y$ — a small linear system to solve by hand.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 3.1"
+          ],
+          "q": "Given the intrinsic parameter matrix $K=\\begin{pmatrix}200&0&350\\\\0&200&250\\\\0&0&1\\end{pmatrix}$, what is the sensor size of the camera in pixels, assuming the optical axis goes through the centre of the image?",
+          "answer": "$700\\times500$ pixels.\n**Why.** The principal point is $(o_x,o_y)=(350,250)$. If the optical axis passes through the image centre, the principal point *is* the centre, so the sensor spans $2\\times350=700$ pixels horizontally and $2\\times250=500$ pixels vertically.\n**Note.** The focal length $200$ is irrelevant here — it sets the field of view, not the sensor size.",
+          "options": [
+            {
+              "text": "$700\\times500$ pixels",
+              "correct": true
+            },
+            {
+              "text": "$400\\times400$ pixels",
+              "correct": false
+            },
+            {
+              "text": "$200\\times200$ pixels",
+              "correct": false
+            },
+            {
+              "text": "$350\\times250$ pixels",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Intrinsics",
+            "Principal point"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 3.4"
+          ],
+          "q": "To capture the details of a distant object with the same camera, you switch to a lens with a **narrower** field of view. What intrinsic parameter matrix could you get after the switch (original $K=\\begin{pmatrix}200&0&350\\\\0&200&250\\\\0&0&1\\end{pmatrix}$)?",
+          "answer": "$K=\\begin{pmatrix}400&0&350\\\\0&400&250\\\\0&0&1\\end{pmatrix}$.\n**Why.** A narrower field of view means more magnification, i.e. a **larger focal length** — so $f_x,f_y$ increase from $200$ to $400$. The sensor has not changed, so the principal point $(350,250)$ stays the same.\n**Why the others fail.** $f=100$ would *widen* the FOV; changing $(o_x,o_y)$ to $(150,100)$ or $(700,500)$ would mean a different sensor or a shifted optical axis, not a different lens.",
+          "extend": "Focal length ↑ ⇒ FOV ↓ ⇒ distant objects larger. The principal point tracks the sensor, not the lens.",
+          "options": [
+            {
+              "text": "$K=\\begin{pmatrix}100&0&350\\\\0&100&250\\\\0&0&1\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$K=\\begin{pmatrix}400&0&350\\\\0&400&250\\\\0&0&1\\end{pmatrix}$",
+              "correct": true
+            },
+            {
+              "text": "$K=\\begin{pmatrix}200&0&150\\\\0&200&100\\\\0&0&1\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$K=\\begin{pmatrix}200&0&700\\\\0&200&500\\\\0&0&1\\end{pmatrix}$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Intrinsics",
+            "Field of view",
+            "Focal length"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 3.3"
+          ],
+          "q": "For $K=\\begin{pmatrix}200&0&640\\\\0&200&480\\\\0&0&1\\end{pmatrix}$ and knowing the optical centre is at the centre of the image: what is the aspect ratio of the image, and what is the new intrinsic parameter matrix $K'$ if the image is downsampled to half resolution?",
+          "answer": "**Aspect ratio.** The image is $1280\\times960$, so\n$$\\frac{640}{480}=\\frac{4}{3}\\quad(\\text{i.e. }4{:}3).$$\n**Half resolution.** Every pixel coordinate is halved, so both the focal lengths and the principal point are halved:\n$$K'=\\begin{pmatrix}100&0&320\\\\0&100&240\\\\0&0&1\\end{pmatrix}.$$",
+          "extend": "State the ratio as $4{:}3$, $4/3$ or \"4, 3\" — writing \"$4\\times3$\" is not a ratio and loses the point. And do not forget that **both** $f$ and $o$ scale with the resolution.",
+          "tags": [
+            "Intrinsics",
+            "Aspect ratio",
+            "Resolution"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 3.4"
+          ],
+          "q": "The $x$-axis points to the right and the $y$-axis downwards in the image coordinate frame. How should the intrinsic parameter matrix $K=\\begin{pmatrix}200&0&640\\\\0&200&480\\\\0&0&1\\end{pmatrix}$ be modified to rotate the image clockwise by $90$ degrees? Write down the new matrix $K''$.",
+          "answer": "$$K''=\\begin{pmatrix}0&-200&480\\\\200&0&640\\\\0&0&1\\end{pmatrix}.$$\n**Reasoning.** A clockwise image rotation by $90^\\circ$ (with $y$ pointing down) maps $(u,v)\\mapsto(-v,u)$ up to the offset. Pre-multiplying $K$ by $\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}$ swaps the two focal entries into the off-diagonal — with **one** minus sign — and swaps the principal-point entries, giving the new $o=(480,640)$: the old height becomes the new width.\n**Check.** The upper-left $2\\times2$ block is still a scaled rotation (determinant $200^2>0$), and the principal point has moved to the centre of the rotated $960\\times1280$ image.",
+          "extend": "Two independent things must both come out right — the sign/position in the first two columns **and** the swapped last column. Each error costs half a point.",
+          "tags": [
+            "Intrinsics",
+            "Image rotation"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 5,
+          "sources": [
+            "20EFB 6e",
+            "20EFB 6f",
+            "20EFB 6g",
+            "20EFB 6h",
+            "21EFB 3c",
+            "21EFB 3d",
+            "24EDC 3.3",
+            "24EDC 3.4",
+            "22EDC 2d"
+          ],
+          "q": "A camera with optical centre at $C=(1,0,0)^\\top$ and $R=I$ observes $X_1=(0,1,2)^\\top$ and $X_2=(1,0,1)^\\top$ at pixels $x_1=(230,300)^\\top$ and $x_2=(280,200)^\\top$. Assuming a pinhole camera with no skew, $K=\\begin{pmatrix}f_x&0&o_x\\\\0&f_y&o_y\\\\0&0&1\\end{pmatrix}$, determine $f_x,f_y,o_x,o_y$.",
+          "answer": "**Set-up.** With $R=I$ the camera coordinates are $\\tilde X_i=X_i-C$: $\\tilde X_1=(-1,1,2)^\\top$, $\\tilde X_2=(0,0,1)^\\top$.\n**Point 2** ($Z=1$): $u_2=f_x\\tfrac{0}{1}+o_x=o_x=280$ and $v_2=f_y\\tfrac{0}{1}+o_y=o_y=200$. So\n$$o_x=280,\\qquad o_y=200.$$\n**Point 1** ($Z=2$): $230=f_x\\tfrac{-1}{2}+280\\Rightarrow f_x=100$; $300=f_y\\tfrac{1}{2}+200\\Rightarrow f_y=200$.\n$$f_x=100,\\qquad f_y=200.$$\n**General recipe.** Write $\\lambda_i(u_i,v_i,1)^\\top=K\\Pi_0(X_i-C)$; the third row gives $\\lambda_i=Z_i$, then each point contributes two linear equations. Two points determine all four unknowns.",
+          "extend": "Always look for the point that lies on the optical axis (or has $X=Y=0$) — it hands you the principal point for free and decouples the system.",
+          "tags": [
+            "Intrinsics",
+            "Calibration",
+            "Extrinsics"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20MFB 4c",
+            "20MFB 4d"
+          ],
+          "q": "A camera has $K=\\begin{pmatrix}500&0&320\\\\0&400&240\\\\0&0&1\\end{pmatrix}$. Given that the camera is nearly perfect, what is the size of the image, and briefly justify your answer.",
+          "answer": "**Size:** height $=480$ px, width $=640$ px.\n**Justification.** For an ideal camera the **principal point sits in the middle of the image**, so the image dimensions are about twice the principal point (up to the pixel-centre convention): $2\\times320=640$ wide and $2\\times240=480$ high.\n**Note.** The focal lengths $500$ and $400$ are irrelevant to the sensor size; they only say the pixels are non-square (different horizontal and vertical scaling).",
+          "tags": [
+            "Intrinsics",
+            "Principal point"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "extrinsics-projection",
+      "title": "Extrinsics and Computing Pixel Coordinates",
+      "recap": "**Full projection equation.**\n$$\\lambda\\begin{pmatrix}u\\\\v\\\\1\\end{pmatrix}=K\\,\\Pi_0\\,g\\begin{pmatrix}X_w\\\\1\\end{pmatrix},\\qquad g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix},\\qquad \\lambda=Z_{\\text{cam}}.$$\n**Hand-computation recipe.** (1) Convert to camera coordinates: $\\tilde X=RX_w+T$; when the camera has optical centre $C$ and $R=I$, that is simply $\\tilde X=X_w-C$. (2) Check $Z>0$ — if the point is behind the camera it is **not observed**, no matter what $K$ says. (3) Apply $u=f_x\\tfrac{X}{Z}+o_x$, $v=f_y\\tfrac{Y}{Z}+o_y$. (4) Check the pixel lies inside $[0,2o_x]\\times[0,2o_y]$.\n**Camera centre vs translation.** For $g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$ taking world (= frame-1) points into frame 2, the **position of camera 2 expressed in frame 1** is $g^{-1}(0,0,0,1)^\\top$, i.e. the translation is $-R^\\top T$, **not** $T$ and **not** $R^\\top T$. This sign/transpose pattern is examined repeatedly.\n**Moving the camera along the optical axis.** Moving *away* by $d$ increases the depth: $Z\\to Z+d$, so $u\\to f_x\\tfrac{X}{Z+d}+o_x$ — the image point moves **towards the principal point** and the object shrinks.\n**Occlusion.** Two opaque objects whose centres lie on the same ray project to the same pixel; only the closer one is visible. A projection computation alone is not enough — check the depth ordering.\n**Inverse problem.** Given a pixel, a depth and the intrinsics, the translation that put the point there follows from $\\lambda(u,v,1)^\\top=K(X_w+T)$: with $K=I$ this is three scalar equations for $t_x,t_y,t_z$.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 3.1",
+            "25RDC 3.2"
+          ],
+          "q": "A 3D point in the camera frame is $X=(-1,2,10)^\\top$ (metres) and $K=\\begin{pmatrix}200&0&640\\\\0&200&480\\\\0&0&1\\end{pmatrix}$. (a) Compute the pixel coordinate $x$ with explicit steps. (b) Compute the new pixel coordinate $x'$ after the camera moves away from the point along the $z$-axis by 10 metres.",
+          "answer": "**(a)**\n$$x=\\Big(\\frac{-1\\cdot200}{10}+640,\\ \\frac{2\\cdot200}{10}+480\\Big)^\\top=(640-20,\\ 480+40)^\\top=(620,520)^\\top.$$\n**(b)** Moving the camera *away* along $z$ increases the depth, so in the camera frame $X'=(-1,2,10+10)^\\top=(-1,2,20)^\\top$ and\n$$x'=\\Big(\\frac{-1\\cdot200}{20}+640,\\ \\frac{2\\cdot200}{20}+480\\Big)^\\top=(640-10,\\ 480+20)^\\top=(630,500)^\\top.$$\n**Sanity check.** The point has moved closer to the principal point $(640,480)$ — exactly what receding from an object should do.",
+          "extend": "Doubling the depth halves the *offset from the principal point*, not the pixel coordinate itself.",
+          "tags": [
+            "Perspective projection",
+            "Intrinsics",
+            "Extrinsics"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 3.2"
+          ],
+          "q": "A camera has optical centre at the world origin, $R=I$, optical axis along $+z$ and $K=\\begin{pmatrix}200&0&350\\\\0&200&250\\\\0&0&1\\end{pmatrix}$ (sensor $700\\times500$). Two opaque 3D spheres $S_1,S_2$ of radius 1 are centred at $P_1=[1,5,10]^\\top$ and $P_2=[2.5,12.5,25]^\\top$. Where is $S_1$ observed?",
+          "answer": "Its centre is at $[u,v]=[370,350]$.\n$$u=200\\cdot\\frac{1}{10}+350=20+350=370,\\qquad v=200\\cdot\\frac{5}{10}+250=100+250=350.$$\n**Inside the sensor?** $370<700$ and $350<500$ ✓, and $Z=10>0$ ✓, so the sphere is indeed imaged.",
+          "options": [
+            {
+              "text": "Its centre is located at the pixel $[u,v]=[235,325]$",
+              "correct": false
+            },
+            {
+              "text": "Its centre is located at the pixel $[u,v]=[20,100]$",
+              "correct": false
+            },
+            {
+              "text": "Its centre is located at the pixel $[u,v]=[370,350]$",
+              "correct": true
+            },
+            {
+              "text": "The sphere is not observed in the image",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Perspective projection",
+            "Intrinsics"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 3.3"
+          ],
+          "q": "With the same camera, where is the sphere $S_2$ (centre $P_2=[2.5,12.5,25]^\\top$, radius 1) observed?",
+          "answer": "**The sphere is not observed in the image.**\n**Why.** Its projection would be\n$$u=200\\cdot\\frac{2.5}{25}+350=370,\\qquad v=200\\cdot\\frac{12.5}{25}+250=350,$$\nexactly the same pixel as $S_1$. Indeed $P_2=2.5\\,P_1$, so both centres lie on the **same ray** through the optical centre. Since the spheres are **opaque** and $S_1$ is closer ($Z=10$ vs $Z=25$) and has the same radius, $S_1$ **occludes** $S_2$ completely.",
+          "extend": "The arithmetic alone would give you a valid pixel — the trap is that the question says *opaque*. Always check depth ordering before answering \"visible\".",
+          "options": [
+            {
+              "text": "Its centre is located at the pixel $[u,v]=[370,350]$",
+              "correct": false
+            },
+            {
+              "text": "Its centre is located at the pixel $[u,v]=[150,250]$",
+              "correct": false
+            },
+            {
+              "text": "Its centre is located at the pixel $[u,v]=[235,325]$",
+              "correct": false
+            },
+            {
+              "text": "The sphere is not observed in the image",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Perspective projection",
+            "Occlusion",
+            "Scale ambiguity"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 3a"
+          ],
+          "q": "A 3D point $P=[-2,-3,-4]^\\top$ (world coordinates) is observed by a canonically oriented camera (origin at $[0,0,0]$, $R=I$, optical axis along $+z$) with $K=\\begin{pmatrix}100&0&320\\\\0&100&240\\\\0&0&1\\end{pmatrix}$. Where is $P$ observed?",
+          "answer": "**The given point is not observed in the image.**\n**Why.** $Z=-4<0$: the point lies **behind** the camera origin while the camera looks towards $+z$. Applying the projection formula anyway would produce a pixel, but it corresponds to the mirrored ray in front of the camera — a mathematical artefact, not an observation.",
+          "extend": "Always check the sign of $Z$ **before** dividing. A negative depth means \"not observed\", never a valid pixel.",
+          "options": [
+            {
+              "text": "$[u,v]=[370,315]$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[640,480]$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[160,120]$",
+              "correct": false
+            },
+            {
+              "text": "The given point is not observed in the image",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Perspective projection",
+            "Visibility"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 3b"
+          ],
+          "q": "A 3D point $P=[-3,-2,5]^\\top$ is observed by a canonically oriented camera with $K=\\begin{pmatrix}250&0&640\\\\0&500&360\\\\0&0&1\\end{pmatrix}$. Where is $P$ observed?",
+          "answer": "$[u,v]=[490,160]$.\n$$u=250\\cdot\\frac{-3}{5}+640=-150+640=490,\\qquad v=500\\cdot\\frac{-2}{5}+360=-200+360=160.$$\n**Check.** $Z=5>0$ ✓ and the pixel lies inside the $1280\\times720$ sensor implied by $(640,360)$ ✓.",
+          "extend": "Note $f_x\\neq f_y$ here — non-square pixels. Use each focal length with its own coordinate.",
+          "options": [
+            {
+              "text": "The given point is not observed in the image",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[70,40]$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[880,820]$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[490,160]$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Perspective projection",
+            "Intrinsics"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "20EFB 6c",
+            "20EFB 6d",
+            "20MFB 4a",
+            "20MFB 4b"
+          ],
+          "q": "A 3D point $P=(2,0,4)^\\top$ (world frame) is observed by a camera with optical centre $C=(0,-1,0)^\\top$ and no rotation ($R=I$), with $K=\\begin{pmatrix}500&0&320\\\\0&400&240\\\\0&0&1\\end{pmatrix}$. Compute the pixel position of the projected point.",
+          "answer": "**Step 1 — camera coordinates.** With $R=I$: $\\tilde X=P-C=(2,0,4)^\\top-(0,-1,0)^\\top=(2,1,4)^\\top$.\n**Step 2 — check depth.** $Z=4>0$ ✓.\n**Step 3 — project.**\n$$u=500\\cdot\\frac{2}{4}+320=250+320=570,\\qquad v=400\\cdot\\frac{1}{4}+240=100+240=340.$$\n**Result:** $[u,v]=[570,340]$.",
+          "extend": "The single most common slip is the sign in $\\tilde X=P-C$: the camera centre is **subtracted**, so a camera at $y=-1$ moves the point *up* in camera coordinates.",
+          "tags": [
+            "Perspective projection",
+            "Extrinsics"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 2a",
+            "22RDC 2b",
+            "22RDC 2c"
+          ],
+          "q": "A 3D world point $P=[3,-7,2]^\\top$ is translated by $t$ before being captured by a canonically oriented camera with $K=I_{3\\times3}$. The point is observed at $[1.5,3]$ at depth 3. Determine $t_x$, $t_y$, $t_z$.",
+          "answer": "**Projection equation.** With $K=I$, $R=I$ and $\\lambda=3$ (the given depth),\n$$3\\begin{pmatrix}1.5\\\\3\\\\1\\end{pmatrix}=\\begin{pmatrix}3+t_x\\\\-7+t_y\\\\2+t_z\\end{pmatrix}=\\begin{pmatrix}4.5\\\\9\\\\3\\end{pmatrix}.$$\n**Solve componentwise.**\n$$t_x=4.5-3=1.5,\\qquad t_y=9+7=16,\\qquad t_z=3-2=1.$$",
+          "extend": "The depth *is* the homogeneous scale $\\lambda$ — multiply the pixel vector by it and the problem becomes three independent linear equations.",
+          "tags": [
+            "Extrinsics",
+            "Perspective projection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 2g"
+          ],
+          "q": "Which vector denotes the translation between the two cameras $C_1$ and $C_2$, relative to camera $C_1$, assuming $g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$?",
+          "answer": "$-R^\\top T$.\n**Derivation.** The origin of $C_2$ in its own frame is $(0,0,0,1)^\\top$. To express it in the frame of $C_1$ we undo $g$:\n$$g^{-1}=\\begin{pmatrix}R^\\top&-R^\\top T\\\\0&1\\end{pmatrix},\\qquad g^{-1}\\begin{pmatrix}0\\\\0\\\\0\\\\1\\end{pmatrix}=\\begin{pmatrix}-R^\\top T\\\\1\\end{pmatrix}.$$\nSo the camera centre of $C_2$, seen from $C_1$, is $-R^\\top T$.",
+          "extend": "$T$ is where the *world origin* goes; $-R^\\top T$ is where the *camera* is. Mixing these two up is one of the most frequent exam errors.",
+          "options": [
+            {
+              "text": "$0$",
+              "correct": false
+            },
+            {
+              "text": "$T$",
+              "correct": false
+            },
+            {
+              "text": "$-R^\\top T$",
+              "correct": true
+            },
+            {
+              "text": "$R^\\top T$",
+              "correct": false
+            },
+            {
+              "text": "$-T$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Extrinsics",
+            "Special Euclidean group",
+            "Camera centre"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 3.1"
+          ],
+          "q": "A 3D point in the world frame is $P=(-9,2,12)^\\top$. The camera pose mapping **camera** coordinates to **world** coordinates and the intrinsic matrix are $[R,T]=\\begin{pmatrix}0&-1&0&-1\\\\1&0&0&2\\\\0&0&1&4\\end{pmatrix}$ and $K=\\begin{pmatrix}300&0&200\\\\0&300&200\\\\0&0&1\\end{pmatrix}$. Write down the pixel position of the projected point.",
+          "answer": "$(u,v)=(200,500)$.\n**Step 1 — invert the pose.** $[R,T]$ maps camera → world, so world → camera is $X_c=R^\\top(P-T)$ with $R=\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}$, $T=(-1,2,4)^\\top$.\n$$P-T=(-8,0,8)^\\top,\\qquad X_c=R^\\top(-8,0,8)^\\top=(0,8,8)^\\top.$$\n**Step 2 — project.** $u=300\\cdot\\tfrac{0}{8}+200=200$, $v=300\\cdot\\tfrac{8}{8}+200=500$.",
+          "extend": "The direction of $[R,T]$ is stated in the question and decides everything. Camera→world means you must apply $R^\\top(\\cdot-T)$, not $R(\\cdot)+T$.",
+          "tags": [
+            "Perspective projection",
+            "Extrinsics",
+            "Intrinsics"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 3.2"
+          ],
+          "q": "A camera has optical centre $C=(1,0,0)^\\top$, rotation $R=\\begin{pmatrix}0&0&-1\\\\0&1&0\\\\1&0&0\\end{pmatrix}$ mapping a vector in world coordinates into camera coordinates, and $K=\\begin{pmatrix}500&0&320\\\\0&400&240\\\\0&0&1\\end{pmatrix}$. Write down the 3D point in the world frame corresponding to the pixel $p=(70,440)$ with depth 2.",
+          "answer": "$P=(3,1,1)^\\top$.\n**Step 1 — back-project to camera coordinates** using the depth $Z=2$:\n$$X_c=\\frac{u-o_x}{f_x}Z=\\frac{70-320}{500}\\cdot2=-1,\\qquad Y_c=\\frac{v-o_y}{f_y}Z=\\frac{440-240}{400}\\cdot2=1,\\qquad Z_c=2,$$\nso $X_{\\text{cam}}=(-1,1,2)^\\top$.\n**Step 2 — transform to the world frame.** $R$ maps world → camera, so world coordinates are $P=R^\\top X_{\\text{cam}}+C$:\n$$R^\\top(-1,1,2)^\\top=(2,1,1)^\\top,\\qquad P=(2,1,1)^\\top+(1,0,0)^\\top=(3,1,1)^\\top.$$",
+          "extend": "Back-projection is the projection formula solved for $X,Y$ — the depth $Z$ is what makes it unique.",
+          "tags": [
+            "Backprojection",
+            "Extrinsics",
+            "Intrinsics"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 2a",
+            "22EDC 2b"
+          ],
+          "q": "A 3D point is given in the world coordinate system as $P=\\big[\\tfrac12,\\tfrac32,1\\big]^\\top$ and observed by a canonically oriented camera (origin at $[0,0,0]$, $R=I$, optical axis along $+z$) with $K=\\begin{pmatrix}200&0&500\\\\0&200&500\\\\0&0&1\\end{pmatrix}$. Where is $P$ observed, and what is its depth?",
+          "answer": "**Pixel:** $[u,v]=[600,800]$.\n$$u=200\\cdot\\frac{1/2}{1}+500=100+500=600,\\qquad v=200\\cdot\\frac{3/2}{1}+500=300+500=800.$$\n**Depth:** $1$ — for a canonically oriented camera the depth is simply the $z$-coordinate of the point, $Z=1$, which is also the homogeneous scale factor $\\lambda$.",
+          "extend": "Depth $=Z$ in camera coordinates $=\\lambda$, the factor you divide by. Three names for the same number.",
+          "options": [
+            {
+              "text": "$[u,v]=[250,400]$, depth $2$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[300,400]$, depth $\\tfrac12$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[600,800]$, depth $1$",
+              "correct": true
+            },
+            {
+              "text": "The given point is not observed in the image",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[500,500]$, depth $0$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Perspective projection",
+            "Intrinsics",
+            "Depth"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 2c"
+          ],
+          "q": "A 3D point is given in the world coordinate system as $P=[1,2,-3]^\\top$ and observed by a canonically oriented camera with $K=\\begin{pmatrix}125&0&250\\\\0&125&250\\\\0&0&1\\end{pmatrix}$. Where is $P$ observed on the image?",
+          "answer": "**The given point is not observed in the image.**\n**Why.** The depth is $Z=-3<0$: the point lies **behind** the camera, which looks along $+z$. Mechanically applying $u=f\\tfrac XZ+o_x$ would still produce numbers, but they correspond to the mirrored ray in front of the camera and have no physical meaning.",
+          "extend": "Check the sign of $Z$ before dividing — negative depth always means \"not observed\", never a pixel.",
+          "options": [
+            {
+              "text": "$[u,v]=[625,500]$",
+              "correct": false
+            },
+            {
+              "text": "The given point is not observed in the image",
+              "correct": true
+            },
+            {
+              "text": "$[u,v]=[125,250]$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[250,250]$",
+              "correct": false
+            },
+            {
+              "text": "$[u,v]=[250,125]$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Perspective projection",
+            "Visibility"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "projective-geometry",
+      "title": "Projective Geometry, Preimage and Coimage",
+      "recap": "**Homogeneous coordinates.** A 2D point $(x_1,x_2)$ becomes $x=(x_1,x_2,1)^\\top$, and points are identified up to a non-zero scale: $x\\sim\\lambda x$. A line $ax_1+bx_2+c=0$ becomes $l=(a,b,c)^\\top$ with the incidence relation\n$$l^\\top x=0.$$\n**Duality via the cross product.** The line through two points is $l=x_1\\times x_2$; the intersection of two lines is $x=l_1\\times l_2$. Both follow from the scalar triple product vanishing with a repeated vector.\n**Points at infinity.** Parallel lines meet at a point with third coordinate $0$: e.g. $l_1=(1,0,-1)^\\top$ and $l_2=(1,0,-2)^\\top$ intersect at $l_1\\times l_2=(0,1,0)^\\top$ — a **point at infinity** encoding the common direction. The set of all such points is the line at infinity; this is exactly what makes vanishing points meaningful.\n**Backprojection of a pixel = a ray.** From $\\lambda x=K\\tilde X$ we get $\\tilde X=\\lambda K^{-1}x$, $\\lambda>0$: all 3D points imaged at $x$ form the **ray** through the origin with direction $K^{-1}x$. That ray is the **preimage** of the point.\n**Backprojection of an image line = a plane.** Every pixel on $l$ backprojects to a ray through the origin, and together they sweep a **plane through the origin**. Its normal is\n$$n=K^\\top l,\\qquad\\text{plane: }(K^\\top l)^\\top\\tilde X=0\\iff l^\\top K\\tilde X=0.$$\n**Preimage and coimage.** The **preimage** of an image point/line is the ray/plane it backprojects to; the **coimage** is the orthogonal complement of the preimage — for a line the coimage is spanned by the normal $n$, for a point it is the plane orthogonal to the ray. In this language the image of a line is a line precisely because the preimage of a line is a plane.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX03 1"
+          ],
+          "q": "With a 2D line written as $l=(a,b,c)^\\top$ and a point in homogeneous coordinates $x=(x_1,x_2,1)^\\top$ so that the line equation is $l^\\top x=0$: (a) show that the line through two points $x_1,x_2$ is $l=x_1\\times x_2$ and that the intersection of two lines $l_1,l_2$ is $x=l_1\\times l_2$; (b) where do two parallel Euclidean lines, e.g. $l_1=(1,0,-1)^\\top$ and $l_2=(1,0,-2)^\\top$, meet in projective space?",
+          "answer": "**(a)** Take $l=x_1\\times x_2$. Then $l^\\top x_1=(x_1\\times x_2)^\\top x_1=0$ and $l^\\top x_2=0$ — both are scalar triple products with a repeated vector. So both points lie on $l$.\nDually, $x=l_1\\times l_2$ satisfies $l_1^\\top x=0$ and $l_2^\\top x=0$, so it lies on both lines.\n**(b)**\n$$l_1\\times l_2=(1,0,-1)^\\top\\times(1,0,-2)^\\top=(0,1,0)^\\top.$$\nThe third coordinate is $0$, so this is a **point at infinity** — it represents the common direction (here along the $y$-axis). Parallel lines meet at a point at infinity.",
+          "extend": "Points and lines in $\\mathbb{P}^2$ are perfectly dual: the same cross product joins two points and meets two lines.",
+          "tags": [
+            "Projective geometry",
+            "Homogeneous coordinates",
+            "Point at infinity"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX03 3"
+          ],
+          "q": "(a) Given a pixel $x=(u,v,1)^\\top$ and the intrinsics $K$, what geometric object in 3D is described by all points that project to this pixel? (b) An image line is $l^\\top x=0$; what is the backprojection of this line, and what is its equation?",
+          "answer": "**(a)** From $\\lambda x=K\\tilde X$ we get $\\tilde X=\\lambda K^{-1}x$ for $\\lambda>0$ — a **ray** from the optical centre (the origin) in direction $K^{-1}x$. This is the *preimage* of the point; the depth $\\lambda$ is unrecoverable from one image.\n**(b)** Every pixel on the line backprojects to a ray through the origin, so together they form a **plane through the origin**. Its normal $n$ must satisfy $n^\\top\\tilde X=0$ for all such points, i.e. $n^\\top K^{-1}x=0$ whenever $l^\\top x=0$. Hence $K^{-\\top}n\\sim l$, giving\n$$n=K^\\top l,\\qquad (K^\\top l)^\\top\\tilde X=0\\ \\iff\\ l^\\top K\\tilde X=0.$$",
+          "extend": "Preimage of a point = ray; preimage of a line = plane. That is precisely why a straight 3D line always images to a straight line.",
+          "tags": [
+            "Preimage",
+            "Coimage",
+            "Projective geometry",
+            "Backprojection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 3a"
+          ],
+          "q": "Which of the following statements is **wrong**?",
+          "answer": "**Wrong:** \"There exists a unique representation for the two-dimensional projective space $\\mathbb{P}^2$.\"\n**Why.** Points of $\\mathbb{P}^2$ are homogeneous coordinates defined only **up to a non-zero scale**: $x$ and $\\lambda x$ denote the same projective point, so the representation is inherently non-unique.\n**The others are correct.** The entries of $K$ model the linear distortions of the mapping into pixel coordinates. Image, preimage and coimage determine one another. The **coimage** of a line is the subspace of $\\mathbb{R}^3$ orthogonal to its **preimage** (its normal). And the **preimage** of an image line is the largest set of 3D points projecting onto that line — the plane through the optical centre.",
+          "extend": "\"Defined up to scale\" is the defining property of projective coordinates — any option claiming uniqueness of representation is the wrong one.",
+          "options": [
+            {
+              "text": "The coefficients in the intrinsic parameter matrix model linear distortions in the transformation to pixel coordinates",
+              "correct": false
+            },
+            {
+              "text": "Image, preimage and coimage uniquely determine one another",
+              "correct": false
+            },
+            {
+              "text": "The coimage of a line is the subspace in $\\mathbb{R}^3$ that is the orthogonal complement of its preimage",
+              "correct": false
+            },
+            {
+              "text": "A preimage of a line in the image plane is the largest set of 3D points that give an image equal to the given line",
+              "correct": false
+            },
+            {
+              "text": "There exists a unique representation for the two-dimensional projective space $\\mathbb{P}^2$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Projective geometry",
+            "Preimage",
+            "Coimage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spherical-projection",
+      "title": "Spherical Perspective Projection",
+      "recap": "**Planar vs spherical.** The standard pinhole model projects onto the plane $Z=1$: $\\pi(\\tilde X)=(X/Z,Y/Z)^\\top$, which blows up as a ray approaches $Z=0$. **Spherical perspective projection** instead projects onto the **unit sphere**:\n$$\\pi_s(\\tilde X)=\\frac{\\tilde X}{\\|\\tilde X\\|_2},\\qquad \\lambda x=K\\,\\Pi_s X\\ \\text{ with }\\ \\lambda=\\|\\tilde X\\|_2.$$\nSo the scale factor is the **distance** to the point (not its depth $Z$), and for $K=I$ a point $X$ is observed at $\\big(\\tfrac{X}{\\lambda},\\tfrac{Y}{\\lambda},\\tfrac{Z}{\\lambda}\\big)^\\top$ with $\\lambda=\\|X\\|$.\n**Example.** $X=[3,4,12]^\\top$ gives $\\lambda=\\sqrt{9+16+144}=\\sqrt{169}=13$ and the observed point $\\big(\\tfrac{3}{13},\\tfrac{4}{13},\\tfrac{12}{13}\\big)^\\top$.\n**Why it matters.** The spherical model is well defined for the whole sphere of directions, including $Z\\le0$, so it is the natural model for fisheye and omnidirectional cameras — where the planar model (and any radial distortion applied after it) cannot represent a field of view of $180^\\circ$ or more. All the epipolar geometry of Chapter 5 carries over unchanged, because it only ever depends on the **direction** of the ray.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 2d"
+          ],
+          "q": "A point $X=[3,4,12]^\\top$ (world frame) is observed by a canonically oriented **spherical perspective** camera with $K=I_{3\\times3}$. Where is the point observed on the imaging surface, with a given scalar factor $\\lambda$?",
+          "answer": "$\\big[\\tfrac{3}{\\lambda},\\tfrac{4}{\\lambda},\\tfrac{12}{\\lambda}\\big]^\\top$.\n**Why.** Spherical projection normalises the point onto the unit sphere:\n$$\\lambda x=K\\Pi_sX=\\frac{X}{\\|X\\|_2}\\cdot\\lambda\\ \\Longrightarrow\\ x=\\frac{X}{\\|X\\|_2}.$$\nAll three coordinates are divided by the same $\\lambda$ — unlike the planar model, the third component is **not** normalised to $1$.",
+          "options": [
+            {
+              "text": "$\\big[\\tfrac{3}{\\lambda},\\tfrac{4}{\\lambda},\\tfrac{12}{\\lambda}\\big]^\\top$",
+              "correct": true
+            },
+            {
+              "text": "$\\big[\\tfrac{3}{\\lambda},\\tfrac{4}{\\lambda},1\\big]^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$[3\\lambda,4\\lambda,12\\lambda]^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$[3\\lambda,4\\lambda,1]^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$\\lambda[1,2,10]^\\top$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Spherical projection",
+            "Perspective projection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 2e"
+          ],
+          "q": "For the same spherical perspective camera and $X=[3,4,12]^\\top$, what is the value of the scalar factor $\\lambda$?",
+          "answer": "$\\lambda=13$.\n**Because** for spherical projection $\\lambda=\\|X\\|_2=\\sqrt{3^2+4^2+12^2}=\\sqrt{9+16+144}=\\sqrt{169}=13$.\n**Contrast.** For the planar pinhole model the scale factor would have been the depth $\\lambda=Z=12$.",
+          "extend": "Planar model: $\\lambda=Z$. Spherical model: $\\lambda=\\|X\\|$. That one difference is what the question tests.",
+          "options": [
+            {
+              "text": "$2$",
+              "correct": false
+            },
+            {
+              "text": "$13$",
+              "correct": true
+            },
+            {
+              "text": "$3$",
+              "correct": false
+            },
+            {
+              "text": "$1$",
+              "correct": false
+            },
+            {
+              "text": "$12$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Spherical projection"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "radial-distortion",
+      "title": "Radial Distortion and Undistortion",
+      "recap": "**Cause.** Radial distortion is caused by **imperfect lenses** — not by non-rectangular pixels (that is skew/aspect, an intrinsic effect), not by sensor noise, and not by where the camera stands in the scene. It **can** be corrected in software.\n**Where it acts.** In the **normalised image plane**, after the generic projection $\\pi$ and before $K$: $\\tilde X\\xrightarrow{\\pi}\\pi(\\tilde X)\\xrightarrow{\\text{distort}}\\pi_d(\\tilde X)\\xrightarrow{K}(u_d,v_d,1)^\\top$. The distortion keeps a point on the same ray from the optical centre and only changes its radius $r_u=\\|\\pi(\\tilde X)\\|\\mapsto r_d=\\|\\pi_d(\\tilde X)\\|$.\n**General shape.** $x_d=g(r)\\frac{x}{\\|x\\|}$ with $r=\\|x\\|$. Inverting is purely radial: take norms to get $r_d=g(r)$, so the inverse is $x=f(r_d)\\frac{x_d}{\\|x_d\\|}$ with $f=g^{-1}$. E.g. $g(r)=s\\log(1+kr)\\Rightarrow f(r_d)=\\frac{\\exp(r_d/s)-1}{k}$, while $g(r)=s\\log\\!\\big(1+\\tfrac{r}{k}\\big)\\Rightarrow f(r_d)=k\\big(\\exp(r_d/s)-1\\big)$ — read the parameterisation carefully, the $k$ moves from denominator to factor.\n**FOV / ATAN model** (Devernay–Faugeras), one parameter $\\omega\\approx$ field of view in radians: $r_d=\\tfrac1\\omega\\arctan\\big(2r_u\\tan\\tfrac\\omega2\\big)$; undistortion $r_u=\\tfrac{\\tan(\\omega r_d)}{2\\tan(\\omega/2)}$; as $\\omega\\to0$ it degenerates to the identity.\n**FOV $>180^\\circ$ is impossible with this pipeline.** Because $r=\\|\\pi(\\tilde X)\\|=\\tan\\theta$, the radius diverges as $\\theta\\to90^\\circ$ and points with $Z<0$ are mapped incorrectly — no finite $g(r)$ can repair a defect that lives in $\\pi$ itself. The fix is to reparameterise by the incidence angle $\\theta=\\arccos(Z/\\|\\tilde X\\|)$, e.g. the equidistant/fisheye model $r_u=\\theta$ (Kannala–Brandt).\n**After perfect undistortion the image obeys the pinhole model,** so a straight 3D line appears as a **straight line — or as a point**, if the line happens to be aligned with the viewing ray. Conversely: three collinear 3D points that do **not** come out collinear in the undistorted image prove the undistortion was imperfect.\n**Division model and calibration from lines.** $x_u=\\frac{x_d}{1+kr_d^2}$ ($k<0$ barrel, $k>0$ pincushion). Collinearity of three undistorted points is a $3\\times3$ determinant; multiplying row $i$ by $(1+kr_{di}^2)\\neq0$ preserves the zero condition and — by multilinearity in the third column — yields the **linear** constraint $A+kB=0$ with $A=\\det[x_d\\ y_d\\ 1]$, $B=\\det[x_d\\ y_d\\ r_d^2]$. Stacking $M$ triplets gives $\\hat k=-\\frac{\\sum_mA_mB_m}{\\sum_mB_m^2}$. One line with three points suffices for one coefficient; $n$ coefficients need $n$ triplets, and the constraint stays linear in all of them.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 3,
+          "sources": [
+            "25EDC 3.6",
+            "21EFB 6a",
+            "24EDC 3.5"
+          ],
+          "q": "Which of the following statements about radial distortion is true?",
+          "answer": "**Radial distortion is caused by imperfect lenses**, and it **can be corrected in software**.\n**Why the others fail.** Non-rectangular pixels produce skew / different $f_x,f_y$ — an intrinsic effect, not radial. Sensor noise is photometric, not geometric. And the distortion is a property of the optics, so it does **not** depend on where the camera stands in the scene; nor does correction require changing the manufacturing process.",
+          "extend": "Lens ⇒ radial distortion. Sensor ⇒ skew, aspect, principal point. Keep the two causes separate.",
+          "options": [
+            {
+              "text": "Radial distortion is caused by non-rectangular pixels.",
+              "correct": false
+            },
+            {
+              "text": "Radial distortion is caused by image sensor noise.",
+              "correct": false
+            },
+            {
+              "text": "Radial distortion is caused by imperfect lenses.",
+              "correct": true
+            },
+            {
+              "text": "Radial distortion is affected by the camera's position in the scene.",
+              "correct": false
+            },
+            {
+              "text": "Radial distortion can only be corrected during manufacturing.",
+              "correct": false
+            },
+            {
+              "text": "Radial distortion can be corrected in software.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Radial distortion"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 3,
+          "sources": [
+            "21EFB 6b",
+            "20EFB 7b",
+            "24EDC 3.6"
+          ],
+          "q": "If the camera exhibits radial distortion, one can obtain a rectified virtual image through undistortion. Assuming perfect undistortion, the rectified virtual image perfectly follows the pinhole camera model. Which statement about a straight line oriented in any direction in 3D is true?",
+          "answer": "**It will either appear as a straight line or as a point in the rectified virtual image.**\n**Why.** Under the pinhole model the preimage of an image line is a plane through the optical centre, so a straight 3D line images to a straight line. The exception: if the line is **aligned with the ray** through the camera origin, the whole line projects onto a single pixel — a point.\n**Why the others fail.** \"Always a straight line\" misses the degenerate aligned case. Angles between lines are **not** preserved by perspective projection.",
+          "extend": "The \"or a point\" clause is exactly what distinguishes the two very similar options — read them to the end.",
+          "options": [
+            {
+              "text": "It will either appear as a straight line or a point in the rectified virtual image.",
+              "correct": true
+            },
+            {
+              "text": "It will appear as a straight line in the rectified virtual image.",
+              "correct": false
+            },
+            {
+              "text": "The angle between the line and another line in 3D is preserved in the rectified virtual image.",
+              "correct": false
+            },
+            {
+              "text": "It will appear as a point in the rectified virtual image.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Radial distortion",
+            "Perspective projection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "20EFB 7a"
+          ],
+          "q": "Which of the following statements about radial distortion is true?",
+          "answer": "**A radial distortion model applied after the pinhole projection cannot model cameras with a field of view of more than $180^\\circ$.**\n**Why.** In the normalised plane the radius is $r=\\|\\pi(\\tilde X)\\|=\\tan\\theta$, which diverges as the incidence angle $\\theta\\to90^\\circ$, and points with $Z<0$ are mapped incorrectly. The defect lies in $\\pi$ itself, so no finite radial function $g(r)$ can repair it.\n**Why the others fail.** The FOV/ATAN model **is** invertible in closed form ($r_u=\\tan(\\omega r_d)/(2\\tan(\\omega/2))$). And radial distortion is caused by the lens, not by non-rectangular pixels.",
+          "options": [
+            {
+              "text": "The FOV (or ATAN) model for radial distortion is not invertible in closed form.",
+              "correct": false
+            },
+            {
+              "text": "Radial distortion is caused by non-rectangular pixels.",
+              "correct": false
+            },
+            {
+              "text": "A radial distortion model applied after the pinhole projection cannot model cameras with a field of view of more than $180^\\circ$.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Radial distortion",
+            "Field of view"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "20EFB 7c"
+          ],
+          "q": "Consider the radial distortion model $x_d=g(r)\\frac{x}{\\|x\\|}$ with $r=\\|x\\|$ and $g(r)=s\\log(1+kr)$, $s,k\\in\\mathbb{R}^+$. Choose $f$ so that the inverse distortion is $x=f(r_d)\\frac{x_d}{\\|x_d\\|}$, $r_d=\\|x_d\\|$.",
+          "answer": "$f(r_d)=\\dfrac{\\exp(r_d/s)-1}{k}$.\n**Derivation.** Taking norms of $x_d=g(r)\\tfrac{x}{\\|x\\|}$ gives $r_d=g(r)$ (both $g$ and $f$ are positive), so\n$$r_d=s\\log(1+kr)\\ \\Rightarrow\\ \\frac{r_d}{s}=\\log(1+kr)\\ \\Rightarrow\\ \\exp(r_d/s)-1=kr\\ \\Rightarrow\\ r=\\frac{\\exp(r_d/s)-1}{k}=f(r_d).$$",
+          "extend": "Undistortion is purely radial: take norms, invert the scalar function, then rescale along the same ray.",
+          "options": [
+            {
+              "text": "$f(r_d)=\\dfrac{1-\\exp(r_d/s)}{k}$",
+              "correct": false
+            },
+            {
+              "text": "$f(r_d)=\\dfrac{\\exp(r_d/s)-1}{k}$",
+              "correct": true
+            },
+            {
+              "text": "$f(r_d)=\\dfrac{1-\\exp(r_ds)}{k}$",
+              "correct": false
+            },
+            {
+              "text": "$f(r_d)=\\dfrac{\\exp(r_ds)-1}{k}$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Radial distortion",
+            "Undistortion"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "21EFB 6c",
+            "22EDC 3b"
+          ],
+          "q": "For the same distortion form but with $g(r)=s\\log\\!\\big(1+\\tfrac{r}{k}\\big)$, choose $f$ so that $x=f(r_d)\\frac{x_d}{\\|x_d\\|}$.",
+          "answer": "$f(r_d)=k\\big(\\exp(r_d/s)-1\\big)$.\n**Derivation.** $r_d=g(r)=s\\log\\!\\big(1+\\tfrac rk\\big)\\Rightarrow\\tfrac{r_d}{s}=\\log\\!\\big(1+\\tfrac rk\\big)\\Rightarrow\\exp(r_d/s)-1=\\tfrac rk\\Rightarrow r=k\\big(\\exp(r_d/s)-1\\big)$.\n**Compare.** With $g(r)=s\\log(1+kr)$ the answer is $\\tfrac{\\exp(r_d/s)-1}{k}$ — the $k$ divides instead of multiplying. Same algebra, mirrored parameterisation.",
+          "extend": "This pair of near-identical questions from two different years is a deliberate trap: check whether $k$ multiplies $r$ or divides it before you invert.",
+          "options": [
+            {
+              "text": "$f(r_d)=\\dfrac{\\exp(r_d/s)-1}{k}$",
+              "correct": false
+            },
+            {
+              "text": "$f(r_d)=\\dfrac{1-\\exp(r_d/s)}{k}$",
+              "correct": false
+            },
+            {
+              "text": "$f(r_d)=k\\big(\\exp(r_d/s)-1\\big)$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Radial distortion",
+            "Undistortion"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 7d",
+            "20EFB 7e"
+          ],
+          "q": "Given the camera-frame points $X_1=(-1,0,10)^\\top$, $X_2=(1,1,10)^\\top$, $X_3=(3,2,10)^\\top$ and their pixel coordinates after undistortion $x_1=(270,240)^\\top$, $x_2=(370,280)^\\top$, $x_3=(470,310)^\\top$ using the pinhole model, decide whether the undistortion worked perfectly, and explain.",
+          "answer": "**The undistortion did not work perfectly**, so the undistorted image cannot be perfectly modelled by the pinhole camera model.\n**Explanation.** The three 3D points are **collinear**:\n$$X_2-X_1=(2,1,0)^\\top,\\qquad X_3-X_2=(2,1,0)^\\top.$$\nUnder a perfect pinhole model the image of a line is a line, so $x_1,x_2,x_3$ would have to be collinear too. But\n$$x_2-x_1=(100,40)^\\top,\\qquad x_3-x_2=(100,30)^\\top,$$\nwhich are not parallel. Hence the undistorted points are not collinear and the undistortion is imperfect.\n**Note.** No knowledge of the actual intrinsics is needed — collinearity is preserved by *any* non-degenerate $K$.",
+          "extend": "\"Lines must stay lines\" is a calibration-free test: it needs neither $K$ nor the pose, which is exactly why line-based distortion calibration works.",
+          "tags": [
+            "Radial distortion",
+            "Undistortion",
+            "Perspective projection"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX03 4"
+          ],
+          "q": "(a) Can a radial distortion model applied in the normalised image plane represent lenses with a field of view greater than $180^\\circ$? Why or why not? (b) For the FOV/ATAN model $r_d=\\tfrac1\\omega\\arctan\\!\\big(2r_u\\tan\\tfrac\\omega2\\big)$: show it approaches the identity as $\\omega\\to0$ and derive the closed-form undistortion. (c) How could the pipeline be modified to handle FOV $>180^\\circ$?",
+          "answer": "**(a) No.** The generic projection $\\pi(\\tilde X)=(X/Z,Y/Z)^\\top$ is undefined at $Z=0$ (the $90^\\circ$ plane) and maps points with $Z<0$ incorrectly. Since $r=\\|\\pi(\\tilde X)\\|=\\tan\\theta$ with $\\theta$ the angle from the optical axis, $r\\to\\infty$ as $\\theta\\to90^\\circ$. No finite $g(r)$ can fix this — the problem is in $\\pi$ itself, not in $g$.\n**(b) Sanity check.** For small $\\omega$: $2r_u\\tan(\\omega/2)\\approx r_u\\omega$ and $\\arctan(r_u\\omega)\\approx r_u\\omega$, so $r_d\\approx\\tfrac1\\omega r_u\\omega=r_u$ ✓.\n**Undistortion.** From $\\omega r_d=\\arctan\\!\\big(2r_u\\tan\\tfrac\\omega2\\big)$ we get $\\tan(\\omega r_d)=2r_u\\tan\\tfrac\\omega2$, hence\n$$r_u=\\frac{\\tan(\\omega r_d)}{2\\tan(\\omega/2)},\\qquad \\pi(\\tilde X)=\\frac{r_u}{r_d}\\pi_d=\\frac{\\tan(\\omega r_d)}{2r_d\\tan(\\omega/2)}\\,\\pi_d.$$\n**(c)** Replace the planar parameterisation by one based on the **incidence angle** $\\theta=\\arccos\\big(Z/\\|\\tilde X\\|\\big)\\in[0,\\pi]$. The simplest is the **equidistant (fisheye)** model $r_u=\\theta$, so with azimuth $\\phi=\\operatorname{atan2}(Y,X)$ the normalised coordinates are $\\pi(\\tilde X)=\\theta(\\cos\\phi,\\sin\\phi)^\\top$, well defined for the whole forward and back hemisphere. The distortion stage becomes $r_d=h(\\theta)$ (e.g. the polynomial Kannala–Brandt model) — the standard pipeline for fisheye and catadioptric cameras.",
+          "extend": "$r=\\tan\\theta$ is the one-line reason the planar model dies at $180^\\circ$; angle-based models replace $\\tan\\theta$ by $\\theta$ itself.",
+          "tags": [
+            "Radial distortion",
+            "Field of view",
+            "Fisheye"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX03 5"
+          ],
+          "q": "Using the division model $x_u=\\frac{x_d}{1+kr_d^2}$, $y_u=\\frac{y_d}{1+kr_d^2}$, $r_d^2=x_d^2+y_d^2$: derive the collinearity constraint for three points, show it is linear in $k$, set up the least-squares estimate, and state the minimum number of lines and points per line.",
+          "answer": "**Collinearity.** Three undistorted points are collinear iff $\\det\\begin{pmatrix}x_{u1}&y_{u1}&1\\\\x_{u2}&y_{u2}&1\\\\x_{u3}&y_{u3}&1\\end{pmatrix}=0$. Row $i$ equals $\\tfrac{1}{1+kr_{di}^2}(x_{di},y_{di},1+kr_{di}^2)$, and multiplying row $i$ by $(1+kr_{di}^2)\\neq0$ only scales the determinant by $\\prod_i(1+kr_{di}^2)$, preserving the zero condition:\n$$\\det\\begin{pmatrix}x_{d1}&y_{d1}&1+kr_{d1}^2\\\\x_{d2}&y_{d2}&1+kr_{d2}^2\\\\x_{d3}&y_{d3}&1+kr_{d3}^2\\end{pmatrix}=0.$$\n**Linear in $k$.** Splitting the third column by multilinearity gives $A+kB=0$ with\n$$A=\\det\\begin{pmatrix}x_{d1}&y_{d1}&1\\\\x_{d2}&y_{d2}&1\\\\x_{d3}&y_{d3}&1\\end{pmatrix},\\qquad B=\\det\\begin{pmatrix}x_{d1}&y_{d1}&r_{d1}^2\\\\x_{d2}&y_{d2}&r_{d2}^2\\\\x_{d3}&y_{d3}&r_{d3}^2\\end{pmatrix}.$$\n$A$ is the collinearity residual of the distorted points (non-zero because the line looks curved).\n**Least squares.** Each triplet gives $A_m+kB_m=0$; stacking and solving,\n$$\\hat k=-\\frac{\\sum_mA_mB_m}{\\sum_mB_m^2}.$$\n**Minimum data.** One unknown, so $M\\ge1$ triplet suffices: **one line with at least three points**. (From a line with $N$ points one can form $\\binom{N}{3}$ triplets.) With a higher-order model $1+k_1r_d^2+k_2r_d^4$ the constraint stays linear, $A+k_1B_1+k_2B_2=0$, and $n$ coefficients need at least $n$ triplets.",
+          "extend": "Multilinearity of the determinant in its columns is what keeps the problem linear no matter how many radial coefficients you add.",
+          "tags": [
+            "Radial distortion",
+            "Division model",
+            "Calibration",
+            "Least squares"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 3.7"
+          ],
+          "q": "Consider the radial distortion model $x_d=g(r)x$, mapping normalised image coordinates $x\\in\\mathbb{R}^2$ to distorted coordinates $x_d\\in\\mathbb{R}^2$, with $r=|x|$ and $g(r)=\\dfrac{1}{1+kr}$, $k\\in\\mathbb{R}$. Write down $f(r_d)$ solely in terms of $k$ and $r_d=|x_d|$ such that the inverse distortion is $x=f(r_d)x_d$.",
+          "answer": "$$f(r_d)=\\frac{1}{1-k\\,r_d}.$$\n**Derivation.** Taking norms of $x_d=g(r)x$ gives\n$$r_d=g(r)\\,r=\\frac{r}{1+kr}\\ \\Longrightarrow\\ r_d(1+kr)=r\\ \\Longrightarrow\\ r_d=r(1-k\\,r_d)\\ \\Longrightarrow\\ r=\\frac{r_d}{1-k\\,r_d}.$$\nSince $x=f(r_d)x_d$ implies $r=f(r_d)\\,r_d$, we get $f(r_d)=r/r_d=\\dfrac{1}{1-k\\,r_d}$.\n**Note the symmetry.** The forward model divides by $1+kr$ and the inverse divides by $1-kr_d$ — the sign of $k$ simply flips.",
+          "extend": "Same recipe as every distortion question: take norms to get a scalar relation $r_d=g(r)$, invert it, then rescale along the same ray.",
+          "tags": [
+            "Radial distortion",
+            "Undistortion"
+          ]
+        }
+      ]
+    }
+  ]
+}

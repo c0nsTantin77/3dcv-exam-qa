@@ -1,0 +1,33 @@
+---
+import type { KnowledgePointData } from "../content.config";
+import QuestionCard from "./QuestionCard.astro";
+import { sortedQuestions } from "../lib/content";
+import { renderAnswer } from "../lib/md";
+import { qid } from "../lib/qid";
+
+interface Props {
+  kp: KnowledgePointData;
+  kpnum?: string;
+}
+const { kp, kpnum = "" } = Astro.props;
+const recapHtml = renderAnswer(kp.recap);
+const questions = sortedQuestions(kp.questions);
+---
+
+<section class="kp" id={kp.id}>
+  <h2>
+    {kpnum && <span class="kp-num">{kpnum}</span>} {kp.title}
+  </h2>
+  <div class="recap" set:html={recapHtml} />
+  <div class="qlist">
+    {
+      questions.map((q, j) => (
+        <QuestionCard
+          q={q}
+          anchor={qid(kp.id, q.q)}
+          qnum={kpnum ? `${kpnum}.${j + 1}` : ""}
+        />
+      ))
+    }
+  </div>
+</section>

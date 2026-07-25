@@ -1,0 +1,1908 @@
+{
+  "id": "ch01",
+  "roman": "I",
+  "title": "Mathematical Background: Linear Algebra",
+  "blurb": "Vector spaces, the matrix groups of 3D vision, rank and kernel, eigenvalues, skew-symmetric matrices and the SVD — the toolbox every later chapter is built on, and reliably the largest single problem on the exam (20–28 credits).",
+  "knowledge_points": [
+    {
+      "id": "vector-spaces",
+      "title": "Vector Spaces, Span, Linear Independence, Basis",
+      "recap": "**Vector space.** A set $V$ over the field $\\mathbb{R}$ that is closed under addition $+:V\\times V\\to V$ and scalar multiplication $\\cdot:\\mathbb{R}\\times V\\to V$, i.e. $\\alpha v_1+\\beta v_2\\in V$ for all $v_i\\in V,\\ \\alpha,\\beta\\in\\mathbb{R}$. Under $+$ it forms a **commutative (abelian) group** (neutral element $0$, inverse $-v$); scalar multiplication respects $\\alpha(\\beta u)=(\\alpha\\beta)u$ and both distributive laws $(\\alpha+\\beta)v=\\alpha v+\\beta v$, $\\alpha(v+u)=\\alpha v+\\alpha u$.\n**Subspace.** $W\\subset V$ with $0\\in W$, closed under $+$ and $\\cdot$. Note $0\\in W$ is what rules out affine sets.\n**Span.** $\\operatorname{span}(S)=\\{v=\\sum_{i=1}^{k}\\alpha_i v_i\\mid v_i\\in S,\\ \\alpha_i\\in\\mathbb{R}\\}$ — the smallest subspace containing $S$.\n**Linear independence.** $\\sum_{i=1}^{k}\\alpha_i v_i=0\\ \\Rightarrow\\ \\alpha_i=0\\ \\forall i$. Equivalently: no vector is a linear combination of the others. The exam MC traps you with the wrong quantifier — it is $\\alpha_i=0$, **not** $v_i=0$.\n**Basis.** $B=\\{v_1,\\dots,v_n\\}$ that is linearly independent **and** spans $V$; a maximal independent set. Every basis of $V$ has the same number of elements $n=\\dim V$, and every $v\\in V$ has a **unique** expansion $v=\\sum_i\\alpha_i b_i$.\n**Basis transform.** With $B=(b_1,\\dots,b_n)$, $B'=(b'_1,\\dots,b'_n)$ as matrices of basis vectors, $B'=BA\\iff B=B'A^{-1}$. A linear map $L(x)=Ax$ written in the new basis $P=[e'_1,\\dots,e'_n]$ becomes $B=P^{-1}AP$ (same map, new coordinates).\n**Useful dimensions.** $\\dim\\mathbb{R}^{n\\times n}=n^2$; symmetric matrices $\\dim=\\tfrac{n(n+1)}{2}$; skew-symmetric $\\dim=\\tfrac{n(n-1)}{2}$; $\\dim\\mathfrak{so}(3)=3$, $\\dim\\mathfrak{se}(3)=6$.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.1",
+            "22EDC 1a"
+          ],
+          "q": "Which of the following sets of vectors is linearly independent?",
+          "answer": "Only $\\{(4,-5,5)^\\top,(-3,1,2)^\\top,(2,5,-2)^\\top\\}$.\n**Why the others fail.** For $\\{(1,5,9),(8,12,16),(-6,-2,2)\\}$ we have $(8,12,16)^\\top-2(1,5,9)^\\top=(6,2,-2)^\\top=-(-6,-2,2)^\\top$, so the three are dependent. The set containing the zero vector is always dependent (take $\\alpha=1$ on the zero vector). For $\\{(2,2,1),(3,1,1),(-1,-7,-2)\\}$ one checks $2\\,(2,2,1)^\\top-\\ldots$ gives a non-trivial vanishing combination.\n**Fast test.** Three vectors in $\\mathbb{R}^3$ are independent iff the $3\\times3$ determinant is non-zero — but the exam usually wants you to spot the combination by eye.",
+          "extend": "Zero vector in the set ⇒ dependent, instantly. That is always one of the four options.",
+          "options": [
+            {
+              "text": "$B=\\left\\{\\begin{pmatrix}1\\\\5\\\\9\\end{pmatrix},\\begin{pmatrix}8\\\\12\\\\16\\end{pmatrix},\\begin{pmatrix}-6\\\\-2\\\\2\\end{pmatrix}\\right\\}$",
+              "correct": false
+            },
+            {
+              "text": "$B=\\left\\{\\begin{pmatrix}4\\\\-5\\\\5\\end{pmatrix},\\begin{pmatrix}-3\\\\1\\\\2\\end{pmatrix},\\begin{pmatrix}2\\\\5\\\\-2\\end{pmatrix}\\right\\}$",
+              "correct": true
+            },
+            {
+              "text": "$B=\\left\\{\\begin{pmatrix}1\\\\0\\\\1\\end{pmatrix},\\begin{pmatrix}0\\\\0\\\\0\\end{pmatrix},\\begin{pmatrix}0\\\\10\\\\1\\end{pmatrix}\\right\\}$",
+              "correct": false
+            },
+            {
+              "text": "$B=\\left\\{\\begin{pmatrix}2\\\\2\\\\1\\end{pmatrix},\\begin{pmatrix}3\\\\1\\\\1\\end{pmatrix},\\begin{pmatrix}-1\\\\-7\\\\-2\\end{pmatrix}\\right\\}$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Linear independence",
+            "Basis"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "20EFB 4a",
+            "24EDC 1.11"
+          ],
+          "q": "Let $\\lambda_1,\\dots,\\lambda_k\\in\\mathbb{R}$. The set of vectors $\\{v_1,\\dots,v_k\\}\\subset\\mathbb{R}^n$ is called **linearly independent** if …",
+          "answer": "$\\sum_{i=1}^{k}\\lambda_i v_i=0\\ \\Rightarrow\\ \\lambda_i=0\\ \\ \\forall i=1,\\dots,k$.\n**Trap 1.** Concluding $v_i=0$ instead of $\\lambda_i=0$ — that would say the vectors themselves vanish.\n**Trap 2.** \"All vectors are pairwise distinct\" is far too weak: $\\{v,2v\\}$ is distinct but dependent.",
+          "options": [
+            {
+              "text": "$\\sum_{i=1}^{k}\\lambda_i v_i=0\\ \\Rightarrow\\ v_i=0\\ \\forall i$",
+              "correct": false
+            },
+            {
+              "text": "$\\sum_{i=1}^{k}\\lambda_i v_i=0\\ \\Rightarrow\\ \\lambda_i=0\\ \\forall i$",
+              "correct": true
+            },
+            {
+              "text": "$v_i\\neq v_j\\ \\ \\forall i,j$ with $i\\neq j$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Linear independence"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 6"
+          ],
+          "q": "State the definition of a vector space $V$ over a field $K$. Does $V$ have to satisfy the group properties? What additional properties does a vector space have?",
+          "answer": "A vector space $V$ over $K$ satisfies:\n**(1)** $(V,+)$ is a **commutative (abelian) group** — so yes, the group axioms are required for addition.\n**(2)** A scalar multiplication $\\cdot:K\\times V\\to V$ with $1v=v$, $\\alpha(\\beta v)=(\\alpha\\beta)v$, $(\\alpha+\\beta)v=\\alpha v+\\beta v$ and $\\alpha(v+w)=\\alpha v+\\alpha w$.\n**So:** the additional structure over a plain group is the scalar multiplication together with its compatibility (associativity + two distributive laws) with the field operations.",
+          "extend": "Scalar multiplication is *not* a group operation — it maps $K\\times V\\to V$, not $V\\times V\\to V$.",
+          "tags": [
+            "Vector space",
+            "Group"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 7"
+          ],
+          "q": "Let $V$ be a vector space over $K$. State the definition of linear independence, of the span of a set $M\\subset V$, and of a basis of a subspace $U\\subset V$.",
+          "answer": "**Linear independence.** $\\sum_{i=1}^{k}\\alpha_i v_i=0\\Rightarrow\\alpha_i=0$ for all $i$.\n**Span.** $\\operatorname{span}(M)=\\left\\{\\sum_{i=1}^{k}\\alpha_i v_i\\ \\middle|\\ v_i\\in M,\\ \\alpha_i\\in K\\right\\}$.\n**Basis.** A linearly independent subset $B\\subset U$ with $\\operatorname{span}(B)=U$.",
+          "extend": "Independence answers \"is anything redundant?\", span answers \"do we reach everything?\" — a basis needs both.",
+          "tags": [
+            "Linear independence",
+            "Span",
+            "Basis"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 8"
+          ],
+          "q": "Without using the determinant, decide for $M_1=\\left\\{(1,1,1)^\\top,(0,1,1)^\\top,(0,0,1)^\\top\\right\\}$ and $M_2=\\left\\{(2,1,0)^\\top,(1,1,0)^\\top\\right\\}$ whether the set is linearly independent, spans $\\mathbb{R}^3$, and forms a basis of $\\mathbb{R}^3$.",
+          "answer": "**$M_1$.** From $\\alpha_1v_1+\\alpha_2v_2+\\alpha_3v_3=0$ the first component gives $\\alpha_1=0$, then the second $\\alpha_2=0$, then the third $\\alpha_3=0$ — the triangular structure cascades. So $M_1$ is linearly independent. It spans: any $x=(x_1,x_2,x_3)^\\top$ is $x_1(v_1-v_2)+(x_2-x_1)v_2+(x_3-x_2)v_3$. Three independent vectors in $\\mathbb{R}^3$ ⇒ $M_1$ **is a basis**.\n**$M_2$.** Independent ($2\\alpha_1+\\alpha_2=0$ and $\\alpha_1+\\alpha_2=0$ force $\\alpha_1=\\alpha_2=0$), but every combination has third component $0$, so it does **not** span $\\mathbb{R}^3$ and is **not** a basis.",
+          "extend": "In $\\mathbb{R}^n$: $n$ independent vectors ⇒ automatically a basis; fewer than $n$ ⇒ never a basis.",
+          "tags": [
+            "Linear independence",
+            "Span",
+            "Basis"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 4b"
+          ],
+          "q": "Let $M=[c_1,\\dots,c_n]\\in\\mathbb{R}^{m\\times n}$. State the name of the quantity $\\dim\\big(\\operatorname{span}(\\{c_1,\\dots,c_n\\})\\big)$.",
+          "answer": "The **rank** of the matrix $M$.\n**Because** $\\operatorname{span}$ of the columns is exactly $\\operatorname{range}(M)$, and $\\operatorname{rank}(M)=\\dim\\operatorname{range}(M)$.",
+          "tags": [
+            "Rank",
+            "Span"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 4d"
+          ],
+          "q": "Let $E=\\{A\\in\\mathbb{R}^{n\\times n}\\mid A^\\top=A\\}$. What is the dimension of this space?",
+          "answer": "$\\dim E=\\dfrac{n(n+1)}{2}$.\n**Count.** $n$ free diagonal entries plus $\\tfrac{n(n-1)}{2}$ free strictly-upper entries (the lower triangle is determined by symmetry).\n**Companion fact.** The skew-symmetric matrices form a space of dimension $\\tfrac{n(n-1)}{2}$; the two dimensions add to $n^2$ because $\\mathbb{R}^{n\\times n}=\\text{Sym}\\oplus\\text{Skew}$ with $A=\\tfrac12(A+A^\\top)+\\tfrac12(A-A^\\top)$.",
+          "extend": "$n=3$: symmetric $6$, skew-symmetric $3$ — the $3$ is exactly $\\dim\\mathfrak{so}(3)$, i.e. the three rotation parameters.",
+          "tags": [
+            "Symmetric matrix",
+            "Skew-symmetric matrix",
+            "Dimension"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 4f"
+          ],
+          "q": "Let $L:\\mathbb{R}^n\\to\\mathbb{R}^n$, $L(x)=Ax$. Let $\\{e_i\\}$ be the canonical basis and $\\{e'_i\\}$ another basis of $\\mathbb{R}^n$. Define $B=P^{-1}AP$ with $P=[e'_1,\\dots,e'_n]$. Describe briefly how $B$ is related to $L$.",
+          "answer": "$B$ **represents the same linear map $L$ in the basis $\\{e'_i\\}$**: it takes the coordinates of $x$ w.r.t. $\\{e'_i\\}$ and returns the coordinates of $L(x)$ w.r.t. $\\{e'_i\\}$.\n**Read it right to left.** $P$ converts new-basis coordinates to canonical ones, $A$ applies the map, $P^{-1}$ converts back.\n**Consequence.** $A$ and $B$ are *similar*, so they share eigenvalues, rank, determinant and trace — $\\sigma(B)=\\sigma(A)$.",
+          "tags": [
+            "Basis",
+            "Linear map"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "24EDC 1.3"
+          ],
+          "q": "Which of the following statements is true for a vector space $(V,+)$ over $\\mathbb{R}$?",
+          "answer": "**$(V,+)$ with scalar-vector multiplication has to fulfil the distributive law.**\n**Why the others fail.** $(V,\\cdot)$ is **not** a group — scalar multiplication maps $\\mathbb{R}\\times V\\to V$, not $V\\times V\\to V$, so it is not even a binary operation on $V$; only $(V,+)$ is a group. Scalar multiplication is a mapping $\\mathbb{R}\\times V\\to V$, **not** $\\mathbb{R}\\times V\\to\\mathbb{R}$. And an inner product is **not** part of the definition of a vector space — adding one turns it into an inner-product (Hilbert) space.",
+          "extend": "Vector space = abelian group under $+$ **plus** a compatible scalar multiplication. Inner product, norm and metric are extra structure.",
+          "options": [
+            {
+              "text": "The $(V,+)$ and $(V,\\cdot)$ are groups.",
+              "correct": false
+            },
+            {
+              "text": "The scalar multiplication is defined as a mapping $\\mathbb{R}\\times V\\to\\mathbb{R}$.",
+              "correct": false
+            },
+            {
+              "text": "The $(V,+)$ with scalar-vector multiplication has to fulfil the distributive law.",
+              "correct": true
+            },
+            {
+              "text": "An inner product $\\langle\\cdot,\\cdot\\rangle:V\\times V\\to\\mathbb{R}$ is defined.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Vector space",
+            "Group",
+            "Inner product"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "24EDC 1.9"
+          ],
+          "q": "Let $B_1=\\{\\hat e_1,\\hat e_2,\\hat e_3\\}$, where $e_i$ is the $i$-th unit vector in $\\mathbb{R}^3$ and $\\widehat{\\ \\cdot\\ }$ maps to the skew-symmetric matrix, and let $B_2=\\left\\{\\begin{pmatrix}1\\\\0\\\\2\\end{pmatrix},\\begin{pmatrix}-3\\\\1\\\\-6\\end{pmatrix},\\begin{pmatrix}0\\\\1\\\\0\\end{pmatrix}\\right\\}$. Determine which statement is correct for these sets.",
+          "answer": "$\\operatorname{span}(B_2)=\\left\\{(x,y,z)^\\top\\in\\mathbb{R}^3\\ \\middle|\\ x-0.5z=0\\right\\}$.\n**Why.** All three vectors of $B_2$ satisfy $x=\\tfrac12z$: $1=\\tfrac12\\cdot2$ ✓, $-3=\\tfrac12(-6)$ ✓, $0=\\tfrac12\\cdot0$ ✓. So they all lie in that plane and span it (two of them are independent), giving a **2-dimensional** span — hence $B_2$ neither forms a basis of $\\mathbb{R}^3$ nor spans it.\n**Why $B_1$ fails.** $B_1=\\{\\hat e_1,\\hat e_2,\\hat e_3\\}$ consists of $3\\times3$ **matrices**, not vectors of $\\mathbb{R}^3$; it is a basis of $\\mathfrak{so}(3)$ (the skew-symmetric matrices), not of $\\mathbb{R}^3$ — and certainly not of $SO(3)$, which is a group, not a vector space.",
+          "extend": "Check whether the candidate vectors satisfy a common linear equation — if they do, they span at most a plane.",
+          "options": [
+            {
+              "text": "$B_2$ forms a basis of $\\mathbb{R}^3$.",
+              "correct": false
+            },
+            {
+              "text": "$B_1$ spans $\\mathbb{R}^3$.",
+              "correct": false
+            },
+            {
+              "text": "$\\operatorname{span}(B_2)=\\left\\{(x,y,z)^\\top\\in\\mathbb{R}^3\\mid x-0.5z=0\\right\\}$.",
+              "correct": true
+            },
+            {
+              "text": "$B_1$ is a basis of $SO(3)$.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Span",
+            "Basis",
+            "Skew-symmetric matrix"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 1b"
+          ],
+          "q": "Which of the following vectors, in addition to the set $B=\\left\\{\\begin{pmatrix}2\\\\-1\\\\2\\end{pmatrix},\\begin{pmatrix}-1\\\\-2\\\\-1\\end{pmatrix},\\begin{pmatrix}1\\\\-3\\\\1\\end{pmatrix}\\right\\}$, spans $\\mathbb{R}^3$?",
+          "answer": "$(2,-1,5)^\\top$.\n**Key observation.** Every vector of $B$ satisfies $x=z$ ($2{=}2$, $-1{=}-1$, $1{=}1$), so all three lie in the plane $\\{x=z\\}$ and $\\operatorname{span}(B)$ is at most **two**-dimensional — $B$ alone does not span $\\mathbb{R}^3$, and a set of 4 vectors in $\\mathbb{R}^3$ certainly *can* span it.\n**Test the candidates.** $(2,-1,5)^\\top$ has $2\\neq5$, so it lies **off** that plane and completes a basis ⇒ the enlarged set spans $\\mathbb{R}^3$. $(15,-25,15)^\\top$ has $15=15$, so it stays inside the plane and adds nothing.",
+          "extend": "Find the linear relation the given vectors all satisfy, then pick the candidate that violates it — far quicker than row-reducing a $3\\times4$ matrix.",
+          "options": [
+            {
+              "text": "$(2,-1,5)^\\top$",
+              "correct": true
+            },
+            {
+              "text": "The given set of vectors spans $\\mathbb{R}^3$",
+              "correct": false
+            },
+            {
+              "text": "A set of 4 vectors in $\\mathbb{R}^3$ cannot span $\\mathbb{R}^3$",
+              "correct": false
+            },
+            {
+              "text": "$(15,-25,15)^\\top$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Span",
+            "Linear independence",
+            "Basis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inner-products",
+      "title": "Inner Products, Norms and Hilbert Spaces",
+      "recap": "**Inner product.** $\\langle\\cdot,\\cdot\\rangle:V\\times V\\to\\mathbb{R}$ with (1) linearity $\\langle u,\\alpha v+\\beta w\\rangle=\\alpha\\langle u,v\\rangle+\\beta\\langle u,w\\rangle$, (2) symmetry $\\langle u,v\\rangle=\\langle v,u\\rangle$, (3) positive definiteness $\\langle v,v\\rangle\\ge0$ with equality iff $v=0$.\n**Induced norm and metric.** $|v|=\\sqrt{\\langle v,v\\rangle}$ and $d(v,w)=|v-w|$. A finite-dimensional vector space with an inner product is a **Hilbert space**. Orthogonality: $v\\perp w\\iff\\langle v,w\\rangle=0$.\n**Canonical inner product on $\\mathbb{R}^n$.** $\\langle x,y\\rangle=x^\\top y=\\sum_i x_iy_i$, inducing the Euclidean $L^2$ norm $|x|_2=\\sqrt{x^\\top x}$.\n**Induced inner product.** After a basis transform $I=B'A^{-1}$, i.e. $x=Ax'$, the canonical product reads $\\langle x,y\\rangle=x'^\\top A^\\top A\\,y'\\equiv\\langle x',y'\\rangle_{A^\\top A}$ — the *induced* inner product of $A$.\n**Matrix inner product / Frobenius.** $\\langle A,B\\rangle=\\operatorname{trace}(A^\\top B)=\\sum_k a_k^\\top b_k$, inducing $\\|A\\|_f=\\sqrt{\\sum_{ij}a_{ij}^2}=\\sqrt{\\operatorname{trace}(A^\\top A)}=\\sqrt{\\sigma_1^2+\\dots+\\sigma_n^2}$. This is the norm used in every projection/Procrustes problem on the exam.\n**Induced 2-norm.** $\\|A\\|_2=\\max_{|x|_2=1}|Ax|_2=\\sigma_1$ — the largest singular value. $\\|A\\|_2\\neq\\|A\\|_f$ in general.\n**Trace tricks worth memorising.** $\\operatorname{trace}(XYZ)=\\operatorname{trace}(YZX)=\\operatorname{trace}(ZXY)$ (cyclic), $\\operatorname{trace}(M)=\\operatorname{trace}(M^\\top)$, and $\\|A\\|_f$ is invariant under left/right multiplication by orthogonal matrices.\n**Kronecker product and stack.** $A\\otimes B$ stacks scaled copies of $B$; $A^s\\in\\mathbb{R}^{mn}$ stacks the columns of $A$. Key identity: $u^\\top A v=(v\\otimes u)^\\top A^s$ — this is what turns the epipolar constraint into a linear system in Chapter 5.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 9"
+          ],
+          "q": "A Hilbert space $H$ is a finite-dimensional vector space over $K$ endowed with an inner product. State the definition of an inner product.",
+          "answer": "A map $\\langle\\cdot,\\cdot\\rangle:H\\times H\\to K$ with\n**Symmetry:** $\\langle u,w\\rangle=\\langle w,u\\rangle$;\n**Linearity:** $\\langle v,\\alpha u\\rangle=\\alpha\\langle v,u\\rangle$ and $\\langle v,u+w\\rangle=\\langle v,u\\rangle+\\langle v,w\\rangle$;\n**Positive definiteness:** $v\\neq0\\Rightarrow\\langle v,v\\rangle>0$.",
+          "extend": "Positive definiteness is only demanded for $v\\neq0$ — $\\langle 0,0\\rangle=0$ is required, not forbidden.",
+          "tags": [
+            "Inner product",
+            "Hilbert space"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 10"
+          ],
+          "q": "Do the following form Hilbert spaces with the given inner product? (a) $\\mathbb{R}^n$ with $\\langle x,y\\rangle=x^\\top y$. (b) $\\mathbb{R}^{n\\times m}$ with $\\langle A,B\\rangle=\\operatorname{trace}(A^\\top B)$.",
+          "answer": "**(a) Yes.** Symmetry: $x^\\top y=\\sum_i x_iy_i=y^\\top x$. Linearity is immediate. Positive definiteness: $x^\\top x=\\sum_i x_i^2>0$ for $x\\neq0$.\n**(b) Yes.** Writing $A=[a_1,\\dots,a_m]$ column-wise, $\\operatorname{trace}(A^\\top B)=\\sum_{k=1}^{m}a_k^\\top b_k$ — a sum of standard inner products, so all three properties follow from (a).",
+          "extend": "$\\operatorname{trace}(A^\\top B)$ is a scalar and needs $A,B$ of identical size. It is *not* $\\operatorname{trace}(AB)$.",
+          "tags": [
+            "Inner product",
+            "Hilbert space",
+            "Frobenius norm"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 11"
+          ],
+          "q": "Show that the Frobenius norm $\\|A\\|_F=\\sqrt{\\sum_{i,j}a_{ij}^2}$ for $A\\in\\mathbb{R}^{n\\times m}$ is the norm induced by the inner product $\\langle A,B\\rangle=\\operatorname{trace}(A^\\top B)$.",
+          "answer": "$\\langle A,A\\rangle=\\operatorname{trace}(A^\\top A)=\\sum_{k=1}^{m}a_k^\\top a_k=\\sum_{k=1}^{m}\\sum_{i=1}^{n}a_{ik}^2=\\sum_{i,j}a_{ij}^2$.\n**Hence** $\\sqrt{\\langle A,A\\rangle}=\\sqrt{\\sum_{i,j}a_{ij}^2}=\\|A\\|_F$, which is exactly the definition of the induced norm $\\|A\\|=\\sqrt{\\langle A,A\\rangle}$.",
+          "extend": "Via SVD, $\\operatorname{trace}(A^\\top A)=\\sum_i\\sigma_i^2$, so $\\|A\\|_F=\\sqrt{\\sigma_1^2+\\dots+\\sigma_p^2}$ while $\\|A\\|_2=\\sigma_1$.",
+          "tags": [
+            "Frobenius norm",
+            "Inner product",
+            "Trace"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "The canonical inner product on $\\mathbb{R}^n$ is expressed in a new basis via $x=Ax'$. Which statements about the resulting **induced inner product** are correct?",
+          "answer": "$\\langle x,y\\rangle=x^\\top y=(Ax')^\\top(Ay')=x'^\\top A^\\top A\\,y'\\equiv\\langle x',y'\\rangle_{A^\\top A}$.\n**So** the induced product is defined by the symmetric positive (semi-)definite matrix $A^\\top A$, and it coincides with the canonical product exactly when $A^\\top A=I$, i.e. when $A$ is **orthogonal** — which is precisely why orthogonal transformations preserve lengths and angles.",
+          "options": [
+            {
+              "text": "The induced product is $\\langle x',y'\\rangle_{A^\\top A}=x'^\\top A^\\top A\\,y'$.",
+              "correct": true
+            },
+            {
+              "text": "It equals the canonical inner product for every invertible $A$.",
+              "correct": false
+            },
+            {
+              "text": "It equals the canonical inner product iff $A\\in O(n)$.",
+              "correct": true
+            },
+            {
+              "text": "The matrix $A^\\top A$ is symmetric and positive semi-definite.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Inner product",
+            "Orthogonal group"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "State the Kronecker product and the stack of a matrix, and give the identity that lets a bilinear expression $u^\\top A v$ be written as a linear expression in the entries of $A$.",
+          "answer": "**Kronecker product.** For $A\\in\\mathbb{R}^{m\\times n}$, $B\\in\\mathbb{R}^{k\\times l}$, $A\\otimes B=\\begin{pmatrix}a_{11}B&\\cdots&a_{1n}B\\\\\\vdots&\\ddots&\\vdots\\\\a_{m1}B&\\cdots&a_{mn}B\\end{pmatrix}\\in\\mathbb{R}^{mk\\times nl}$.\n**Stack.** $A^s=(a_1^\\top,\\dots,a_n^\\top)^\\top\\in\\mathbb{R}^{mn}$, the columns of $A$ stacked on top of each other.\n**Identity.** $u^\\top A v=(v\\otimes u)^\\top A^s$.\n**Why it matters.** It converts \"quadratic in the data, linear in the unknown matrix\" into a plain linear system — exactly the step that turns the epipolar constraint $x_2^\\top E x_1=0$ into $(x_1\\otimes x_2)^\\top E^s=0$ for the eight-point algorithm.",
+          "tags": [
+            "Kronecker product",
+            "Stack",
+            "Eight-point algorithm"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 1.4"
+          ],
+          "q": "Using the Frobenius inner product on matrices $A,B\\in\\mathbb{R}^{n\\times n}$, defined as $\\langle A,B\\rangle_F=\\operatorname{tr}(A^\\top B)$, show that a rotation matrix $R\\in SO(n)$ does not change the inner product of two matrices, i.e. $\\langle RA,RB\\rangle_F=\\langle A,B\\rangle_F$.",
+          "answer": "$$\\langle RA,RB\\rangle_F=\\operatorname{tr}\\big((RA)^\\top RB\\big)=\\operatorname{tr}\\big(A^\\top R^\\top RB\\big)=\\operatorname{tr}\\big(A^\\top B\\big)=\\langle A,B\\rangle_F,$$\nusing $R^\\top R=I$ for $R\\in SO(n)\\subset O(n)$.\n**Consequence.** Taking $A=B$ gives $\\|RA\\|_F=\\|A\\|_F$ — the Frobenius norm is invariant under orthogonal transformations. That invariance is exactly what is used in the orthogonal-Procrustes derivation and in the low-rank approximation error $\\|A-A_k\\|_F^2=\\sum_{i>k}\\sigma_i^2$.",
+          "extend": "The whole proof is \"insert $R^\\top R=I$\". Only orthogonality is needed — $\\det R=1$ plays no role here.",
+          "tags": [
+            "Frobenius norm",
+            "Inner product",
+            "Orthogonal group"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "groups",
+      "title": "Groups and the Matrix Groups of 3D Vision",
+      "recap": "**Group.** A set $G$ with an operation $\\circ:G\\times G\\to G$ satisfying exactly four axioms: **(1) closure** $g_1\\circ g_2\\in G$; **(2) associativity** $(g_1\\circ g_2)\\circ g_3=g_1\\circ(g_2\\circ g_3)$; **(3) neutral element** $\\exists e\\in G:\\ e\\circ g=g\\circ e=g$; **(4) inverse** $\\forall g\\ \\exists g^{-1}\\in G:\\ g\\circ g^{-1}=g^{-1}\\circ g=e$. **Commutativity is *not* an axiom** — that is the single most repeated MC trap.\n**$GL(n)$** — general linear group: all $A\\in\\mathbb{R}^{n\\times n}$ with $\\det(A)\\neq0$.\n**$SL(n)$** — special linear group: $\\det(A)=1$ (closed because $\\det(A^{-1})=\\det(A)^{-1}$).\n**$O(n)$** — orthogonal group: $R^\\top R=RR^\\top=I$, equivalently $\\langle Rx,Ry\\rangle=\\langle x,y\\rangle$. From $\\det(R^\\top R)=\\det(R)^2=1$ we get $\\det(R)\\in\\{-1,+1\\}$.\n**$SO(n)=O(n)\\cap SL(n)$** — rotations, $\\det(R)=+1$ only. $SO(3)$ = all 3D rotation matrices.\n**$A(n)$** — affine group: $L(x)=Ax+b$ with $A\\in GL(n)$. Not linear unless $b=0$; in homogeneous coordinates it becomes the linear $\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}\\in GL(n+1)$.\n**$E(n)$** — Euclidean group: $x\\mapsto Rx+T$ with $R\\in O(n)$. **$SE(n)$** — special Euclidean group, $R\\in SO(n)$; $SE(3)$ = the rigid-body motions.\n**Inclusions to memorise.** $SO(n)\\subset O(n)\\subset GL(n)$, $SO(n)\\subset SL(n)\\subset GL(n)$, and $SE(n)\\subset E(n)\\subset A(n)\\subset GL(n+1)$ — note the $n+1$: the affine/Euclidean groups only become matrix groups after homogenisation. $SL(n)\\subset O(n)$ is **false**.\n**Standard exam counterexamples.** $\\{A\\mid\\det A=-1\\}$ is not a group (no identity, not closed). $\\{A\\mid\\det A>0\\}$ *is* a group. Symmetric invertible matrices are not closed under multiplication since $(AB)^\\top=BA\\neq AB$. $\\left\\{\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}\\right\\}$ with $A\\in\\mathbb{R}^{n\\times n}$ **unrestricted** is not a group — invertibility fails unless $A\\in GL(n)$.\n**Matrix representation.** An injective $R:G\\to GL(n)$ with $R(e)=I$ and $R(g\\circ h)=R(g)R(h)$ — a group homomorphism, which is why abstract rotations can be studied as matrices.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.8",
+            "EX01 1"
+          ],
+          "q": "Name the four axioms a group $(G,\\circ)$ has to satisfy.",
+          "answer": "**(1) Closure:** $g_1\\circ g_2\\in G$ for all $g_1,g_2\\in G$.\n**(2) Associativity:** $(g_1\\circ g_2)\\circ g_3=g_1\\circ(g_2\\circ g_3)$ for all $g_1,g_2,g_3\\in G$.\n**(3) Identity / neutral element:** $\\exists e\\in G$ with $e\\circ g=g\\circ e=g$ for all $g\\in G$.\n**(4) Inverse element:** $\\forall g\\in G\\ \\exists g^{-1}\\in G$ with $g\\circ g^{-1}=g^{-1}\\circ g=e$.",
+          "extend": "Strictly, writing the operation as $\\circ:M\\times M\\to M$ already encodes closure — but the exam awards a point for naming it, so always list all four.",
+          "tags": [
+            "Group",
+            "Definition"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25RDC 1.3"
+          ],
+          "q": "Which of the following is **not** a necessary condition for a set $G$ with an operation $\\circ:G\\times G\\to G$ to be a group?",
+          "answer": "**Commutativity** is not required. A group in which $g_1\\circ g_2=g_2\\circ g_1$ holds is called *abelian*, which is a strictly stronger notion.\n**Counterexample.** $SO(3)$ is a group but rotations do not commute — $R_xR_y\\neq R_yR_x$ in general.",
+          "extend": "Matrix multiplication is associative but not commutative — every matrix group is a live counterexample.",
+          "options": [
+            {
+              "text": "Associativity: $(g_1\\circ g_2)\\circ g_3=g_1\\circ(g_2\\circ g_3)\\ \\forall g_1,g_2,g_3\\in G$",
+              "correct": false
+            },
+            {
+              "text": "Commutativity: $g_1\\circ g_2=g_2\\circ g_1\\ \\forall g_1,g_2\\in G$",
+              "correct": true
+            },
+            {
+              "text": "Closure: $g_1\\circ g_2\\in G\\ \\forall g_1,g_2\\in G$",
+              "correct": false
+            },
+            {
+              "text": "Neutral element: $\\exists e\\in G:\\ e\\circ g=g\\circ e=g\\ \\forall g\\in G$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Group",
+            "Definition"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.9",
+            "20RFB 4a"
+          ],
+          "q": "Consider the set $G$ of all matrices of the form $\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}$, where $A\\in\\mathbb{R}^{n\\times n}$, $b\\in\\mathbb{R}^n$, and let $\\circ$ be matrix multiplication. Is $(G,\\circ)$ a group? If so, give the name of this group; if not, explain why.",
+          "answer": "**It is not a group.**\n**Reason.** The elements of $G$ are not invertible whenever the top-left block $A$ is singular — nothing in the definition forces $\\det(A)\\neq0$, so the inverse axiom fails.\n**Fix.** Restricting to $A\\in GL(n)$ *does* give a group: the **affine group $A(n)$**, a subgroup of $GL(n+1)$, with $\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}^{-1}=\\begin{pmatrix}A^{-1}&-A^{-1}b\\\\0&1\\end{pmatrix}$.",
+          "extend": "Read the constraint on $A$ very carefully: $A\\in\\mathbb{R}^{n\\times n}$ ⇒ no group; $A\\in GL(n)$ ⇒ affine group $A(n)$.",
+          "tags": [
+            "Group",
+            "Affine group"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 4d"
+          ],
+          "q": "Let $A\\in GL(n)$, $b\\in\\mathbb{R}^n$, $c\\in\\mathbb{R}^n$ with $c=0$. Consider the group of all matrices $\\begin{pmatrix}A&b\\\\c^\\top&1\\end{pmatrix}$ under matrix multiplication. State the name of this group.",
+          "answer": "The **affine group $A(n)$**.\n**Why.** With $c=0$ the matrix is $\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}$, the homogeneous-coordinate representation of $x\\mapsto Ax+b$. Because $A$ is required to be invertible here, closure and inverses hold, and $A(n)$ is a subgroup of $GL(n+1)$.",
+          "tags": [
+            "Affine group",
+            "Homogeneous coordinates"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25RDC 1.2"
+          ],
+          "q": "Which of the following sets represents all the possible values of determinants of a matrix in $SO(n)$?",
+          "answer": "$\\{1\\}$.\n**Derivation.** $SO(n)=O(n)\\cap SL(n)$, so orthogonality forces $\\det(R)^2=1\\Rightarrow\\det(R)=\\pm1$, and the *special* condition then keeps only $\\det(R)=+1$.\n**Contrast with $O(n)$,** whose determinants are $\\{-1,+1\\}$ — the $-1$ elements are the reflections.",
+          "options": [
+            {
+              "text": "$\\{0\\}$",
+              "correct": false
+            },
+            {
+              "text": "$\\mathbb{R}\\setminus\\{0\\}$",
+              "correct": false
+            },
+            {
+              "text": "$\\{-1,1\\}$",
+              "correct": false
+            },
+            {
+              "text": "$\\{1\\}$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Special orthogonal group",
+            "Determinant"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 1a"
+          ],
+          "q": "Which of the following sets represents all the possible values of determinants of a matrix in $O(n)$?",
+          "answer": "$\\{-1,+1\\}$.\n**Derivation.** $R^\\top R=I\\Rightarrow\\det(R^\\top R)=\\det(R)^2=\\det(I)=1$, hence $\\det(R)=\\pm1$. Both values occur: $I$ has determinant $+1$, any reflection has $-1$.",
+          "options": [
+            {
+              "text": "$\\mathbb{R}\\setminus\\{0\\}$",
+              "correct": false
+            },
+            {
+              "text": "$\\{0\\}$",
+              "correct": false
+            },
+            {
+              "text": "$\\mathbb{R}$",
+              "correct": false
+            },
+            {
+              "text": "$\\{-1,+1\\}$",
+              "correct": true
+            },
+            {
+              "text": "$\\{-1,0,+1\\}$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Orthogonal group",
+            "Determinant"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 1b"
+          ],
+          "q": "Show that the set $O(n)=\\{R\\in GL(n)\\mid R^\\top R=I\\}$ is **closed** under matrix multiplication.",
+          "answer": "Let $A,B\\in O(n)$. Then\n$$(AB)^\\top AB=B^\\top A^\\top A B=B^\\top I B=B^\\top B=I,$$\nusing $A^\\top A=I$ and $B^\\top B=I$. Hence $AB\\in O(n)$, so $O(n)$ is closed under matrix multiplication.",
+          "extend": "The whole proof is \"insert $A^\\top A=I$, then $B^\\top B=I$\" — write both steps, they are worth a point each.",
+          "tags": [
+            "Orthogonal group",
+            "Group"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 1c"
+          ],
+          "q": "Show that the set $O(n)$ is **associative** with matrix multiplication.",
+          "answer": "Matrix multiplication is associative for all matrices, and $O(n)$ is closed under matrix multiplication (previous part), so every product of elements of $O(n)$ stays inside $O(n)$ and inherits associativity: $(AB)C=A(BC)$ for all $A,B,C\\in O(n)$.",
+          "extend": "Associativity is never proved from scratch — you cite the ambient operation plus closure. Mentioning closure is what earns the second point.",
+          "tags": [
+            "Orthogonal group",
+            "Group"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 1d"
+          ],
+          "q": "Show that the set $O(n)$ contains the neutral element (the identity matrix) with matrix multiplication.",
+          "answer": "$I^\\top I=II=I$, since $I^\\top=I$ and $I\\cdot I=I$. Hence $I\\in O(n)$, and $IA=AI=A$ for every $A\\in O(n)$, so $I$ is the neutral element.",
+          "tags": [
+            "Orthogonal group",
+            "Group"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 1e"
+          ],
+          "q": "Show that the set $O(n)$ contains an inverse element for each of its elements.",
+          "answer": "Each $R\\in O(n)$ has $\\det(R)=\\pm1\\neq0$, so $R^{-1}$ exists.\n**Identify it.** From $R^\\top R=I$, multiplying on the right by $R^{-1}$ gives $R^\\top=R^{-1}$.\n**Show it stays in $O(n)$.** $(R^{-1})^\\top R^{-1}=(R^\\top)^\\top R^{-1}=RR^{-1}=I$, so $R^{-1}=R^\\top\\in O(n)$.",
+          "extend": "For orthogonal matrices, transpose = inverse. This single fact drives $g^{-1}=\\begin{pmatrix}R^\\top&-R^\\top T\\\\0&1\\end{pmatrix}$ in Chapter 2.",
+          "tags": [
+            "Orthogonal group",
+            "Group"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 2.2"
+          ],
+          "q": "In the lecture you have seen the groups $O(n)$, $A(n)$, $E(n)$, $SE(n)$, $SO(n)$ and $GL(n)$ with $n\\in\\mathbb{N}$. Which subset relations are true?",
+          "answer": "True: $SE(n)\\subset A(n)$, $SO(n)\\subset GL(n)$, $SE(n)\\subset GL(n+1)$.\n**False:** $O(n)\\subset SO(n)$ (the inclusion runs the other way — $SO(n)$ is the subgroup with $\\det=+1$); $A(n)\\subset E(n)$ (again reversed: Euclidean transformations are the affine ones with orthogonal $A$); $SE(n)\\subset GL(n)$ — rigid motions are $(n+1)\\times(n+1)$ homogeneous matrices, so they embed in $GL(n+1)$, **not** $GL(n)$.\n**Chain to remember:** $SE(n)\\subset E(n)\\subset A(n)\\subset GL(n+1)$.",
+          "extend": "Whenever $A(n)$, $E(n)$ or $SE(n)$ meets $GL$, the answer carries $n+1$.",
+          "options": [
+            {
+              "text": "$O(n)\\subset SO(n)$",
+              "correct": false
+            },
+            {
+              "text": "$A(n)\\subset E(n)$",
+              "correct": false
+            },
+            {
+              "text": "$SE(n)\\subset A(n)$",
+              "correct": true
+            },
+            {
+              "text": "$SO(n)\\subset GL(n)$",
+              "correct": true
+            },
+            {
+              "text": "$SE(n)\\subset GL(n)$",
+              "correct": false
+            },
+            {
+              "text": "$SE(n)\\subset GL(n+1)$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Matrix groups",
+            "Special Euclidean group"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "20EFB 4e"
+          ],
+          "q": "Tick the correct statement.",
+          "answer": "$SE(n)\\subset A(n)\\subset GL(n+1)$.\n**Why the $n+1$.** An affine map $x\\mapsto Ax+b$ is only linear after homogenisation, where it becomes the $(n+1)\\times(n+1)$ matrix $\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}$ — an element of $GL(n+1)$, not of $GL(n)$.\n**And** $GL$ is never contained in $O$: orthogonality is a restriction, so $O(n)\\subset GL(n)$.",
+          "options": [
+            {
+              "text": "$SE(n)\\subset A(n)\\subset GL(n)$",
+              "correct": false
+            },
+            {
+              "text": "$SE(n)\\subset A(n)\\subset GL(n+1)$",
+              "correct": true
+            },
+            {
+              "text": "$GL(n+1)\\subset O(n)$",
+              "correct": false
+            },
+            {
+              "text": "$GL(n)\\subset O(n)$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Matrix groups",
+            "Affine group"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "20RFB 4g",
+            "24EDC 2.4"
+          ],
+          "q": "Tick the **wrong** statement.",
+          "answer": "$SL(n)\\subset O(n)$ is wrong.\n**Counterexample.** $\\begin{pmatrix}1&1\\\\0&1\\end{pmatrix}$ has determinant $1$, so it lies in $SL(2)$, but it is not orthogonal.\n**Correct relation.** It goes the other way round only for the *special* orthogonal part: $SO(n)=O(n)\\cap SL(n)\\subset SL(n)$. The other three statements — $E(n)\\subset A(n)$, $SO(n)\\subset O(n)$, $SE(n)\\subset GL(n+1)$ — are all true.",
+          "options": [
+            {
+              "text": "$SL(n)\\subset O(n)$",
+              "correct": true
+            },
+            {
+              "text": "$E(n)\\subset A(n)$",
+              "correct": false
+            },
+            {
+              "text": "$SO(n)\\subset O(n)$",
+              "correct": false
+            },
+            {
+              "text": "$SE(n)\\subset GL(n+1)$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Matrix groups",
+            "Special linear group"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 2"
+          ],
+          "q": "Let $(M,\\cdot)$ be a group with right identity $e\\in M$ ($a\\cdot e=a$) and right inverse $a^{-1}\\in M$ ($a\\cdot a^{-1}=e$). Show that the right identity is also a left identity and the right inverse is also a left inverse.",
+          "answer": "**Left inverse first.** Set $b=a^{-1}$; $b$ has its own right inverse $b^{-1}$ with $b\\cdot b^{-1}=e$. Then\n$$b\\cdot a=(b\\cdot a)\\cdot e=(b\\cdot a)(b\\cdot b^{-1})=b\\,(a\\cdot b)\\,b^{-1}=b\\,(a\\cdot a^{-1})\\,b^{-1}=b\\cdot e\\cdot b^{-1}=b\\cdot b^{-1}=e,$$\nso $a^{-1}\\cdot a=e$.\n**Then left identity.** $e\\cdot a=(a\\cdot a^{-1})\\cdot a=a\\cdot(a^{-1}\\cdot a)=a\\cdot e=a$.",
+          "extend": "Order matters: prove the left inverse first, then reuse it for the left identity. You may only use associativity plus the two right-sided assumptions.",
+          "tags": [
+            "Group",
+            "Proof"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 3"
+          ],
+          "q": "Let $(M,\\cdot)$ be a group. Show that the inverse element $a^{-1}$ of $a\\in M$ is unique.",
+          "answer": "Suppose $c\\in M$ also satisfies $a\\cdot c=e$. Then\n$$c=e\\cdot c=(a^{-1}\\cdot a)\\cdot c=a^{-1}\\cdot(a\\cdot c)=a^{-1}\\cdot e=a^{-1}.$$\nSo any element behaving as an inverse equals $a^{-1}$ — the inverse is unique.",
+          "extend": "Standard uniqueness pattern: assume a second candidate, then derive that it equals the first.",
+          "tags": [
+            "Group",
+            "Proof"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 4"
+          ],
+          "q": "Which of the following sets forms a group under matrix multiplication? Prove or disprove. (a) $G_1=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)\\neq0,\\ A^\\top=A\\}$ (b) $G_2=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)=-1\\}$ (c) $G_3=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)>0\\}$",
+          "answer": "**(a) Not a group.** Closure fails: for $A,B\\in G_1$, $(AB)^\\top=B^\\top A^\\top=BA\\neq AB$ in general, so the product need not be symmetric.\n**(b) Not a group.** No identity: $\\det(I)=1\\neq-1$. Closure also fails, since $\\det(AB)=(-1)(-1)=1\\notin G_2$.\n**(c) Yes, a group** (a subgroup of $GL(n)$). Identity: $\\det(I)=1>0$. Closure: $\\det(AB)=\\det(A)\\det(B)>0$. Inverse: $\\det(A^{-1})=1/\\det(A)>0$. Associativity is inherited from matrix multiplication.",
+          "extend": "Check the identity first — it is the cheapest axiom to falsify, and it kills every \"$\\det=c$\" set with $c\\neq1$.",
+          "tags": [
+            "Group",
+            "Determinant",
+            "Symmetric matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 5"
+          ],
+          "q": "Which groups were mentioned in the lecture? Write down the names and the correct inclusions.",
+          "answer": "**Groups.** $GL(n)$ general linear, $SL(n)$ special linear, $O(n)$ orthogonal, $SO(n)$ special orthogonal, $A(n)$ affine, $E(n)$ Euclidean, $SE(n)$ special Euclidean.\n**Inclusions.** $SO(n)\\subset O(n)\\subset GL(n)$; $SO(n)\\subset SL(n)\\subset GL(n)$; $SE(n)\\subset E(n)\\subset A(n)\\subset GL(n+1)$.\n**Note.** $A(n)$, $E(n)$, $SE(n)$ are $(n+1)\\times(n+1)$ matrices in homogeneous coordinates, hence the $GL(n+1)$.",
+          "extend": "$SO(n)$ sits in *both* $O(n)$ and $SL(n)$ — in fact $SO(n)=O(n)\\cap SL(n)$.",
+          "tags": [
+            "Matrix groups"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "24EDC 1.10"
+          ],
+          "q": "Determine which statement is correct.",
+          "answer": "**$\\operatorname{sym}(3)=\\{A\\in\\mathbb{R}^{3\\times3}\\mid A=A^\\top\\}$ is a subvectorspace of $\\mathbb{R}^{3\\times3}$ over $\\mathbb{R}$ with matrix addition.**\n**Why.** The symmetric matrices contain $0$ and are closed under addition and scalar multiplication ($(\\alpha A+\\beta B)^\\top=\\alpha A+\\beta B$), so they form a linear subspace — of dimension $\\tfrac{n(n+1)}{2}=6$.\n**Why the $SO(3)$ options fail.** $SO(3)$ **is** a group under matrix multiplication, but it is a subgroup of $GL(3)$, not of $\\mathbb{R}^{3\\times3}$ (which is not a group under multiplication — singular matrices have no inverse), and certainly not of $\\mathbb{R}^3$. It is **not** a vector space at all: $0\\notin SO(3)$ and the sum of two rotations is generally not a rotation.",
+          "extend": "$SO(3)$ is a curved manifold and a group; $\\operatorname{sym}(n)$ and $\\mathfrak{so}(n)$ are flat vector spaces. Do not mix the two structures.",
+          "options": [
+            {
+              "text": "$SO(3)$ is a subgroup of $\\mathbb{R}^{3\\times3}$ with the matrix multiplication.",
+              "correct": false
+            },
+            {
+              "text": "$SO(3)$ is a vectorspace over $\\mathbb{R}$ with the matrix addition.",
+              "correct": false
+            },
+            {
+              "text": "$SO(3)$ is a subvectorspace of $\\mathbb{R}^{3\\times3}$ vectorspace over $\\mathbb{R}$ with the matrix addition.",
+              "correct": false
+            },
+            {
+              "text": "$\\operatorname{sym}(3)=\\{A\\in\\mathbb{R}^{3\\times3}\\mid A=A^\\top\\}$ is a subvectorspace of $\\mathbb{R}^{3\\times3}$ over $\\mathbb{R}$ with the matrix addition.",
+              "correct": true
+            },
+            {
+              "text": "$SO(3)$ is a subgroup of $\\mathbb{R}^3$ with the matrix multiplication.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Special orthogonal group",
+            "Vector space",
+            "Symmetric matrix"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 1c"
+          ],
+          "q": "Which of the following statements is **incorrect**?",
+          "answer": "**Incorrect:** \"In general, for a matrix $B\\in SE(n)$, $\\det(B)\\neq1$.\"\n**Why.** An element of $SE(n)$ is $\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$ with $R\\in SO(n)$, so its determinant is $\\det(R)\\cdot1=1$ — **always** exactly $1$, never anything else.\n**The others are correct.** A general $B\\in GL(n+1)$ only needs $\\det(B)\\neq0$, so in general $\\det(B)\\neq1$. $SO(3)\\subset O(3)$ ✓ (the determinant-$+1$ subgroup). $A(n)\\subset\\mathbb{R}^{(n+1)\\times(n+1)}$ ✓ (affine matrices in homogeneous coordinates). $SE(3)\\subset A(3)$ ✓.",
+          "extend": "$\\det=1$ is exactly what the \"special\" in special Euclidean / special orthogonal / special linear means.",
+          "options": [
+            {
+              "text": "In general, for a matrix $B\\in GL(n+1)$, $\\det(B)\\neq1$",
+              "correct": false
+            },
+            {
+              "text": "In general, for a matrix $B\\in SE(n)$, $\\det(B)\\neq1$",
+              "correct": true
+            },
+            {
+              "text": "$SO(3)\\subset O(3)$",
+              "correct": false
+            },
+            {
+              "text": "$A(n)\\subset\\mathbb{R}^{(n+1)\\times(n+1)}$",
+              "correct": false
+            },
+            {
+              "text": "$SE(3)\\subset A(3)$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Matrix groups",
+            "Determinant",
+            "Special Euclidean group"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "range-kernel-rank",
+      "title": "Range, Kernel and Rank",
+      "recap": "**Range (image).** $\\operatorname{range}(A)=\\{y\\in\\mathbb{R}^m\\mid\\exists x\\in\\mathbb{R}^n: Ax=y\\}\\subset\\mathbb{R}^m$ — the **span of the columns** of $A$.\n**Kernel (null space).** $\\ker(A)=\\{x\\in\\mathbb{R}^n\\mid Ax=0\\}\\subset\\mathbb{R}^n$ — the vectors orthogonal to all **rows** of $A$. Note which space each lives in: that is a recurring source of lost points.\n**Solving $Ax=b$.** A solution exists iff $b\\in\\operatorname{range}(A)$, and it is unique iff $\\ker(A)=\\{0\\}$ (otherwise $x_s+x_o$ is a solution for every $x_o\\in\\ker A$).\n**Rank.** $\\operatorname{rank}(A)=\\dim\\operatorname{range}(A)$ = number of linearly independent rows = number of linearly independent columns = number of non-zero singular values.\n**Rank properties.** (1) **Rank–nullity:** $\\operatorname{rank}(A)=n-\\dim\\ker(A)$ for $A\\in\\mathbb{R}^{m\\times n}$ — the $n$ is the number of **columns**. (2) $0\\le\\operatorname{rank}(A)\\le\\min\\{m,n\\}$. (3) Highest order of a non-zero minor. (4) **Sylvester's inequality:** for $B\\in\\mathbb{R}^{n\\times k}$, $\\operatorname{rank}(A)+\\operatorname{rank}(B)-n\\le\\operatorname{rank}(AB)\\le\\min\\{\\operatorname{rank}(A),\\operatorname{rank}(B)\\}$. (5) Rank is unchanged by multiplication with non-singular matrices: $\\operatorname{rank}(A)=\\operatorname{rank}(CAD)$, and by any non-zero scalar factor.\n**Useful identity.** $\\ker(A)=\\ker(A^\\top A)$ and $\\operatorname{range}(A^\\top A)=\\operatorname{range}(A^\\top)$ — the bridge from a general matrix to a symmetric one, and the starting point of the SVD proof.\n**Answering \"write down a matrix $Q$ with $\\operatorname{range}(Q)=\\ker(C)$\".** Compute $\\dim\\ker(C)=n-\\operatorname{rank}(C)$, find that many independent solutions of $Cq=0$, and put them as the **columns** of $Q$. Writing \"$\\ker(C)=q$\" instead of $\\operatorname{span}\\{q\\}$ loses points, because $\\ker(C)=\\{\\lambda q\\mid\\lambda\\in\\mathbb{R}\\}$.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.5",
+            "24EDC 1.1"
+          ],
+          "q": "How are the kernel and the range of a matrix $A\\in\\mathbb{R}^{n\\times m}$ defined?",
+          "answer": "$$\\ker(A)=\\{x\\in\\mathbb{R}^m\\mid Ax=0\\},\\qquad \\operatorname{range}(A)=\\{Ax\\mid x\\in\\mathbb{R}^m\\}.$$\n**Equivalently** the range is the span of the columns of $A$ and the kernel is the orthogonal complement of the span of its rows.\n**Dimensions.** $\\ker(A)\\subset\\mathbb{R}^m$ (input space), $\\operatorname{range}(A)\\subset\\mathbb{R}^n$ (output space).",
+          "tags": [
+            "Kernel",
+            "Range"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25EDC 1.6"
+          ],
+          "q": "Compute the kernel and the range of $A=\\begin{pmatrix}1&0&1&0\\\\0&0&0&2\\\\0&0&0&4\\end{pmatrix}$.",
+          "answer": "**Kernel.** $Ax=0$ gives $x_1+x_3=0$ and $2x_4=0$ (the third row is $2\\times$ the second), so $x_4=0$, $x_1=-x_3$ and $x_2$ free:\n$$\\ker(A)=\\operatorname{span}\\left\\{\\begin{pmatrix}1\\\\0\\\\-1\\\\0\\end{pmatrix},\\begin{pmatrix}0\\\\1\\\\0\\\\0\\end{pmatrix}\\right\\}.$$\n**Range.** The columns span $\\operatorname{span}\\{(1,0,0)^\\top,(0,2,4)^\\top\\}=\\operatorname{span}\\{(1,0,0)^\\top,(0,1,2)^\\top\\}$.\n**Check.** $\\operatorname{rank}(A)=2$ and $\\dim\\ker(A)=4-2=2$. ✓",
+          "extend": "Always finish with the rank–nullity check $\\operatorname{rank}+\\dim\\ker=\\#\\text{columns}$ — it catches sign and counting slips for free.",
+          "tags": [
+            "Kernel",
+            "Range",
+            "Rank"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.7",
+            "21EFB 2c"
+          ],
+          "q": "What is the rank of the matrix $C=\\begin{pmatrix}2&0&0&2\\\\0&1&0&0\\\\0&0&-1&0\\end{pmatrix}$? Write down a matrix $Q$ such that $\\operatorname{range}(Q)=\\ker(C)$.",
+          "answer": "**Rank.** $\\operatorname{rank}(C)=3$ — the three rows are linearly independent and $\\operatorname{rank}\\le\\min(3,4)=3$.\n**Kernel dimension.** $4-3=1$, so a single column suffices.\n**Solution.** $Q=[1,0,0,-1]^\\top$ is one valid answer: $CQ=0$ and $\\operatorname{range}(Q)=\\operatorname{span}\\{(1,0,0,-1)^\\top\\}=\\ker(C)$.",
+          "extend": "Writing \"$\\ker(C)=[1,0,0,-1]^\\top$\" is marked wrong — the kernel is the *set* $\\{\\lambda[1,0,0,-1]^\\top\\}$, which is why the question asks for a matrix $Q$ whose **range** is that set.",
+          "tags": [
+            "Rank",
+            "Kernel"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 2g"
+          ],
+          "q": "What is the dimension of $\\ker(C)$ for $C=\\begin{pmatrix}2&0&0&2\\\\0&1&0&0\\\\0&0&-1&0\\end{pmatrix}$?",
+          "answer": "$\\dim\\ker(C)=1$.\n**Rank–nullity:** $C$ has $4$ columns and $3$ independent rows, so $\\dim\\ker(C)=4-3=1$.",
+          "options": [
+            {
+              "text": "$2$",
+              "correct": false
+            },
+            {
+              "text": "$1$",
+              "correct": true
+            },
+            {
+              "text": "$3$",
+              "correct": false
+            },
+            {
+              "text": "$4$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Kernel",
+            "Rank"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25RDC 1.1"
+          ],
+          "q": "What is the dimension of the kernel of the matrix $C=\\begin{pmatrix}2&0&0&0\\\\0&1&-1&0\\\\-1&-1&1&0\\end{pmatrix}$?",
+          "answer": "$\\dim\\ker(C)=2$.\n**Reasoning.** Only two rows are linearly independent (the third is a combination of the first two), so $\\operatorname{rank}(C)=2$. With $4$ columns, $\\dim\\ker(C)=4-2=2$.",
+          "extend": "Count the *columns*, not the rows, when applying rank–nullity. $\\dim\\ker = \\#\\text{cols} - \\operatorname{rank}$.",
+          "options": [
+            {
+              "text": "$0$",
+              "correct": false
+            },
+            {
+              "text": "$1$",
+              "correct": false
+            },
+            {
+              "text": "$2$",
+              "correct": true
+            },
+            {
+              "text": "$3$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Kernel",
+            "Rank"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 1f"
+          ],
+          "q": "What is the rank of the matrix $C=\\begin{pmatrix}1&0&0&1\\\\0&2&1&0\\\\0&0&1&2\\end{pmatrix}$?",
+          "answer": "$\\operatorname{rank}(C)=3$.\n**Reasoning.** The maximal rank is $\\min(3,4)=3$, and the three rows are linearly independent, so the bound is attained.",
+          "options": [
+            {
+              "text": "$1$",
+              "correct": false
+            },
+            {
+              "text": "$2$",
+              "correct": false
+            },
+            {
+              "text": "$0$",
+              "correct": false
+            },
+            {
+              "text": "$4$",
+              "correct": false
+            },
+            {
+              "text": "$3$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Rank"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 1g"
+          ],
+          "q": "What is the dimension of the kernel of $C=\\begin{pmatrix}2&0&0&0&0\\\\0&1&0&0&0\\\\0&0&1&2&0\\end{pmatrix}$?",
+          "answer": "$\\dim\\ker(C)=2$.\n**Reasoning.** $\\operatorname{rank}(C)=\\min(5,3)=3$ since the three rows are independent, and $C$ has $5$ columns, so $\\dim\\ker(C)=5-3=2$.",
+          "options": [
+            {
+              "text": "$3$",
+              "correct": false
+            },
+            {
+              "text": "$1$",
+              "correct": false
+            },
+            {
+              "text": "$2$",
+              "correct": true
+            },
+            {
+              "text": "$4$",
+              "correct": false
+            },
+            {
+              "text": "$0$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Kernel",
+            "Rank"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 4f"
+          ],
+          "q": "Let $M\\in\\mathbb{R}^{m\\times n}$ and consider the set $\\{y\\in\\mathbb{R}^m\\mid\\exists x\\in\\mathbb{R}^n:Mx=y\\}$. What is the name of this set?",
+          "answer": "It is the **range** (equivalently the **image**, or the column space) of $M$, written $\\operatorname{range}(M)$.\n**Its dimension** is $\\operatorname{rank}(M)$.",
+          "tags": [
+            "Range",
+            "Rank"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20MFB 2a"
+          ],
+          "q": "Consider $U=\\operatorname{span}\\left\\{(1,0,0)^\\top,(0,0,1)^\\top\\right\\}$ and $V=\\operatorname{span}\\left\\{(1,0,-1,0)^\\top,(0,2,0,-1)^\\top\\right\\}$. Find a matrix $A\\in\\mathbb{R}^{3\\times4}$ such that $U$ and $V$ are the range and the kernel of $A$.",
+          "answer": "One valid solution is\n$$A=\\begin{pmatrix}0&1&0&2\\\\0&0&0&0\\\\1&0&1&0\\end{pmatrix}.$$\n**Construction.** $V$ (dimension $2$) must be killed, so the rows of $A$ have to be orthogonal to both spanning vectors of $V$; that leaves a two-dimensional space of admissible rows. $U$ (dimension $2$) must be reached, so the columns must span $U=\\operatorname{span}\\{e_1,e_3\\}$ — hence the all-zero second row.\n**Check.** $\\operatorname{rank}(A)=2=\\dim U$ ✓ and $\\dim\\ker(A)=4-2=2=\\dim V$ ✓; verify $A\\cdot(1,0,-1,0)^\\top=0$ and $A\\cdot(0,2,0,-1)^\\top=0$.",
+          "extend": "The answer is far from unique — any $A$ with the right range and kernel scores. Always sanity-check with rank–nullity before writing it down.",
+          "tags": [
+            "Kernel",
+            "Range",
+            "Rank"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "20MFB 2b",
+            "21RFB 2i"
+          ],
+          "q": "Let $B\\in\\mathbb{R}^{n\\times k}$, $C\\in\\mathbb{R}^{m\\times k}$, $D\\in\\mathbb{R}^{m\\times n}$ and $X=\\big(\\operatorname{rank}(C^\\top DB)+1\\big)^{-1}BC^\\top D$. For given $n,k,m$, give the minimal and the maximal rank of $X$ with a brief justification.",
+          "answer": "**Minimal rank: $0$.** Attained e.g. if any of $B$, $C$, $D$ is the zero matrix.\n**Maximal rank: $\\min(n,k,m)$.**\n**Justification.** The scalar factor $(\\operatorname{rank}(C^\\top DB)+1)^{-1}$ is strictly positive, so it does not change the rank. For a product, $\\operatorname{rank}(BC^\\top D)\\le\\min\\{\\operatorname{rank}(B),\\operatorname{rank}(C^\\top),\\operatorname{rank}(D)\\}$, and each factor obeys $\\operatorname{rank}(M)\\le\\min(\\text{rows},\\text{cols})$, giving the bounds $n,k$ and $m$ respectively.",
+          "extend": "Two facts do all the work: a non-zero scalar never changes rank, and the rank of a product is at most the smallest rank of its factors.",
+          "tags": [
+            "Rank",
+            "Matrix product"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 13"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$. Prove that $\\ker(A)=\\ker(A^\\top A)$.",
+          "answer": "**($\\subseteq$)** If $Ax=0$ then $A^\\top Ax=A^\\top0=0$, so $x\\in\\ker(A^\\top A)$.\n**($\\supseteq$)** If $A^\\top Ax=0$ then $x^\\top A^\\top Ax=0$, i.e. $\\|Ax\\|^2=(Ax)^\\top(Ax)=0$, hence $Ax=0$.\n**Therefore** the two kernels coincide.",
+          "extend": "You may **not** \"cancel $A^\\top$\" in the second direction — $A^\\top$ need not be invertible (or even square). The trick is to turn it into a squared norm.",
+          "tags": [
+            "Kernel",
+            "Proof",
+            "SVD"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 15"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$ have SVD $A=U\\Sigma V^\\top$ with $r$ non-zero singular values. Show that $\\operatorname{rank}(A)=r$, that the null space of $A$ is spanned by the last $n-r$ columns of $V$, and conclude the rank–nullity theorem.",
+          "answer": "**Action on the basis.** $Av_i=\\sigma_iu_i$ for $i=1,\\dots,r$ and $Av_i=0$ for $i=r+1,\\dots,n$.\n**Range.** $\\operatorname{range}(A)=\\operatorname{span}\\{u_1,\\dots,u_r\\}$, so $\\operatorname{rank}(A)=r$.\n**Null space.** $\\ker(A)=\\operatorname{span}\\{v_{r+1},\\dots,v_n\\}$, of dimension $n-r$.\n**Rank–nullity.** $\\operatorname{rank}(A)+\\dim\\ker(A)=r+(n-r)=n$.",
+          "extend": "$V$ lives in the input space $\\mathbb{R}^n$ (⇒ kernel), $U$ in the output space $\\mathbb{R}^m$ (⇒ range). Mixing them up is the classic error.",
+          "tags": [
+            "Rank",
+            "Kernel",
+            "SVD"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Which statements about the rank of matrices are correct?",
+          "answer": "**Rank–nullity** is stated with the number of *columns*: $\\operatorname{rank}(A)=n-\\dim\\ker(A)$ for $A\\in\\mathbb{R}^{m\\times n}$.\n**Sylvester's inequality** gives both a lower and an upper bound: $\\operatorname{rank}(A)+\\operatorname{rank}(B)-n\\le\\operatorname{rank}(AB)\\le\\min\\{\\operatorname{rank}(A),\\operatorname{rank}(B)\\}$.\n**Invariance:** $\\operatorname{rank}(CAD)=\\operatorname{rank}(A)$ for non-singular $C,D$ — this is why orthogonal factors $U,V$ in the SVD never change the rank.\n**Row rank equals column rank** always, which is why $\\operatorname{rank}(A)=\\operatorname{rank}(A^\\top)$.",
+          "options": [
+            {
+              "text": "For $A\\in\\mathbb{R}^{m\\times n}$, $\\operatorname{rank}(A)=n-\\dim\\ker(A)$.",
+              "correct": true
+            },
+            {
+              "text": "$\\operatorname{rank}(AB)\\le\\min\\{\\operatorname{rank}(A),\\operatorname{rank}(B)\\}$.",
+              "correct": true
+            },
+            {
+              "text": "Multiplying $A$ by a non-singular matrix can increase its rank.",
+              "correct": false
+            },
+            {
+              "text": "$\\operatorname{rank}(A)=\\operatorname{rank}(A^\\top)$ for every matrix $A$.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Rank",
+            "Sylvester's inequality"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eigen-symmetric",
+      "title": "Eigenvalues, Symmetric and Positive-Definite Matrices",
+      "recap": "**Eigenvalue / eigenvector.** $Av=\\lambda v$ with $v\\neq0$; the set of eigenvalues is the spectrum $\\sigma(A)$, given by the roots of $\\det(\\lambda I-A)=0$. Consequently $\\det(A)=\\prod_i\\lambda_i$.\n**General properties.** $\\sigma(A)=\\sigma(A^\\top)$. Eigenvectors for *different* eigenvalues are linearly independent. Similar matrices share the spectrum: $B=PAP^{-1}\\Rightarrow\\sigma(B)=\\sigma(A)$. For real $A$, complex eigenvalues come in conjugate pairs.\n**Symmetric matrices $S^\\top=S$.** (1) All eigenvalues are **real**. (2) Eigenvectors of distinct eigenvalues are **orthogonal**. (3) There is always an orthonormal eigenbasis, so $S=V\\Lambda V^\\top$ with $V\\in O(n)$ — the eigenvalue decomposition.\n**Definiteness.** $S\\succeq0$ (positive semi-definite) iff $x^\\top Sx\\ge0\\ \\forall x$ iff all $\\lambda_i\\ge0$ iff $S=M^\\top M$ for some $M$. $S\\succ0$ iff $x^\\top Sx>0\\ \\forall x\\neq0$ iff all $\\lambda_i>0$. Watch the quantifier: \"there exists $x$ with $x^\\top Ax\\ge0$\" is **not** a definiteness criterion.\n**Rayleigh quotient.** For symmetric psd $S$ with largest/smallest eigenvalues $\\lambda_1,\\lambda_n$: $\\lambda_1=\\max_{|x|=1}\\langle x,Sx\\rangle$ and $\\lambda_n=\\min_{|x|=1}\\langle x,Sx\\rangle$, attained at the corresponding unit eigenvectors. This is the workhorse behind every \"minimise $\\|Ax\\|$ subject to $\\|x\\|=1$\" question.\n**Symmetric part.** For any $A$, $x^\\top Ax=x^\\top\\big(\\tfrac12(A+A^\\top)\\big)x$, because the skew part contributes nothing ($x^\\top A^\\top x=x^\\top Ax$ for scalars). So a quadratic form can always be written with a symmetric matrix.\n**When is the SVD an eigenvalue decomposition?** Exactly when $A$ is symmetric **and** positive semi-definite; then $U=V=W$ and $\\Sigma=\\Lambda$. For $A=\\operatorname{diag}(-1,1)$ the eigenvalues are $-1,1$ but the singular values are $1,1$ — they differ.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21RFB 2d"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{n\\times n}$ be symmetric and positive definite with distinct eigenvalues. Your friend claims the minimiser of $\\min_{|x|=1}x^\\top Ax$ is $x^\\star=v_1$, the unit eigenvector of the smallest eigenvalue. Prove or disprove.",
+          "answer": "**The claim is correct.**\n**Step 1.** $A$ symmetric ⇒ eigenvalue decomposition $A=V\\Lambda V^\\top$ with $V$ orthogonal.\n**Step 2.** $A$ positive definite ⇒ all eigenvalues $0<\\lambda_1<\\lambda_2<\\dots$ are positive.\n**Step 3.** $x^\\top Ax=x^\\top V\\Lambda V^\\top x=\\big|\\sqrt{\\Lambda}V^\\top x\\big|^2=\\sum_i\\lambda_i(v_i^\\top x)^2$, where $\\sqrt{\\Lambda}$ is the element-wise square root.\n**Step 4.** Over unit vectors the coefficients $(v_i^\\top x)^2$ sum to $1$ (since $V$ is orthogonal), so the weighted average is minimised by putting all the weight on the smallest $\\lambda$: $V^\\top x=(1,0,\\dots,0)^\\top$.\n**Step 5.** That is achieved by $x=v_1$, giving the minimum value $\\lambda_1$.",
+          "extend": "Same argument with the maximum gives $\\max_{|x|=1}x^\\top Ax=\\lambda_{\\max}$ at $v_n$ — the Rayleigh quotient bounds.",
+          "tags": [
+            "Eigenvalues",
+            "Positive definite",
+            "Rayleigh quotient"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21RFB 2c"
+          ],
+          "q": "For $n>1$ and $A\\in\\mathbb{R}^{n\\times n}$ not symmetric, your friend claims one can always find a symmetric $B\\in\\mathbb{R}^{n\\times n}$ with $x^\\top Ax=x^\\top Bx$ for all $x\\in\\mathbb{R}^n$. Prove or disprove.",
+          "answer": "**The claim is correct**, with $B=\\tfrac12(A+A^\\top)$.\n**Proof.** Let $S=A+A^\\top$ (symmetric) and $P=A-A^\\top$ (skew-symmetric); then $S+P=2A$, so $2x^\\top Ax=x^\\top Sx+x^\\top Px$.\n**Skew part vanishes.** $x^\\top A^\\top x$ is a scalar, so it equals its own transpose $x^\\top Ax$; hence $x^\\top Px=x^\\top Ax-x^\\top A^\\top x=0$.\n**Symmetric part doubles.** $x^\\top Sx=x^\\top Ax+x^\\top A^\\top x=2x^\\top Ax$.\n**Conclusion.** $x^\\top Ax=\\tfrac12x^\\top Sx=x^\\top Bx$ with $B=\\tfrac12S$ symmetric.",
+          "extend": "Every square matrix splits uniquely as symmetric + skew-symmetric; quadratic forms only ever see the symmetric half.",
+          "tags": [
+            "Symmetric matrix",
+            "Skew-symmetric matrix",
+            "Quadratic form"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21RFB 2e"
+          ],
+          "q": "Let $A$ be a symmetric matrix. Which of the following statements is true?",
+          "answer": "$A$ is **positive semi-definite if and only if there exists a matrix $S$ with $A=S^\\top S$**.\n**Why.** Write $S=LV^\\top$ with $L$ diagonal; then $A=VL^\\top LV^\\top$, and $L^\\top L$ has only non-negative diagonal entries, so the eigenvalue decomposition of $A$ has non-negative eigenvalues, i.e. $A\\succeq0$. Conversely $A\\succeq0$ gives $A=V\\Lambda V^\\top=(\\sqrt{\\Lambda}V^\\top)^\\top(\\sqrt{\\Lambda}V^\\top)$.\n**Why the others fail.** \"There exists $x$ with $x^\\top Ax\\ge0$\" is vacuous — $x=0$ always works. And the singular values in $\\Sigma$ are non-negative for *every* matrix, so they cannot certify definiteness (see $\\operatorname{diag}(-1,1)$).",
+          "options": [
+            {
+              "text": "$A$ is positive definite iff $\\Sigma$ has positive diagonal elements, where $U\\Sigma V^\\top$ is the SVD of $A$.",
+              "correct": false
+            },
+            {
+              "text": "$A$ is positive definite iff there exists a vector $x$ with $x^\\top Ax\\ge0$.",
+              "correct": false
+            },
+            {
+              "text": "$A$ is positive semi-definite iff there exists a vector $x$ with $x^\\top Ax\\ge0$.",
+              "correct": false
+            },
+            {
+              "text": "$A$ is positive semi-definite iff there exists a matrix $S$ such that $A=S^\\top S$.",
+              "correct": true
+            },
+            {
+              "text": "$A$ is positive semi-definite iff $\\Sigma$ has positive diagonal elements, where $U\\Sigma V^\\top$ is the SVD of $A$.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Positive definite",
+            "Symmetric matrix",
+            "SVD"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "21RFB 2b",
+            "21RFB 2a"
+          ],
+          "q": "Give an example of $A\\in\\mathbb{R}^{2\\times2}$ whose SVD $U\\Sigma V^\\top$ is a valid eigenvalue decomposition $W\\Lambda W^\\top$ (i.e. $U=V=W$, $\\Sigma=\\Lambda$), and then list sufficient properties of $A\\in\\mathbb{R}^{n\\times n}$ that characterise infinitely many such matrices.",
+          "answer": "**Example.** $A=I=\\begin{pmatrix}1&0\\\\0&1\\end{pmatrix}$ (one of infinitely many).\n**Sufficient properties.** $A$ is **symmetric** and **positive (semi-)definite**.\n**Why.** Symmetry gives an orthonormal eigenbasis $A=W\\Lambda W^\\top$; positive semi-definiteness makes all eigenvalues non-negative, so they can be read as singular values. Then $U=V=W$ and $\\Sigma=\\Lambda$.\n**Why definiteness is needed.** For $A=\\operatorname{diag}(-1,1)$ (symmetric, indefinite) the eigenvalues are $-1,1$ but the singular values are $1,1$ — the decompositions differ.",
+          "tags": [
+            "SVD",
+            "Eigenvalues",
+            "Positive definite"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 2h"
+          ],
+          "q": "Let $U\\Sigma V^\\top$ be the singular value decomposition of the symmetric full-rank matrix $D$. Which of the following is true?",
+          "answer": "**If $U=V$, the matrix $D$ is positive semi-definite.**\n**Why.** With $U=V$ the SVD reads $U\\Sigma U^\\top$, which is an eigenvalue decomposition with eigenvalue matrix $\\Sigma$ and eigenvector matrix $U$. Singular values are non-negative by definition, hence all eigenvalues are non-negative and $D\\succeq0$.\n**Why the others fail.** If $D=I$ then $U=V=-I$, $\\Sigma=I$ also works, so $U,V$ need not be the identity. $\\Sigma$ contains the eigenvalues only when $D\\succeq0$ (consider $\\operatorname{diag}(-1,1)$). And $\\Sigma\\succeq0$ holds for every matrix, so it certifies nothing about $D$.",
+          "options": [
+            {
+              "text": "If $U=V$, the matrix $D$ is positive semi-definite.",
+              "correct": true
+            },
+            {
+              "text": "If $D$ is the identity matrix, $U$ and $V$ can only be identity matrices.",
+              "correct": false
+            },
+            {
+              "text": "The matrix $\\Sigma$ contains the eigenvalues of $D$ on its diagonal.",
+              "correct": false
+            },
+            {
+              "text": "If $\\Sigma$ is the identity matrix, $U$ must be equal to $V$.",
+              "correct": false
+            },
+            {
+              "text": "If $\\Sigma$ is positive semi-definite, the matrix $D$ is also positive semi-definite.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "SVD",
+            "Positive definite",
+            "Symmetric matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "EX01 12",
+            "24EDC 1.2"
+          ],
+          "q": "Let $A$ be a real symmetric matrix with eigenvalues $\\lambda_a,\\lambda_b$ and eigenvectors $v_a,v_b$. Prove: if $v_a$ and $v_b$ are **not** orthogonal, then $\\lambda_a=\\lambda_b$.",
+          "answer": "$\\langle Av_a,v_b\\rangle=\\langle\\lambda_av_a,v_b\\rangle=\\lambda_a\\langle v_a,v_b\\rangle$.\n**Using $A=A^\\top$:**\n$$\\langle Av_a,v_b\\rangle=v_b^\\top Av_a=(A^\\top v_b)^\\top v_a=\\langle v_b,Av_a\\rangle=\\lambda_b\\langle v_b,v_a\\rangle=\\lambda_b\\langle v_a,v_b\\rangle.$$\n**Hence** $(\\lambda_a-\\lambda_b)\\langle v_a,v_b\\rangle=0$. If $\\langle v_a,v_b\\rangle\\neq0$ then $\\lambda_a=\\lambda_b$.",
+          "extend": "This is the contrapositive of \"distinct eigenvalues ⇒ orthogonal eigenvectors\". The symmetry $A=A^\\top$ is what lets you move $A$ across the inner product.",
+          "tags": [
+            "Symmetric matrix",
+            "Eigenvalues",
+            "Proof"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Which of the following properties hold for **every** real symmetric matrix $S\\in\\mathbb{R}^{n\\times n}$?",
+          "answer": "**True.** All eigenvalues are real; eigenvectors of distinct eigenvalues are orthogonal; there always exists an orthonormal eigenbasis so $S=V\\Lambda V^\\top$ with $V\\in O(n)$.\n**False.** Symmetry alone does *not* give non-negative eigenvalues — that is positive semi-definiteness, a strictly stronger condition ($\\operatorname{diag}(-1,1)$ is symmetric with a negative eigenvalue).",
+          "options": [
+            {
+              "text": "All eigenvalues of $S$ are real.",
+              "correct": true
+            },
+            {
+              "text": "Eigenvectors corresponding to distinct eigenvalues are orthogonal.",
+              "correct": true
+            },
+            {
+              "text": "$S$ can be written as $V\\Lambda V^\\top$ with $V$ orthogonal.",
+              "correct": true
+            },
+            {
+              "text": "All eigenvalues of $S$ are non-negative.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Symmetric matrix",
+            "Eigenvalues"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 1d"
+          ],
+          "q": "Which of the following is **false** given a full-rank symmetric matrix $B\\in\\mathbb{R}^{n\\times n}$?",
+          "answer": "**False:** \"The eigenvalues of $B$ are always positive.\"\n**Why.** Symmetry guarantees only that the eigenvalues are **real**; full rank guarantees only that none of them is **zero**. They may perfectly well be negative — $B=\\operatorname{diag}(-1,1)$ is symmetric and full rank.\n**The others are true.** $B$ is positive semi-definite if its minimum eigenvalue is $0$ (all others being $\\ge0$). Positive definite ⇔ minimum eigenvalue $>0$. The singular values $|\\lambda_i|$ of a full-rank matrix are always positive. And for a positive definite $B$ the SVD coincides with the eigendecomposition, so $U=V$.",
+          "extend": "Symmetric ⇒ real eigenvalues. Positive (semi-)definite ⇒ positive (non-negative) eigenvalues. The two are not the same statement.",
+          "options": [
+            {
+              "text": "The eigenvalues of $B$ are always positive",
+              "correct": true
+            },
+            {
+              "text": "$B$ is positive semidefinite if the minimum eigenvalue is $0$",
+              "correct": false
+            },
+            {
+              "text": "If $B$ is positive definite the minimum eigenvalue is greater than $0$",
+              "correct": false
+            },
+            {
+              "text": "The singular values of $B$ are always positive",
+              "correct": false
+            },
+            {
+              "text": "When $B$ is positive definite, if $\\operatorname{svd}(B)=U\\Sigma V^\\top$ then $U=V$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Symmetric matrix",
+            "Eigenvalues",
+            "Positive definite",
+            "SVD"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22EDC 1e"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{n\\times n}$ be symmetric with eigenvalues ordered $\\lambda_1\\ge\\lambda_2\\ge\\dots\\ge\\lambda_{n-1}\\ge\\lambda_n$ and eigenvectors $v_1,\\dots,v_n$. Write down the solution of $\\min_{\\|x\\|=1}x^\\top Ax$, as specifically as possible. When is the solution unique, and what is it in that case?",
+          "answer": "The minimum value is $\\lambda_n$, attained at the unit eigenvector of the smallest eigenvalue.\n**(i) If $\\lambda_{n-1}>\\lambda_n$** (the smallest eigenvalue is simple) the minimiser is $v_n$ — but $-v_n$ works just as well, so we get **two solutions $\\pm v_n$**. The minimiser is therefore never unique in the strict sense; it is unique **up to sign**.\n**(ii) If $\\lambda_n=\\lambda_{n-1}$** (a repeated smallest eigenvalue) the whole unit circle of the corresponding eigenspace attains the minimum:\n$$x^\\star=a_1v_{n-1}+a_2v_n\\quad\\text{with}\\quad a_1^2+a_2^2=1.$$\n**Reason.** Writing $x=\\sum_i\\alpha_iv_i$ with $\\sum_i\\alpha_i^2=1$ gives $x^\\top Ax=\\sum_i\\lambda_i\\alpha_i^2$ — a convex combination of the eigenvalues, minimised by putting all the weight on the smallest one, and the weight can be split arbitrarily between eigenvectors sharing that eigenvalue.",
+          "extend": "The $\\pm$ sign and the repeated-eigenvalue case are exactly what \"be as specific as possible\" is asking for — the bare answer $v_n$ loses marks.",
+          "tags": [
+            "Rayleigh quotient",
+            "Eigenvalues",
+            "Symmetric matrix"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "skew-symmetric",
+      "title": "Skew-Symmetric Matrices and the Hat Operator",
+      "recap": "**Definition.** $A\\in\\mathbb{R}^{n\\times n}$ is skew-symmetric (anti-symmetric) if $A^\\top=-A$. The diagonal is therefore zero, and the space has dimension $\\tfrac{n(n-1)}{2}$.\n**Spectral structure.** All eigenvalues are zero or purely imaginary ($i\\omega$). There is an orthogonal $V$ with $A=V\\Lambda V^\\top$, $\\Lambda$ block-diagonal with $2\\times2$ blocks $\\begin{pmatrix}0&a_i\\\\-a_i&0\\end{pmatrix}$ and zeros. **Consequence: the rank of a skew-symmetric matrix is always even.** For $3\\times3$ that means rank $\\in\\{0,2\\}$ — never $1$ or $3$.\n**Hat operator.** For $u=(u_1,u_2,u_3)^\\top\\in\\mathbb{R}^3$,\n$$\\hat u=\\begin{pmatrix}0&-u_3&u_2\\\\u_3&0&-u_1\\\\-u_2&u_1&0\\end{pmatrix}\\in\\mathbb{R}^{3\\times3},\\qquad \\hat u\\,v=u\\times v.$$\nIt is a linear isomorphism $\\mathbb{R}^3\\to$ skew-symmetric $3\\times3$ matrices. For $u\\neq0$: $\\operatorname{rank}(\\hat u)=2$ and $\\ker(\\hat u)=\\operatorname{span}\\{u\\}$, since $\\hat u u=u^\\top\\hat u=0$.\n**Identities for a unit vector $w$ ($\\|w\\|=1$).** $\\hat w^2=ww^\\top-I$ and $\\hat w^3=-\\hat w$. These are exactly what collapse the exponential series into Rodrigues' formula in Chapter 2.\n**$z^\\top Yz=0$ for skew-symmetric $Y$.** Two standard proofs: (i) $Y=\\hat w$, so $z^\\top\\hat wz=z^\\top(w\\times z)=0$ because $w\\times z\\perp z$; (ii) split $z^\\top Yz=\\tfrac12z^\\top(Y+Y^\\top)z=0$, using that a scalar equals its transpose. Proof (ii) works in any dimension.\n**Linear constraint form.** Stacking $X\\in\\mathbb{R}^{2\\times2}$ as $X^s=[a,b,c,d]^\\top$, skew-symmetry $X^\\top=-X$ is exactly $a=0$, $b+c=0$, $d=0$, i.e. $BX^s=0$ with $B=\\begin{pmatrix}1&0&0&0\\\\0&1&1&0\\\\0&0&0&1\\end{pmatrix}$. Crucially $B$ must also give $BX^s\\neq0$ for non-skew $X$ — i.e. $\\ker(B)=\\operatorname{range}([0,-1,1,0]^\\top)$, the (stacked) basis of $2\\times2$ skew-symmetric matrices.\n**Only matrix that is both symmetric and skew-symmetric:** the zero matrix ($A=A^\\top=-A\\Rightarrow2A=0$).",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 3,
+          "sources": [
+            "25EDC 1.3",
+            "21RFB 2f",
+            "21RFB 2g"
+          ],
+          "q": "Let $C\\in\\mathbb{R}^{3\\times3}$ be skew-symmetric. What ranks are possible for $C$?",
+          "answer": "**$0$ and $2$.**\n**Reason.** A real skew-symmetric matrix decomposes as $V\\Lambda V^\\top$ with $\\Lambda$ made of $2\\times2$ blocks $\\begin{pmatrix}0&a\\\\-a&0\\end{pmatrix}$ and zeros, so its **rank is always even**. In $\\mathbb{R}^{3\\times3}$ the even numbers $\\le3$ are $0$ and $2$.\n**Both are attained:** $C=0$ has rank $0$; $\\hat u$ for any $u\\neq0$ has rank $2$ (its kernel is exactly $\\operatorname{span}\\{u\\}$).",
+          "extend": "\"Skew-symmetric ⇒ even rank\" also forces $\\det(\\hat u)=0$ — every $3\\times3$ skew-symmetric matrix is singular. That is why the essential matrix $E=\\hat TR$ has rank $2$.",
+          "options": [
+            {
+              "text": "$0$",
+              "correct": true
+            },
+            {
+              "text": "$1$",
+              "correct": false
+            },
+            {
+              "text": "$2$",
+              "correct": true
+            },
+            {
+              "text": "$3$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Skew-symmetric matrix",
+            "Rank",
+            "Hat operator"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.4",
+            "20EFB 4c"
+          ],
+          "q": "Let $w\\in\\mathbb{R}^3$ with $\\|w\\|=1$. Which of the following holds for the cross-product matrix $\\hat w$, where $I_{3\\times3}$ denotes the identity matrix?",
+          "answer": "$\\hat w^2=ww^\\top-I_{3\\times3}$.\n**Derivation.** Using $\\hat w v=w\\times v$ and the BAC–CAB rule, $\\hat w^2v=w\\times(w\\times v)=w(w^\\top v)-v(w^\\top w)=(ww^\\top-I)v$ for $\\|w\\|=1$.\n**Companion identity.** $\\hat w^3=-\\hat w$ (not $+\\hat w$, and not $-\\hat w^2$) — apply $\\hat w$ once more and use $\\hat w w=0$.",
+          "extend": "$\\hat w^2=ww^\\top-I$ and $\\hat w^3=-\\hat w$ are what truncate $e^{\\hat w}=\\sum\\hat w^n/n!$ into Rodrigues' formula.",
+          "options": [
+            {
+              "text": "$\\hat w^2=I_{3\\times3}-ww^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$\\hat w^3=\\hat w$",
+              "correct": false
+            },
+            {
+              "text": "$\\hat w^3=-\\hat w^2$",
+              "correct": false
+            },
+            {
+              "text": "$\\hat w^2=ww^\\top-I_{3\\times3}$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Hat operator",
+            "Skew-symmetric matrix",
+            "Rodrigues formula"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.11",
+            "20RFB 5b"
+          ],
+          "q": "Prove that $z^\\top Yz=0$ holds for any $z\\in\\mathbb{R}^3$ if $Y\\in\\mathbb{R}^{3\\times3}$ is a skew-symmetric matrix.",
+          "answer": "**Solution 1 (cross product).** $Y$ skew-symmetric ⇒ there is $w\\in\\mathbb{R}^3$ with $\\hat w=Y$, where $\\hat wz=w\\times z$. Hence $z^\\top Yz=z^\\top\\hat wz=z^\\top(w\\times z)=0$, because $w\\times z$ is orthogonal to $z$.\n**Solution 2 (works for any $n$).** Split $z^\\top Yz=\\tfrac12z^\\top Yz+\\tfrac12z^\\top Yz$; each summand is a scalar, so transposing the second changes nothing:\n$$z^\\top Yz=\\tfrac12z^\\top Yz+\\tfrac12(z^\\top Yz)^\\top=\\tfrac12z^\\top(Y+Y^\\top)z.$$\nPlugging in $Y^\\top=-Y$ gives $\\tfrac12z^\\top(Y-Y)z=0$.",
+          "extend": "Solution 2 generalises beyond $\\mathbb{R}^3$ and is the safer one to write down; it is also the reason $x^\\top Ax$ only ever sees the symmetric part of $A$.",
+          "tags": [
+            "Skew-symmetric matrix",
+            "Hat operator",
+            "Proof"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 1.4",
+            "21EFB 2b"
+          ],
+          "q": "Given $X=\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}\\in\\mathbb{R}^{2\\times2}$ and its vectorisation $X^s=[a,b,c,d]^\\top\\in\\mathbb{R}^4$, derive and write down a matrix $B$ such that $BX^s=0$ constrains $X$ to be skew-symmetric.",
+          "answer": "Skew-symmetry means $X^\\top=-X\\iff X^\\top+X=0$, i.e. $a=0$, $b+c=0$, $d=0$.\n**In matrix form:**\n$$B=\\begin{pmatrix}1&0&0&0\\\\0&1&1&0\\\\0&0&0&1\\end{pmatrix},\\qquad BX^s=[a,\\ b+c,\\ d]^\\top=0\\iff X^\\top=-X.$$\n**Important.** It is not enough that $BX^s=0$ *when* $X$ is skew-symmetric — you also need $BX^s\\neq0$ when it is not. Formally $\\ker(B)=\\operatorname{range}([0,-1,1,0]^\\top)$, since $[0,-1,1,0]^\\top$ is a basis of the (vectorised) $2\\times2$ skew-symmetric matrices.",
+          "extend": "$B$ must be a matrix, not a $4\\times1$ vector, and $[0,1,1,0]$ alone is wrong — it fails to force $a=d=0$.",
+          "tags": [
+            "Skew-symmetric matrix",
+            "Stack",
+            "Kernel"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21EFB 2a"
+          ],
+          "q": "Are there matrices that are symmetric and skew-symmetric at the same time? If yes, give an example; if no, explain why.",
+          "answer": "**Yes** — the zero matrix of any dimension.\n**And only that one:** $A^\\top=A$ together with $A^\\top=-A$ gives $A=-A$, i.e. $2A=0$, so $A=0$.",
+          "tags": [
+            "Symmetric matrix",
+            "Skew-symmetric matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 4b"
+          ],
+          "q": "Let $M\\in\\mathbb{R}^{n\\times n}$ be a matrix for which $M^\\top=-M$ holds. The matrix $M$ is called …",
+          "answer": "**skew-symmetric** (equivalently anti-symmetric, dt. *schiefsymmetrisch*).",
+          "tags": [
+            "Skew-symmetric matrix",
+            "Definition"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21EFB 2d"
+          ],
+          "q": "The Euclidean projection $P$ of $A\\in\\mathbb{R}^{n\\times n}$ onto the skew-symmetric matrices $S_n=\\{X\\mid X^\\top=-X\\}$ solves $P=\\arg\\min_{X\\in S_n}\\|A-X\\|_f^2$. Explain how this constrained problem can be turned into an **unconstrained** linear least-squares problem of the form $\\ldots=\\arg\\min\\|A^s-\\ldots\\|_2^2$, and specify $P^s$.",
+          "answer": "**Idea: parameterise the constraint set instead of enforcing it.** Let $B$ be the matrix with $BX^s=0\\iff X$ skew-symmetric, and let $Z$ satisfy $\\operatorname{range}(Z)=\\ker(B)$. Then every skew-symmetric $X$ is exactly $X^s=Z\\alpha$ for some coefficient vector $\\alpha$.\n**Unconstrained problem.** $\\displaystyle\\alpha^\\star=\\arg\\min_{\\alpha}\\|A^s-Z\\alpha\\|_2^2$.\n**Projection.** $P^s=Z\\alpha^\\star$ — and since $Z$ has full column rank, $\\alpha^\\star=(Z^\\top Z)^{-1}Z^\\top A^s$, i.e. $P^s=Z(Z^\\top Z)^{-1}Z^\\top A^s$.\n**Closed form check.** The answer must coincide with $P=\\tfrac12(A-A^\\top)$, the skew part of $A$.",
+          "extend": "General recipe: a linear equality constraint $BX^s=0$ becomes the parameterisation $X^s=Z\\alpha$ with $\\operatorname{range}(Z)=\\ker(B)$ — the same trick used to solve $\\min\\|Ax\\|$ subject to $\\|x\\|=1$ with the SVD.",
+          "tags": [
+            "Skew-symmetric matrix",
+            "Least squares",
+            "Projection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 2e"
+          ],
+          "q": "Let $B$ be a matrix such that $BX^s=0$ is equivalent to $X$ being skew-symmetric, let $Z$ satisfy $\\operatorname{range}(Z)=\\ker(B)$, and let $\\alpha$ be a real column vector such that $Z\\alpha$ is well defined. For which of the following $Y^s$ is the unstacked matrix $Y$ skew-symmetric?",
+          "answer": "$Y^s=Z\\alpha$.\n**Why.** $\\operatorname{range}(Z)=\\ker(B)$, so $BZ\\alpha=0$ for every $\\alpha$, and $BY^s=0$ is precisely the condition that $Y$ is skew-symmetric.\n**Why the others fail.** Adding or subtracting a symmetric stack ($M^s$, $I^s$) leaves the skew-symmetric subspace: $B(M^s\\pm Z\\alpha)=BM^s\\neq0$ in general.",
+          "options": [
+            {
+              "text": "$Y^s=M^s-Z\\alpha$, where $M^s$ is the stack of any symmetric matrix $M$",
+              "correct": false
+            },
+            {
+              "text": "$Y^s=M^s+Z\\alpha$, where $M^s$ is the stack of any symmetric matrix $M$",
+              "correct": false
+            },
+            {
+              "text": "$Y^s=I^s+Z\\alpha$, where $I^s$ is the stack of the identity matrix",
+              "correct": false
+            },
+            {
+              "text": "$Y^s=Z\\alpha$",
+              "correct": true
+            },
+            {
+              "text": "$Y^s=I^s-Z\\alpha$, where $I^s$ is the stack of the identity matrix",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Skew-symmetric matrix",
+            "Kernel",
+            "Stack"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For $u\\in\\mathbb{R}^3$ with $u\\neq0$, which statements about the hat operator $\\hat u$ are correct?",
+          "answer": "**Correct.** $\\hat uv=u\\times v$ by definition; $\\operatorname{rank}(\\hat u)=2$; $\\ker(\\hat u)=\\operatorname{span}\\{u\\}$ because $\\hat uu=u\\times u=0$.\n**Incorrect.** $\\hat u$ is never invertible for $u\\in\\mathbb{R}^3$ — it is a $3\\times3$ skew-symmetric matrix, so its rank is even and hence at most $2$, giving $\\det(\\hat u)=0$.",
+          "options": [
+            {
+              "text": "$\\hat u v=u\\times v$ for all $v\\in\\mathbb{R}^3$.",
+              "correct": true
+            },
+            {
+              "text": "$\\operatorname{rank}(\\hat u)=2$.",
+              "correct": true
+            },
+            {
+              "text": "$\\ker(\\hat u)=\\operatorname{span}\\{u\\}$.",
+              "correct": true
+            },
+            {
+              "text": "$\\hat u$ is invertible whenever $u\\neq0$.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Hat operator",
+            "Skew-symmetric matrix",
+            "Rank"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "svd",
+      "title": "The Singular Value Decomposition",
+      "recap": "**Statement.** For $A\\in\\mathbb{R}^{m\\times n}$ with $m\\ge n$ and $\\operatorname{rank}(A)=p$ there exist $U\\in\\mathbb{R}^{m\\times p}$ and $V\\in\\mathbb{R}^{n\\times p}$ with orthonormal columns and $\\Sigma=\\operatorname{diag}\\{\\sigma_1,\\dots,\\sigma_p\\}$, $\\sigma_1\\ge\\dots\\ge\\sigma_p>0$, such that $A=U\\Sigma V^\\top$. (In the *full* SVD one pads to $U\\in\\mathbb{R}^{m\\times m}$, $\\Sigma\\in\\mathbb{R}^{m\\times n}$, $V\\in\\mathbb{R}^{n\\times n}$.)\n**Relation to eigen-decomposition.** $A^\\top A=V\\Sigma^\\top\\Sigma V^\\top$ and $AA^\\top=U\\Sigma\\Sigma^\\top U^\\top$. So the columns of $V$ are the eigenvectors of $A^\\top A$, the columns of $U$ those of $AA^\\top$, and $\\sigma_i^2$ are the shared non-zero eigenvalues. The SVD **generalises** the eigenvalue decomposition to non-square matrices, and the eigenvalue decomposition can be used to compute it — but the two are **not** equivalent for symmetric matrices in general (only for symmetric psd ones; $\\operatorname{diag}(-1,1)$ is the standard counterexample).\n**Proof sketch (worth knowing).** $A^\\top A$ is symmetric psd ⇒ orthonormal eigenvectors $v_i$ with eigenvalues $\\sigma_i^2\\ge0$. Since $\\ker(A^\\top A)=\\ker(A)$ and $\\operatorname{range}(A^\\top A)=\\operatorname{range}(A^\\top)$, we get $\\operatorname{span}\\{v_1..v_p\\}=\\operatorname{range}(A^\\top)$, $\\operatorname{span}\\{v_{p+1}..v_n\\}=\\ker(A)$. Setting $u_i=\\tfrac1{\\sigma_i}Av_i$ yields orthonormal $u_i$ and $A=U\\Sigma V^\\top$.\n**What the SVD reads off.** $\\operatorname{rank}(A)=\\#\\{\\sigma_i\\neq0\\}$ (numerically: $\\sigma_i>\\varepsilon$); $\\ker(A)=\\operatorname{span}$ of the right singular vectors with $\\sigma_i=0$ (the **last rows of $V^\\top$**); $\\operatorname{range}(A)=\\operatorname{span}$ of the first $r$ columns of $U$; $\\|A\\|_2=\\sigma_1$; $\\|A\\|_f=\\sqrt{\\sum\\sigma_i^2}$.\n**Geometry.** $A$ maps the unit sphere onto an ellipsoid with semi-axes $\\sigma_iu_i$: $V^\\top$ rotates into the input frame, $\\Sigma$ scales each axis, $U$ rotates into the output frame.\n**Low-rank approximation (Eckart–Young).** The best rank-$k$ approximation in the Frobenius norm is $A_k=\\sum_{i=1}^{k}\\sigma_iu_iv_i^\\top$ with error $\\|A-A_k\\|_f^2=\\sum_{i=k+1}^{r}\\sigma_i^2$. Storage $k(m+n+1)$ vs $mn$ — worth it when $k<\\tfrac{mn}{m+n}$ (about $k<n/2$ for square matrices).",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.2",
+            "21EFB 2i"
+          ],
+          "q": "Which of the following statements is **incorrect**?",
+          "answer": "**Incorrect:** \"The singular value decomposition and the eigenvalue decomposition must be equivalent for symmetric matrices.\"\n**Counterexample.** $A=\\operatorname{diag}(-1,1)$ is symmetric; its eigenvalues are $-1$ and $1$, but its singular values are $1$ and $1$. They agree only when $A$ is additionally positive semi-definite.\n**Why the others are correct.** SVD generalises the eigenvalue decomposition to non-square matrices; the eigenvalue decompositions of $A^\\top A$ / $AA^\\top$ give $V$, $U$ and $\\sigma_i^2$; $A^{-1}=V\\Sigma^{-1}U^\\top$ inverts each singular value; and $A^\\dagger=V\\Sigma^\\dagger U^\\top$ is the pseudo-inverse.",
+          "extend": "Singular values are always $\\ge0$; eigenvalues can be negative or complex. That single asymmetry generates most of the SVD-vs-EVD MC options.",
+          "options": [
+            {
+              "text": "The singular value decomposition can be understood as a generalisation of the eigenvalue decomposition to non-square matrices.",
+              "correct": false
+            },
+            {
+              "text": "The eigenvalue decomposition can be used to compute the singular value decomposition.",
+              "correct": false
+            },
+            {
+              "text": "The singular value decomposition and the eigenvalue decomposition must be equivalent for symmetric matrices.",
+              "correct": true
+            },
+            {
+              "text": "The singular value decomposition can be used to compute the pseudo inverse of a matrix.",
+              "correct": false
+            },
+            {
+              "text": "The singular value decomposition can be used to compute the inverse of an invertible matrix.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "SVD",
+            "Eigenvalues",
+            "Pseudo-inverse"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 1.5",
+            "20RFB 5a"
+          ],
+          "q": "Let $USV^\\top$ be the singular value decomposition of $A\\in\\mathbb{R}^{n\\times n}$ and let $XLX^\\top$ denote the eigenvalue decomposition of $AA^\\top$. How can you compute $X$ and $L$ from $U,S,V$? Write down the solution with a derivation.",
+          "answer": "**Derivation.** $A=USV^\\top$, hence\n$$AA^\\top=USV^\\top\\big(USV^\\top\\big)^\\top=USV^\\top VS^\\top U^\\top=USS^\\top U^\\top,$$\nwhere $V^\\top V=I$ because $V$ is orthogonal.\n**Identification.** Comparing with $XLX^\\top$:\n$$X=U,\\qquad L=SS^\\top.$$\nSince $S$ is diagonal, $L=SS=S^2$ is equally valid — the eigenvalues of $AA^\\top$ are the squared singular values $\\sigma_i^2$.",
+          "extend": "The mirrored statement is $A^\\top A=VS^\\top SV^\\top$, so the right singular vectors $V$ diagonalise $A^\\top A$. Forgetting $V^\\top V=I$ is the single most common deduction in the marking scheme.",
+          "tags": [
+            "SVD",
+            "Eigenvalues"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25EDC 1.12"
+          ],
+          "q": "For the following code, what do the variables `r`, `d_n`, and the output mean in relation to the matrix `X`?\n```\ndef func(X):\n    \"\"\"\n    X: MxN matrix\n    \"\"\"\n    U, S, Vt = svd(X)\n    r = sum(S > 1e-10)\n    d_n = Vt.shape[1] - r\n    return Vt[r:]\n```",
+          "answer": "**`r`** — the (numerical) **rank** of `X`: the number of singular values above the tolerance $10^{-10}$.\n**`d_n`** — the **dimension of the kernel** (null space) of `X`: number of columns $N$ minus the rank, i.e. rank–nullity.\n**Output `Vt[r:]`** — the right singular vectors corresponding to the **zero** singular values, i.e. a **basis of the kernel** (null space) of `X`.",
+          "extend": "`Vt` holds $V^\\top$, so its *rows* are the right singular vectors. The tolerance $10^{-10}$ is there because floating-point singular values are never exactly zero.",
+          "tags": [
+            "SVD",
+            "Rank",
+            "Kernel"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21RFB 2h"
+          ],
+          "q": "Consider $A\\in\\mathbb{R}^{n\\times n}$ with rank $n$ and let $U\\Sigma V^\\top$ be its singular value decomposition. Which of the following statements is **incorrect**?",
+          "answer": "**All the other statements are correct** — so that is the option to tick.\n**Why.** Since $A$ has full rank $n$, so do $U$, $\\Sigma$ and $V$. Their range is all of $\\mathbb{R}^n$ and their null space is $\\{0\\}$. Hence $\\operatorname{range}(U)=\\operatorname{range}(\\Sigma)=\\operatorname{range}(V)=\\mathbb{R}^n$, $\\ker(U)=\\ker(\\Sigma)=\\ker(V)=\\{0\\}$, and trivially $\\ker(U)=\\{0\\}\\subseteq\\operatorname{range}(U)$.",
+          "options": [
+            {
+              "text": "$\\ker(U)\\subseteq\\operatorname{range}(U)$",
+              "correct": false
+            },
+            {
+              "text": "The matrix $V$ is full rank",
+              "correct": false
+            },
+            {
+              "text": "$\\operatorname{range}(U)=\\operatorname{range}(\\Sigma)=\\operatorname{range}(V)$",
+              "correct": false
+            },
+            {
+              "text": "The matrix $\\Sigma$ is full rank",
+              "correct": false
+            },
+            {
+              "text": "$\\ker(U)=\\ker(\\Sigma)=\\ker(V)$",
+              "correct": false
+            },
+            {
+              "text": "All other statements are correct",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "SVD",
+            "Rank",
+            "Kernel"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 14"
+          ],
+          "q": "Let $A=U\\Sigma V^\\top$ be the SVD of $A\\in\\mathbb{R}^{m\\times n}$. (a) Write down the dimensions of $U,\\Sigma,V$. (b) Name similarities and differences between SVD and eigenvalue decomposition. (c) Relate $U,\\Sigma,V$ to the eigen-decompositions of $A^\\top A$ and $AA^\\top$. (d) Interpret the singular values.",
+          "answer": "**(a)** Full SVD: $U\\in\\mathbb{R}^{m\\times m}$, $\\Sigma\\in\\mathbb{R}^{m\\times n}$ (diagonal, not necessarily square), $V\\in\\mathbb{R}^{n\\times n}$. Thin SVD with rank $r$: $U_r\\in\\mathbb{R}^{m\\times r}$, $\\Sigma_r\\in\\mathbb{R}^{r\\times r}$, $V_r\\in\\mathbb{R}^{n\\times r}$. The dimensions must chain: $(m\\times m)(m\\times n)(n\\times n)=m\\times n$.\n**(b)** Both read as \"rotation × scaling × rotation\". The eigenvalue decomposition $A=PDP^{-1}$ needs $A$ square and diagonalisable and uses **one** basis; the SVD exists for **any** matrix and uses **two** orthonormal bases $U$ and $V$.\n**(c)** Columns of $V$ are eigenvectors of $A^\\top A$; columns of $U$ are eigenvectors of $AA^\\top$; the $\\sigma_i^2$ are the eigenvalues of both.\n**(d)** $\\sigma_1\\ge\\sigma_2\\ge\\dots\\ge0$. The number of non-zero $\\sigma_i$ is $\\operatorname{rank}(A)$; $\\sigma_1=\\|A\\|_2$ (operator norm); $\\sum_i\\sigma_i^2=\\|A\\|_F^2$.",
+          "extend": "Eigenvalues of $A^\\top A$ are $\\sigma_i^2$, **not** $\\sigma_i$ — and $V\\leftrightarrow A^\\top A$, $U\\leftrightarrow AA^\\top$, never the other way round.",
+          "tags": [
+            "SVD",
+            "Eigenvalues",
+            "Rank",
+            "Frobenius norm"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX01 16"
+          ],
+          "q": "The Eckart–Young theorem states that the best rank-$k$ approximation of $A$ in the Frobenius norm is $A_k=\\sum_{i=1}^{k}\\sigma_iu_iv_i^\\top$. (a) Show $\\|A-A_k\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2$. (b) Compare the storage of the full matrix and of the rank-$k$ approximation. (c) When does the rank-$k$ approximation save storage?",
+          "answer": "**(a)** $A-A_k=U(\\Sigma-\\Sigma_k)V^\\top$, where $\\Sigma_k$ keeps the first $k$ singular values and zeroes the rest. The Frobenius norm is invariant under multiplication by orthogonal matrices, so\n$$\\|A-A_k\\|_F^2=\\|\\Sigma-\\Sigma_k\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2.$$\n**(b)** Full matrix: $mn$ entries. Rank-$k$: $U_k\\in\\mathbb{R}^{m\\times k}$, the $k$ diagonal entries of $\\Sigma_k$, and $V_k\\in\\mathbb{R}^{n\\times k}$, i.e. $mk+k+nk=k(m+n+1)\\approx k(m+n)$.\n**(c)** Whenever $k(m+n)<mn$, i.e. $k<\\dfrac{mn}{m+n}$; for a square $n\\times n$ matrix that is roughly $k<n/2$.",
+          "extend": "The error is the sum of the **squares** of the discarded singular values — so truncating is cheap exactly when the tail of the spectrum decays fast.",
+          "tags": [
+            "SVD",
+            "Low-rank approximation",
+            "Frobenius norm"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Give the geometric interpretation of the SVD $A=U\\Sigma V^\\top$ for $A\\in\\mathbb{R}^{n\\times n}$, and state what happens to the unit sphere under $A$.",
+          "answer": "**Three-step reading.** $V^\\top$ expresses $x$ in the orthonormal input basis $V$, $\\Sigma$ scales coordinate $i$ by $\\sigma_i$, and $U$ maps the result into the orthonormal output basis: $y=Ax=U\\Sigma V^\\top x\\iff U^\\top y=\\Sigma V^\\top x$.\n**Unit sphere → ellipsoid.** With $\\alpha=V^\\top x$ and $\\beta=U^\\top y$ we get $\\beta_i=\\sigma_i\\alpha_i$, so $\\sum_i\\alpha_i^2=1$ becomes $\\sum_i\\beta_i^2/\\sigma_i^2=1$: the image of the unit sphere is an **ellipsoid with semi-axes $\\sigma_iu_i$**, oriented along the columns of $U$.\n**Consequences.** The longest semi-axis is $\\sigma_1=\\|A\\|_2$, the shortest is $\\sigma_n=\\min_{|x|=1}\\|Ax\\|$; if some $\\sigma_i=0$ the ellipsoid collapses in that direction — exactly the rank deficiency.",
+          "tags": [
+            "SVD",
+            "Geometry"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "svd-applications",
+      "title": "SVD in Action: Least Squares, Pseudo-Inverse and Projections",
+      "recap": "**Constrained minimisation $\\min_{\\|x\\|=1}\\|Ax\\|$.** The minimiser is the **last column of $V$** (the right singular vector of the smallest singular value) and the minimum value is $\\sigma_n$. This is *the* recurring tool of the course: the eight-point algorithm, the DLT and every homogeneous system $Ax=0$ are solved this way.\n**Unconstrained least squares $\\min_x\\|Ax-b\\|_2^2$** with $A\\in\\mathbb{R}^{n\\times m}$, $\\operatorname{rank}(A)=m\\le n$. Expand $\\|Ax-b\\|_2^2=x^\\top A^\\top Ax-2b^\\top Ax+b^\\top b$, differentiate $\\nabla f(x)=2A^\\top Ax-2A^\\top b$, set to zero ⇒ **normal equations** $A^\\top Ax=A^\\top b$, and since $A^\\top A\\in\\mathbb{R}^{m\\times m}$ is invertible, $x^\\star=(A^\\top A)^{-1}A^\\top b$. Just naming the pseudo-inverse without the derivation only scores half.\n**Pseudo-inverse (Moore–Penrose).** $A^\\dagger=V\\Sigma^\\dagger U^\\top$ with $\\Sigma^\\dagger=\\begin{pmatrix}\\Sigma_1^{-1}&0\\\\0&0\\end{pmatrix}$, $\\Sigma_1$ the diagonal of non-zero singular values. It satisfies $AA^\\dagger A=A$ and $A^\\dagger AA^\\dagger=A^\\dagger$. Among all minimisers of $\\|Ax-b\\|$, $x_{\\min}=A^\\dagger b$ is the one of **smallest norm** — which is also the answer to $\\arg\\min_{x\\in S}\\|x\\|_2$ for $S=\\{x\\mid Ax=b\\}$.\n**Matrix calculus you are expected to know.** $\\nabla\\|X\\|_F^2=2X$, and by the chain rule $\\nabla_A\\|B-AC\\|_F^2=-2(B-AC)C^\\top$. Always state the **dimension** of the gradient — it equals the dimension of the variable.\n**Orthogonal Procrustes: projection onto $O(n)$.** $R^\\star=\\arg\\min_{R\\in O(n)}\\|A-R\\|_f=UV^\\top$ for $A=U\\Sigma V^\\top$. Derivation chain: square the norm ⇒ expand with $\\langle X,Y\\rangle=\\operatorname{trace}(X^\\top Y)$ ⇒ drop $\\langle A,A\\rangle$ (constant) and $\\langle R,R\\rangle=\\operatorname{trace}(I)$ (constant on $O(n)$) ⇒ $\\arg\\max_R\\langle A,R\\rangle$ ⇒ insert the SVD and use cyclic trace invariance to get $\\arg\\max_R\\langle\\Sigma,U^\\top RV\\rangle$ ⇒ $\\Sigma$ diagonal and non-negative while $U^\\top RV$ is orthogonal, so the maximum is at $U^\\top RV=I$ ⇒ $R^\\star=UV^\\top$.\n**Projection onto $SO(n)$.** $R^\\star=U\\operatorname{diag}(1,\\dots,1,\\det(UV^\\top))V^\\top$. The inner term takes only **two** values because $\\det(UV^\\top)=\\pm1$ for orthogonal $U,V$. If $+1$, $UV^\\top$ is already a rotation; if $-1$, the sign flip repairs the determinant. The flip **must** sit at the **smallest** singular value — flipping at the largest one would increase $\\|A-R\\|_f$.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 1.6"
+          ],
+          "q": "Derive the solution to the least squares problem $\\min_{x\\in\\mathbb{R}^m}\\|Ax-b\\|_2^2$, with $A\\in\\mathbb{R}^{n\\times m}$, $b\\in\\mathbb{R}^n$ and $\\operatorname{rank}(A)=m\\le n$.",
+          "answer": "**Expand the objective.**\n$$\\|Ax-b\\|_2^2=(Ax-b)^\\top(Ax-b)=x^\\top A^\\top Ax-2b^\\top Ax+b^\\top b.$$\n**Differentiate.** $\\nabla f(x)=2A^\\top Ax-2A^\\top b$.\n**Set to zero → normal equations.** $A^\\top Ax=A^\\top b$.\n**Solve.** $\\operatorname{rank}(A)=m$ makes the $m\\times m$ matrix $A^\\top A$ invertible, so\n$$x^\\star=(A^\\top A)^{-1}A^\\top b=A^\\dagger b.$$",
+          "extend": "Writing only \"$x^\\star=A^\\dagger b$\" without the derivation scores half the points — the marking scheme rewards the four steps.",
+          "tags": [
+            "Least squares",
+            "Pseudo-inverse",
+            "Normal equations"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 1.10",
+            "24EDC 1.8"
+          ],
+          "q": "Given that the derivative of the squared Frobenius norm is $\\nabla\\|X\\|_F^2=2X$, compute the gradient $\\nabla f(A)$ of $f(A)=\\|B-AC\\|_F^2$ with $B,C\\in\\mathbb{R}^{n\\times m}$, mapping $A\\in\\mathbb{R}^{n\\times n}$ to $\\mathbb{R}$. What is the dimension of $\\nabla f(A)$?",
+          "answer": "$$\\nabla f(A)=-2(B-AC)C^\\top.$$\n**Chain rule.** Outer derivative $2X$ evaluated at $X=B-AC$, times the derivative of $B-AC$ with respect to $A$, which contributes the factor $-C^\\top$ on the right.\n**Dimension.** $\\nabla f(A)\\in\\mathbb{R}^{n\\times n}$ — the gradient always has the shape of the variable it differentiates with respect to.\n**Shape check.** $(B-AC)\\in\\mathbb{R}^{n\\times m}$ and $C^\\top\\in\\mathbb{R}^{m\\times n}$, so the product is $n\\times n$. ✓",
+          "extend": "The dimension question is free marks — the gradient has the same shape as the variable, here $n\\times n$, not $n\\times m$.",
+          "tags": [
+            "Matrix calculus",
+            "Frobenius norm",
+            "Gradient"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "20EFB 4h"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{n\\times n}$ with $\\operatorname{rank}(A)=n$ and let $A=U\\Sigma V^\\top$ be its SVD with ordered singular values $s_1\\ge s_2\\ge\\dots\\ge s_n$. How do we find $x\\in\\mathbb{R}^n$ that minimises $\\|Ax\\|$ subject to $\\|x\\|=1$?",
+          "answer": "$x$ is the **last column of $V$** — the right singular vector belonging to the smallest singular value $s_n$.\n**Why.** $\\|Ax\\|^2=x^\\top A^\\top Ax$ and $A^\\top A=V\\Sigma^2V^\\top$, so on the unit sphere the quadratic form is minimised at the eigenvector of the smallest eigenvalue $s_n^2$, i.e. $v_n$.\n**Not $U$:** $U$ lives in the output space; the unknown $x$ lives in the input space, which is spanned by $V$.",
+          "extend": "This is the single most reused fact of the course — every homogeneous system $Ax=0$ under $\\|x\\|=1$ (eight-point algorithm, DLT, triangulation) is solved by the last column of $V$.",
+          "options": [
+            {
+              "text": "$x$ is the last column of $V$.",
+              "correct": true
+            },
+            {
+              "text": "$x$ is the first column of $V$.",
+              "correct": false
+            },
+            {
+              "text": "$x$ is the last column of $U$.",
+              "correct": false
+            },
+            {
+              "text": "$x$ is the first column of $U$.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "SVD",
+            "Constrained optimisation",
+            "Eight-point algorithm"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "20EFB 4i"
+          ],
+          "q": "Given the same setting, what is the value of $\\nu=\\min_{x\\in\\mathbb{R}^n,\\ \\|x\\|=1}\\|Ax\\|$?",
+          "answer": "$\\nu=s_n$, the **smallest singular value**.\n**Why.** At the minimiser $x=v_n$ we get $\\|Av_n\\|=\\|s_nu_n\\|=s_n$ since $u_n$ is a unit vector.\n**Symmetric statement.** $\\max_{\\|x\\|=1}\\|Ax\\|=s_1=\\|A\\|_2$.",
+          "extend": "It is $s_n$, not $\\sqrt{s_n}$ — the square root already happened when going from $A^\\top A$ (eigenvalue $s_n^2$) to $\\|Ax\\|$.",
+          "options": [
+            {
+              "text": "$\\nu=s_n$",
+              "correct": true
+            },
+            {
+              "text": "$\\nu=\\sqrt{s_n}$",
+              "correct": false
+            },
+            {
+              "text": "$\\nu=s_1$",
+              "correct": false
+            },
+            {
+              "text": "$\\nu=\\sqrt{s_1}$",
+              "correct": false
+            },
+            {
+              "text": "$\\nu=\\sum_{i=1}^{n}s_i$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "SVD",
+            "Constrained optimisation"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 4e"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$, $b\\in\\operatorname{range}(A)$ and $S=\\{x\\in\\mathbb{R}^n\\mid Ax=b\\}$. Write down the solution of $x^\\star=\\arg\\min_{x\\in S}\\|x\\|_2$.",
+          "answer": "$$x^\\star=A^\\dagger b,$$\nwhere $A^\\dagger\\in\\mathbb{R}^{n\\times m}$ is the Moore–Penrose pseudo-inverse $A^\\dagger=V\\Sigma^\\dagger U^\\top$.\n**Interpretation.** Among all solutions of $Ax=b$ (they form the affine set $x_s+\\ker(A)$), the pseudo-inverse picks the one orthogonal to $\\ker(A)$, which is the one of minimum norm.",
+          "extend": "Two different roles, one formula: $A^\\dagger b$ is the *least-squares* solution when $b\\notin\\operatorname{range}(A)$, and the *minimum-norm* solution when the system is underdetermined.",
+          "tags": [
+            "Pseudo-inverse",
+            "Least squares"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 5"
+          ],
+          "q": "The Euclidean projection of $A\\in\\mathbb{R}^{n\\times n}$ onto $O(n)$ is $R^\\star=\\arg\\min_{R\\in O(n)}\\|A-R\\|_f$, and it equals $UV^\\top$ for $A=U\\Sigma V^\\top$. Explain the individual steps of the derivation. (Hint: $\\langle X,Y\\rangle=\\operatorname{trace}(X^\\top Y)$; the trace is invariant under cyclic permutations.)",
+          "answer": "**(a) Square the norm.** $\\arg\\min\\|A-R\\|_f=\\arg\\min\\|A-R\\|_f^2$ — squaring is monotone on non-negative reals, so the minimiser is unchanged.\n**(b) Expand.** $\\|A-R\\|_f^2=\\langle A,A\\rangle-\\langle A,R\\rangle-\\langle R,A\\rangle+\\langle R,R\\rangle=\\langle A,A\\rangle-2\\langle A,R\\rangle+\\langle R,R\\rangle$, using $\\langle A,R\\rangle=\\operatorname{trace}(A^\\top R)=\\operatorname{trace}\\big((A^\\top R)^\\top\\big)=\\langle R,A\\rangle$.\n**(c) Drop constants.** $\\langle A,A\\rangle$ does not depend on $R$; and $\\langle R,R\\rangle=\\operatorname{trace}(R^\\top R)=\\operatorname{trace}(I)=n$ is constant **on $O(n)$**. Left with $\\arg\\min-2\\langle A,R\\rangle$.\n**(d) Flip to a maximisation.** The factor $2$ is irrelevant; removing the minus turns $\\arg\\min$ into $\\arg\\max\\langle A,R\\rangle$.\n**(e) Insert the SVD.** $\\arg\\max_R\\langle U\\Sigma V^\\top,R\\rangle$.\n**(f) Move the orthogonal factors.** $\\langle U\\Sigma V^\\top,R\\rangle=\\operatorname{trace}(V\\Sigma^\\top U^\\top R)=\\operatorname{trace}(\\Sigma^\\top U^\\top RV)=\\langle\\Sigma,U^\\top RV\\rangle$ by cyclic invariance.\n**(g) Maximise.** $\\Sigma$ is **diagonal** and **non-negative**, and $U^\\top RV$ is **orthogonal** (product of orthogonal matrices). An orthogonal matrix has entries in $[-1,1]$, so the diagonal pairing is maximised by $U^\\top RV=I$, which is itself orthogonal and hence attainable.\n**(h) Solve for $R$.** $U^\\top RV=I\\Rightarrow U(U^\\top RV)V^\\top=UIV^\\top\\Rightarrow R^\\star=UV^\\top$.",
+          "extend": "This orthogonal-Procrustes chain reappears whenever a noisy matrix has to be \"re-orthogonalised\" — e.g. projecting an estimated rotation back onto $SO(3)$ after the eight-point algorithm.",
+          "tags": [
+            "SVD",
+            "Orthogonal group",
+            "Projection",
+            "Frobenius norm"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 6a"
+          ],
+          "q": "What is the difference between the sets $O(n)$ and $SO(n)$?",
+          "answer": "Elements of $SO(n)$ have determinant $+1$, while elements of $O(n)$ have determinant $\\pm1$.\n**Geometrically:** $O(n)$ contains rotations **and** reflections; $SO(n)$ keeps only the rotations (orientation-preserving maps). $SO(n)=O(n)\\cap SL(n)$.",
+          "tags": [
+            "Orthogonal group",
+            "Special orthogonal group",
+            "Determinant"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 6b",
+            "20RFB 6c",
+            "20RFB 6d"
+          ],
+          "q": "The Euclidean projection onto $SO(n)$ is $R^\\star=U\\operatorname{diag}\\big(1,\\dots,1,\\det(UV^\\top)\\big)V^\\top$ for $A=U\\Sigma V^\\top$. How many different values can the inner term take? List the cases and explain their effect.",
+          "answer": "**Exactly two.** Since $U$ and $V$ are orthogonal, $\\det(UV^\\top)=\\det(U)\\det(V)=\\pm1$.\n**Case $\\det(UV^\\top)=+1$.** The inner term becomes $I_{n\\times n}$, so $R^\\star=UV^\\top$ — the matrix $UV^\\top$ is already in $SO(n)$ and the $O(n)$ projection is also the $SO(n)$ projection.\n**Case $\\det(UV^\\top)=-1$.** Then $UV^\\top\\in O(n)\\setminus SO(n)$ (it contains a reflection). Multiplying by $\\operatorname{diag}(1,\\dots,1,-1)$ flips the sign of the last singular direction, turning the determinant into $+1$ so that $R^\\star\\in SO(n)$.",
+          "tags": [
+            "SVD",
+            "Special orthogonal group",
+            "Projection"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 6e"
+          ],
+          "q": "Explain why $S=U\\operatorname{diag}\\big(\\det(UV^\\top),1,\\dots,1\\big)V^\\top$ does **not** necessarily compute a Euclidean projection onto $SO(n)$ for general $A$.",
+          "answer": "**Formal argument.** By invariance of the Frobenius norm under orthogonal transformations,\n$$\\|A-S\\|_f=\\big\\|U^\\top AV-\\operatorname{diag}(\\det(UV^\\top),1,\\dots,1)\\big\\|_f=\\big\\|\\Sigma-\\operatorname{diag}(\\det(UV^\\top),1,\\dots,1)\\big\\|_f,$$\nsince $U^\\top AV=\\Sigma$. Flipping the sign at the position of the **largest** singular value changes that entry from $\\sigma_1$ to a term of the opposite sign, which increases the distance far more than flipping at the smallest singular value $\\sigma_n$.\n**High-level argument.** We minimise $\\|A-R\\|_f$ over $R\\in SO(n)$; when the determinant has to be repaired by flipping the direction of one column of $U$ (or $V$), that flip must happen in the direction that costs least — the one belonging to the **smallest** singular value, i.e. the last position, not the first.",
+          "extend": "Same reasoning underlies \"project $E$ onto the essential space\": you always modify the least significant singular direction.",
+          "tags": [
+            "SVD",
+            "Special orthogonal group",
+            "Projection",
+            "Frobenius norm"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "State the Moore–Penrose pseudo-inverse in terms of the SVD and give the two identities it satisfies.",
+          "answer": "**Definition.** For $A=U\\Sigma V^\\top\\in\\mathbb{R}^{m\\times n}$,\n$$A^\\dagger=V\\Sigma^\\dagger U^\\top,\\qquad \\Sigma^\\dagger=\\begin{pmatrix}\\Sigma_1^{-1}&0\\\\0&0\\end{pmatrix}_{n\\times m},$$\nwhere $\\Sigma_1$ is the diagonal matrix of the **non-zero** singular values (each is inverted; the zeros stay zero).\n**Identities.** $AA^\\dagger A=A$ and $A^\\dagger AA^\\dagger=A^\\dagger$.\n**Use.** $x_{\\min}=A^\\dagger b$ is, among all minimisers of $\\|Ax-b\\|$, the one with the smallest norm $\\|x\\|$. For invertible square $A$ it reduces to $A^{-1}=V\\Sigma^{-1}U^\\top$.",
+          "tags": [
+            "Pseudo-inverse",
+            "SVD",
+            "Least squares"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 1.5",
+            "24EDC 1.6",
+            "24EDC 1.7"
+          ],
+          "q": "For a totally differentiable $f:H\\to\\mathbb{R}$ with $H$ either $\\mathbb{R}^n$ or $\\mathbb{R}^{m\\times n}$ we have $\\lim_{t\\to0}\\frac{f(x+t\\Delta x)-f(x)}{t}=\\frac{df(x)}{dx}\\Delta x=\\langle\\nabla f(x),\\Delta x\\rangle$. (a) How is the directional derivative defined? (b) What is the dimension of the gradient $\\nabla f(x)$ for the two cases of $H$? (c) Which inner product expresses the directional derivative in each case?",
+          "answer": "**(a) Directional derivative.**\n$$D_{\\Delta x}f(x)=\\lim_{t\\to0}\\frac{f(x+t\\Delta x)-f(x)}{t}$$\n— the rate of change of $f$ at $x$ along the direction $\\Delta x$.\n**(b) Dimension of the gradient.** The gradient always lives in the **same space as the variable**:\n$$\\nabla f(x)\\in\\mathbb{R}^n\\ \\text{ for }H=\\mathbb{R}^n,\\qquad \\nabla f(x)\\in\\mathbb{R}^{m\\times n}\\ \\text{ for }H=\\mathbb{R}^{m\\times n}.$$\n**(c) Inner products.**\n$$\\langle x,y\\rangle=x^\\top y\\ \\text{ for }H=\\mathbb{R}^n,\\qquad \\langle A,B\\rangle=\\operatorname{tr}(A^\\top B)\\ \\text{ for }H=\\mathbb{R}^{m\\times n}.$$\nThe second is the **Frobenius** inner product — which is why matrix gradients such as $\\nabla_A\\|B-AC\\|_F^2=-2(B-AC)C^\\top$ come out as matrices of the same shape as $A$.",
+          "extend": "\"The gradient has the shape of the variable\" answers half of every matrix-calculus sub-question on these papers.",
+          "tags": [
+            "Matrix calculus",
+            "Gradient",
+            "Inner product",
+            "Frobenius norm"
+          ]
+        }
+      ]
+    }
+  ]
+}

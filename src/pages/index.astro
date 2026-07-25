@@ -1,0 +1,265 @@
+---
+import Layout from "../components/Layout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import TumLogo from "../components/TumLogo.astro";
+import GlobalSearch from "../components/islands/GlobalSearch.vue";
+import { getOrderedChapters, chapterStats, buildSearchIndex } from "../lib/content";
+import { manifest } from "../lib/manifest";
+import { EXAM_NAMES, examOf, isPrimary } from "../lib/exams";
+import { url } from "../lib/paths";
+import updates from "../../data/updates.json";
+
+const chapters = await getOrderedChapters();
+const index = await buildSearchIndex();
+
+let totalQ = 0;
+let totalTopics = 0;
+const statsById = new Map<string, ReturnType<typeof chapterStats>>();
+for (const ch of chapters) {
+  const s = chapterStats(ch);
+  statsById.set(ch.data.id, s);
+  totalQ += s.questions;
+  totalTopics += s.topics;
+}
+
+const readyCount = manifest.chapters.filter((m) => m.status === "ready").length;
+
+// chapter cards in manifest order (ready + coming-soon)
+const cards = manifest.chapters.map((m) => {
+  const ready = m.status === "ready";
+  const s = ready ? statsById.get(m.id) : undefined;
+  return { ...m, ready, stats: s };
+});
+
+// exam question counts: each question once per exam it appears in
+const examCounts = new Map<string, number>();
+for (const e of index) {
+  const seen = new Set<string>();
+  for (const s of e.srcs) {
+    const x = examOf(s);
+    if (x && !seen.has(x)) {
+      seen.add(x);
+      examCounts.set(x, (examCounts.get(x) ?? 0) + 1);
+    }
+  }
+}
+const examCards = manifest.exams
+  .filter((e) => examCounts.get(e))
+  .map((e) => ({
+    code: e,
+    name: EXAM_NAMES[e] ?? e,
+    n: examCounts.get(e) ?? 0,
+    primary: isPrimary(e),
+  }));
+
+// popular concept tags
+const tagCounts = new Map<string, number>();
+for (const e of index) for (const t of e.tg) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+const popTags = [...tagCounts.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 6)
+  .map(([t, n]) => ({ t, n }));
+
+const recentUpdates = (updates as { date: string; text: string }[]).slice(0, 3);
+// UTM tags so friend-shared visits show up in GA4 as source/medium
+// "share / referral" (campaign "friend"), instead of blending into Direct.
+const shareText =
+  "Hey! Just found the best 3D Computer Vision exam-prep tool — check it out: https://c0nsTantin77.github.io/3dcv-exam-qa/?utm_source=share&utm_medium=referral&utm_campaign=friend";
+---
+
+<Layout title="3DCV Exam Q&A · TUM IN2228">
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-top">
+        <TumLogo />
+        <span class="kicker">Technische Universität München · IN2228</span>
+      </div>
+      <h1>3D Computer Vision</h1>
+      <ul class="hero-points">
+        <li>
+          <div class="hp-head"><span class="hp-ic">★</span><span class="hp-t">Cremers first</span></div>
+          <span class="hp-d">Papers by the current examiner rank on top.</span>
+        </li>
+        <li>
+          <div class="hp-head"><span class="hp-ic">✅</span><span class="hp-t">Interactive quizzes</span></div>
+          <span class="hp-d">Pick. Check. Then see why.</span>
+        </li>
+        <li>
+          <div class="hp-head"><span class="hp-ic">🤖</span><span class="hp-t">AI practice</span></div>
+          <span class="hp-d">Fresh questions for every concept.</span>
+        </li>
+      </ul>
+      <div class="hero-cta">
+        <p class="hero-cta-text">
+          <b>Free, for every TUM student.</b> Built to help you master 3D Computer Vision. If it
+          helps, pass it on.
+        </p>
+        <div class="hero-cta-pills">
+          <button class="share-pill" type="button" data-share={shareText}>
+            <span class="share-ic" aria-hidden="true">🔗</span><span class="share-txt">Share with a friend</span>
+          </button>
+          <a class="share-pill" href="https://github.com/c0nsTantin77/3dcv-exam-qa" target="_blank" rel="noopener">
+            <span class="share-ic" aria-hidden="true">⭐</span><span>Star on GitHub</span>
+          </a>
+          <a class="share-pill doner" href="https://buymeacoffee.com/c0ns77" target="_blank" rel="noopener">
+            <span class="share-ic" aria-hidden="true">🥙</span><span>Buy me a Döner</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="hub">
+    <GlobalSearch client:load totalQ={totalQ} />
+
+    <section class="poptags">
+      <div class="poptags-head">
+        <span class="poptags-label">Popular tags</span>
+        <a class="poptags-all" href={url("/tags")}>All {tagCounts.size} tags →</a>
+      </div>
+      <div class="poptags-row">
+        {
+          popTags.map(({ t, n }) => (
+            <a class="ptag" href={`${url("/tags")}?t=${encodeURIComponent(t)}`}>
+              {t}
+              <span class="ptag-n">{n}</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <details class="progress-card" id="progress" hidden open>
+      <summary class="prog-head">
+        <span class="prog-title">Your progress</span>
+        <span id="authctl" class="authctl"></span>
+      </summary>
+      <div id="prog-body"></div>
+    </details>
+
+    <div class="view-toggle" role="tablist" aria-label="Browse by">
+      <button type="button" class="vt-btn active" data-view="chapters" aria-selected="true">By chapter</button>
+      <button type="button" class="vt-btn" data-view="exams" aria-selected="false">By exam</button>
+    </div>
+
+    <div class="cards" id="view-chapters">
+      {
+        cards.map((c) =>
+          c.ready ? (
+            <a class="card" href={url(`/chapters/${c.id}`)}>
+              <div class="card-top">
+                <span class="card-roman">{c.roman}</span>
+                <span class="card-prog" data-ch={c.id}></span>
+              </div>
+              <h3>{c.title}</h3>
+              <div class="card-meta">
+                {c.stats!.questions} questions · {c.stats!.topics} topics
+              </div>
+            </a>
+          ) : (
+            <div class="card card-soon">
+              <div class="card-roman">{c.roman}</div>
+              <h3>{c.title}</h3>
+              <div class="card-meta">coming soon</div>
+            </div>
+          ),
+        )
+      }
+    </div>
+
+    <div id="view-exams" hidden>
+      <p class="exam-legend">
+        Codes read <b>year · kind · examiner</b> — <span class="src src-primary">25EDC</span> is the
+        2025 <b>E</b>ndterm by <b>DC</b> (Cremers), <span class="src">23RLI</span> the 2023
+        <b>R</b>etake by <b>LI</b> (Li), <span class="src">20MFB</span> the 2020 <b>M</b>idterm by
+        <b>FB</b> (Bernard). Each examiner writes a different paper, so
+        <b>Cremers is the one that counts</b> — those questions are marked ★ and always come first.
+      </p>
+      <div class="examgrid">
+        {
+          examCards.map((e) => (
+            <a
+              class:list={["examcard", { "examcard-primary": e.primary }]}
+              href={`${url("/exams")}?e=${encodeURIComponent(e.code)}`}
+            >
+              <span class="examcard-top">
+                <span class="examcard-code">{e.code}</span>
+                <span class="card-prog" data-exam={e.code} />
+              </span>
+              <span class="examcard-name">{e.name}</span>
+              <span class="examcard-n">{e.n} questions</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+
+    {
+      recentUpdates.length > 0 && (
+        <details class="updates collapsible" open>
+          <summary class="collapse-head"><span>📣 Recent updates</span></summary>
+          <ul class="up-list">
+            {recentUpdates.map((u) => (
+              <li>
+                <span class="up-date">{u.date}</span>
+                <span class="up-text">{u.text}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )
+    }
+
+    <details class="how collapsible" open>
+      <summary class="collapse-head"><span>🧭 How to use this deck</span></summary>
+      <div class="how-grid">
+        <div class="how-col">
+          <h3>🔎 Find</h3>
+          <ul>
+            <li>
+              Search any keyword or concept <b>tag</b> (e.g. <i>essential matrix</i>, <i>SO(3)</i>).
+            </li>
+            <li>Jump to an exact question by code — type <span class="src">25EDC 1.1</span>.</li>
+            <li>Browse <b>by exam</b> (tap a paper above) or <b>by tag</b> across all chapters.</li>
+          </ul>
+        </div>
+        <div class="how-col">
+          <h3>📝 Practice</h3>
+          <ul>
+            <li>Toggle <b>Review / Test</b> (top-right): Review shows answers, Test hides them.</li>
+            <li><b>Interactive</b> multiple-choice, short-answer (matching words light up green) &amp; number-checked calculation questions.</li>
+            <li>Answers follow the <b>official sample solutions</b>; <span class="src-ai">AI-generated</span> items are marked.</li>
+            <li>Short on time? Do the <span class="examiner-badge">★ Cremers</span> items first — they head every knowledge point.</li>
+          </ul>
+        </div>
+        <div class="how-col">
+          <h3>📈 Track</h3>
+          <ul>
+            <li><b>🃏 Flashcards</b> — study a due / wrong-book / all deck and rate each card <i>Again / Hard / Good / Easy</i> (spaced repetition).</li>
+            <li>Mark <b>Reviewed</b>, keep a <b>wrong book</b>, or jot a <b>note</b> (<b>Markdown + math</b>).</li>
+            <li>The <b>Review page</b> groups what's due by chapter; <b>sign in</b> to sync across devices.</li>
+          </ul>
+        </div>
+      </div>
+    </details>
+
+    <section class="feedback" id="feedback">
+      <div class="feedback-text">
+        <span class="feedback-title">💬 Feedback &amp; issues</span>
+        <span class="feedback-sub">Spotted a wrong answer or have a suggestion? It goes straight to the author.</span>
+      </div>
+      <div class="feedback-actions">
+        <a class="feedback-link" id="feedback-link" target="_blank" rel="noopener">Open the feedback form →</a>
+        <a class="feedback-issue" href="https://github.com/c0nsTantin77/3dcv-exam-qa/issues" target="_blank" rel="noopener">Open an issue →</a>
+      </div>
+    </section>
+
+    <p class="hubnote">
+      {readyCount} of {manifest.chapters.length} chapters live — {totalQ} questions across {
+        totalTopics
+      } knowledge points, from 12 past papers (2020–2025) and all 8 exercise sheets.
+    </p>
+  </main>
+
+  <SiteFooter />
+</Layout>

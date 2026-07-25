@@ -1,0 +1,573 @@
+{
+  "id": "ch02",
+  "roman": "II",
+  "title": "Representing a Moving Scene",
+  "blurb": "Rigid-body motion, the Lie group SO(3) and its algebra so(3), the exponential map and Rodrigues' formula, twists in SE(3), velocity transformation — plus the alternatives (Euler angles, quaternions) and why gimbal lock matters.",
+  "knowledge_points": [
+    {
+      "id": "rigid-body-motion",
+      "title": "Rigid-Body Motion and What It Preserves",
+      "recap": "**Definition.** A rigid-body motion is a map $g:\\mathbb{R}^3\\to\\mathbb{R}^3$ that preserves the **distance** between any two points **and** the **orientation** (handedness) of the frame. Written on vectors, the two defining properties are\n$$\\|g_*(v)\\|=\\|v\\|\\quad\\text{(norm / length)},\\qquad g_*(v)\\times g_*(w)=g_*(v\\times w)\\quad\\text{(cross product / orientation)}.$$\nThe second condition is what rules out reflections: an orthogonal map preserving lengths but flipping the cross product is a mirror, not a motion.\n**Consequence.** Preserving lengths ⇒ preserving inner products (polarisation: $\\langle u,v\\rangle=\\tfrac12(\\|u+v\\|^2-\\|u\\|^2-\\|v\\|^2)$), so the linear part is orthogonal; adding the cross-product condition forces $\\det=+1$, i.e. $R\\in SO(3)$. Hence every rigid-body motion is $x\\mapsto Rx+T$ with $R\\in SO(3)$, $T\\in\\mathbb{R}^3$ — the group $SE(3)$.\n**Cross product and the hat operator.** $u\\times v=\\hat uv$ with $\\hat u$ skew-symmetric (Ch. 1). Useful identities: $u\\times v=-v\\times u$, $u\\times u=0$, $\\langle u\\times v,u\\rangle=0$, and the BAC–CAB rule $a\\times(b\\times c)=b(a^\\top c)-c(a^\\top b)$.\n**Rotation and the cross product.** For $R\\in SO(3)$: $R(v\\times w)=(Rv)\\times(Rw)$ and the conjugation identity $R\\hat uR^\\top=\\widehat{Ru}$ — both appear repeatedly when manipulating the essential matrix.\n**Quadratic-form fact.** $x^\\top M_1x=x^\\top M_2x$ for all $x$ **iff** $M_1-M_2$ is skew-symmetric — the same \"quadratic forms only see the symmetric part\" statement as in Chapter 1.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 2.3",
+            "24EDC 2.1"
+          ],
+          "q": "Write down two equations with respect to any two vectors $v,w\\in\\mathbb{R}^3$ to show the properties that a rigid-body motion needs to preserve.",
+          "answer": "**Preservation of norm / length:**\n$$\\|g(v)\\|=\\|v\\|.$$\n**Preservation of the cross product / orientation:**\n$$g(v\\times w)=g(v)\\times g(w).$$\n**Why both.** The first alone only gives $R\\in O(3)$ — reflections included. The cross-product condition forces $\\det(R)=+1$, restricting to $SO(3)$, i.e. proper rigid motions.",
+          "extend": "Length alone ⇒ orthogonal; length **and** cross product ⇒ rotation. That is exactly the difference between $E(3)$ and $SE(3)$.",
+          "tags": [
+            "Rigid-body motion",
+            "Special Euclidean group",
+            "Cross product"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 1"
+          ],
+          "q": "Given a rotation matrix $R\\in SO(3)$, show that it preserves distances: $\\|Rv\\|=\\|v\\|$ for all $v\\in\\mathbb{R}^3$.",
+          "answer": "$$\\|Rv\\|^2=(Rv)^\\top(Rv)=v^\\top R^\\top Rv=v^\\top Iv=\\|v\\|^2,$$\nusing $R^\\top R=I$. Taking square roots (both sides non-negative) gives $\\|Rv\\|=\\|v\\|$.",
+          "extend": "The same computation with two different vectors gives $\\langle Rv,Rw\\rangle=\\langle v,w\\rangle$ — rotations preserve angles as well as lengths.",
+          "tags": [
+            "Rotation matrix",
+            "Orthogonal group",
+            "Proof"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 3"
+          ],
+          "q": "Let $M_1,M_2\\in\\mathbb{R}^{3\\times3}$. Prove that $x^\\top M_1x=x^\\top M_2x$ for all $x\\in\\mathbb{R}^3$ if and only if $M_1-M_2$ is skew-symmetric.",
+          "answer": "Write $S=M_1-M_2$; the claim is $x^\\top Sx=0\\ \\forall x\\iff S^\\top=-S$.\n**($\\Leftarrow$)** If $S$ is skew-symmetric then $x^\\top Sx=(x^\\top Sx)^\\top=x^\\top S^\\top x=-x^\\top Sx$, so $x^\\top Sx=0$.\n**($\\Rightarrow$)** Suppose $x^\\top Sx=0$ for all $x$. Taking $x=e_i$ gives $s_{ii}=0$. Taking $x=e_i+e_j$ gives $0=s_{ii}+s_{ij}+s_{ji}+s_{jj}=s_{ij}+s_{ji}$, i.e. $s_{ij}=-s_{ji}$. Hence $S$ is skew-symmetric.",
+          "extend": "The forward direction needs *two* clever choices of $x$: the basis vectors kill the diagonal, their sums pair up the off-diagonals.",
+          "tags": [
+            "Skew-symmetric matrix",
+            "Quadratic form",
+            "Proof"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Which of the following identities hold for all $R\\in SO(3)$ and $u,v,w\\in\\mathbb{R}^3$?",
+          "answer": "**True.** $R(v\\times w)=(Rv)\\times(Rw)$ — rotations preserve the cross product (this is exactly the orientation condition). $R\\hat uR^\\top=\\widehat{Ru}$ — the conjugation identity, used constantly when rewriting $\\hat TR$. $\\langle u\\times v,u\\rangle=0$ — the cross product is orthogonal to its factors.\n**False.** $\\hat u\\hat v=\\hat v\\hat u$ is wrong: skew-symmetric matrices do not commute in general (their commutator is again a cross product, $[\\hat u,\\hat v]=\\widehat{u\\times v}$, which is the Lie bracket of $\\mathfrak{so}(3)$).",
+          "options": [
+            {
+              "text": "$R(v\\times w)=(Rv)\\times(Rw)$",
+              "correct": true
+            },
+            {
+              "text": "$R\\hat uR^\\top=\\widehat{Ru}$",
+              "correct": true
+            },
+            {
+              "text": "$\\langle u\\times v,u\\rangle=0$",
+              "correct": true
+            },
+            {
+              "text": "$\\hat u\\hat v=\\hat v\\hat u$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Cross product",
+            "Rotation matrix",
+            "Hat operator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "so3-rotations",
+      "title": "SO(3): Recognising and Handling Rotation Matrices",
+      "recap": "**Definition.** $SO(3)=\\{R\\in\\mathbb{R}^{3\\times3}\\mid R^\\top R=I,\\ \\det(R)=+1\\}$.\n**Checklist for \"is this a rotation matrix?\"** (1) square, (2) columns (equivalently rows) **orthonormal** — unit length and mutually orthogonal, (3) $\\det=+1$. A matrix that passes (1)–(2) but has $\\det=-1$ is a **reflection**, in $O(3)\\setminus SO(3)$: e.g. $-I_{3\\times3}$ has $\\det=-1$ in odd dimensions.\n**Handy examples.** $\\begin{pmatrix}0&-1\\\\1&0\\end{pmatrix}$ and $\\begin{pmatrix}0.8&0.6\\\\-0.6&0.8\\end{pmatrix}$ are 2D rotations ($\\cos^2+\\sin^2=1$, $\\det=1$); $\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}$ is orthogonal but has $\\det=-1$; $\\begin{pmatrix}0.5&0.5\\\\-0.5&0.5\\end{pmatrix}$ has columns of length $\\tfrac{1}{\\sqrt2}\\neq1$.\n**$SO(3)$ is a group but not a vector space.** It is **not** closed under addition or averaging: $\\tfrac12(R_1+R_2)$ is generally **not** a rotation (it violates $R^\\top R=I$ and $\\det=1$ — e.g. $R_1=I$, $R_2=-\\!$ a $180^\\circ$ rotation gives a singular average). Correct averaging goes through the SVD projection $R^\\star=U\\operatorname{diag}(1,1,\\det(UV^\\top))V^\\top$ from Chapter 1, or through quaternions.\n**Extracting angle and axis.** For $R\\in SO(3)$ representing a rotation by $\\theta\\in(0,\\pi)$ about the unit axis $\\vec u$:\n$$\\theta=\\cos^{-1}\\!\\left(\\frac{\\operatorname{trace}(R)-1}{2}\\right),\\qquad \\vec u=\\frac{1}{2\\sin\\theta}\\,(r_{32}-r_{23},\\ r_{13}-r_{31},\\ r_{21}-r_{12})^\\top.$$\nWatch three details: it is $\\cos^{-1}$ (not $\\cos$), the divisor is $2\\sin\\theta$ (not $\\sin\\theta$), and the component order is $(32{-}23,\\,13{-}31,\\,21{-}12)$ — this is exactly the vector whose hat matrix is the skew part $\\tfrac12(R-R^\\top)$.\n**Degrees of freedom.** $R$ has $9$ entries with $6$ constraints ($R^\\top R=I$ gives $6$ independent equations), leaving $3$ DOF — matching $\\dim\\mathfrak{so}(3)=3$.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 2.1"
+          ],
+          "q": "Which of the following matrices are rotation matrices?",
+          "answer": "The rotation matrices are $\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}$, $\\begin{pmatrix}0.8&0.6\\\\-0.6&0.8\\end{pmatrix}$ and $\\begin{pmatrix}\\sqrt{0.5}&-\\sqrt{0.5}&0\\\\\\sqrt{0.5}&\\sqrt{0.5}&0\\\\0&0&1\\end{pmatrix}$.\n**Why the others fail.** $\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}$ is orthogonal but $\\det=-1$ (a reflection). $\\begin{pmatrix}0.5&0.5\\\\-0.5&0.5\\end{pmatrix}$ has columns of norm $\\tfrac{1}{\\sqrt2}\\neq1$, so $R^\\top R\\neq I$. $-I_{3\\times3}$ has $\\det=(-1)^3=-1$, again a reflection (a point reflection in odd dimension).\n**Procedure.** Check orthonormal columns first (cheap), then the determinant sign.",
+          "extend": "In **even** dimension $-I$ *is* a rotation ($\\det=+1$); in odd dimension it is not. The exam likes that asymmetry.",
+          "options": [
+            {
+              "text": "$\\begin{pmatrix}0&1\\\\1&0\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{pmatrix}$",
+              "correct": true
+            },
+            {
+              "text": "$\\begin{pmatrix}0.5&0.5\\\\-0.5&0.5\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$\\begin{pmatrix}-1&0&0\\\\0&-1&0\\\\0&0&-1\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$\\begin{pmatrix}0.8&0.6\\\\-0.6&0.8\\end{pmatrix}$",
+              "correct": true
+            },
+            {
+              "text": "$\\begin{pmatrix}\\sqrt{0.5}&-\\sqrt{0.5}&0\\\\\\sqrt{0.5}&\\sqrt{0.5}&0\\\\0&0&1\\end{pmatrix}$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Rotation matrix",
+            "Special orthogonal group",
+            "Determinant"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 2.5"
+          ],
+          "q": "Given any two rotation matrices $R_1,R_2\\in SO(3)$, is the average matrix $R=\\tfrac12(R_1+R_2)$ always a valid rotation matrix? Justify your answer.",
+          "answer": "**No.**\n**Requirements.** A valid rotation matrix must be orthogonal, $R^\\top R=I$, and have determinant $+1$.\n**Failure.** The average of two rotation matrices is still a square matrix, but it need not satisfy either condition — $SO(3)$ is a curved manifold, not a linear subspace, so it is not closed under addition or convex combination.\n**Counterexample.** Take $R_1=I$ and $R_2=\\operatorname{diag}(-1,-1,1)$ (a $180^\\circ$ rotation about $z$). Then $R=\\tfrac12(R_1+R_2)=\\operatorname{diag}(0,0,1)$, which is singular — $\\det(R)=0\\neq1$.\n**How to do it properly.** Project the average back with the SVD: $R^\\star=U\\operatorname{diag}(1,1,\\det(UV^\\top))V^\\top$, or average unit quaternions and renormalise.",
+          "extend": "Saying only \"$SO(3)$ is not closed under summation\" earns partial credit — the marking scheme wants the definition **and** a concrete counterexample.",
+          "tags": [
+            "Rotation matrix",
+            "Special orthogonal group",
+            "Projection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "20RFB 4h"
+          ],
+          "q": "Let $R=(r_{ij})\\in SO(3)$ represent a rotation by an angle $\\theta\\in(0,\\pi)$ around an axis spanned by a unit vector $\\vec u$. Which of the following gives the correct expressions for $\\theta$ and $\\vec u$?",
+          "answer": "$$\\theta=\\cos^{-1}\\!\\left(\\frac{\\operatorname{trace}(R)-1}{2}\\right),\\qquad \\vec u=\\frac{1}{2\\sin\\theta}\\big(r_{32}-r_{23},\\ r_{13}-r_{31},\\ r_{21}-r_{12}\\big)^\\top.$$\n**Where it comes from.** Rodrigues gives $\\operatorname{trace}(R)=1+2\\cos\\theta$, hence the angle formula; and the skew part $\\tfrac12(R-R^\\top)=\\sin\\theta\\,\\hat u$, whose hat-vector read-off produces the axis with the factor $\\tfrac1{2\\sin\\theta}$.\n**Three traps.** It is $\\cos^{-1}$, not $\\cos$; the denominator is $2\\sin\\theta$, not $\\sin\\theta$; and the component order is $(r_{32}-r_{23},\\,r_{13}-r_{31},\\,r_{21}-r_{12})$ — swapping the last two entries is the usual decoy.",
+          "options": [
+            {
+              "text": "$\\theta=\\cos\\!\\big(\\tfrac{\\operatorname{trace}(R)-1}{2}\\big)$, $\\vec u=\\tfrac{1}{\\sin\\theta}(r_{32}-r_{23},r_{13}-r_{31},r_{21}-r_{12})^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$\\theta=\\cos^{-1}\\!\\big(\\tfrac{\\operatorname{trace}(R)-1}{2}\\big)$, $\\vec u=\\tfrac{1}{\\sin\\theta}(r_{32}-r_{23},r_{21}-r_{12},r_{13}-r_{31})^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$\\theta=\\cos^{-1}\\!\\big(\\tfrac{\\operatorname{trace}(R)}{2}\\big)$, $\\vec u=\\tfrac{1}{2\\sin\\theta}(r_{32}-r_{23},r_{21}-r_{12},r_{13}-r_{31})^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$\\theta=\\cos^{-1}\\!\\big(\\tfrac{\\operatorname{trace}(R)+1}{2}\\big)$, $\\vec u=\\tfrac{1}{2\\sin\\theta}(r_{32}+r_{23},r_{13}+r_{31},r_{21}+r_{12})^\\top$",
+              "correct": false
+            },
+            {
+              "text": "$\\theta=\\cos^{-1}\\!\\big(\\tfrac{\\operatorname{trace}(R)-1}{2}\\big)$, $\\vec u=\\tfrac{1}{2\\sin\\theta}(r_{32}-r_{23},r_{13}-r_{31},r_{21}-r_{12})^\\top$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Rotation matrix",
+            "Logarithm",
+            "Axis-angle"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 2.3"
+          ],
+          "q": "The matrix of a rotation in the plane by angle $\\theta$ is $\\begin{pmatrix}\\cos\\theta&-\\sin\\theta\\\\\\sin\\theta&\\cos\\theta\\end{pmatrix}$. Let $R\\in\\mathbb{R}^{3\\times3}$ correspond to a rotation around the $z$-axis by $\\alpha$, **followed by** a rotation around the $x$-axis by $\\gamma$. Write $R$ in terms of $\\alpha$ and $\\gamma$.",
+          "answer": "The later rotation is applied **on the left**, so $R=R_x(\\gamma)R_z(\\alpha)$ with\n$$R_z(\\alpha)=\\begin{pmatrix}\\cos\\alpha&-\\sin\\alpha&0\\\\\\sin\\alpha&\\cos\\alpha&0\\\\0&0&1\\end{pmatrix},\\qquad R_x(\\gamma)=\\begin{pmatrix}1&0&0\\\\0&\\cos\\gamma&-\\sin\\gamma\\\\0&\\sin\\gamma&\\cos\\gamma\\end{pmatrix}.$$\n**Multiplying out:**\n$$R=\\begin{pmatrix}\\cos\\alpha&-\\sin\\alpha&0\\\\\\cos\\gamma\\sin\\alpha&\\cos\\gamma\\cos\\alpha&-\\sin\\gamma\\\\\\sin\\gamma\\sin\\alpha&\\sin\\gamma\\cos\\alpha&\\cos\\gamma\\end{pmatrix}.$$\n**Order matters.** The reverse order, $R_z(\\alpha)R_x(\\gamma)$ (rotate about $x$ first), gives a different matrix and only earns partial credit.",
+          "extend": "Read right to left: the **first** rotation is the rightmost factor. Sanity-check with $\\gamma=0$, which must return $R_z(\\alpha)$.",
+          "tags": [
+            "Rotation matrix",
+            "Composition",
+            "Euler angles"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lie-algebra-exp",
+      "title": "Lie Algebra so(3), the Exponential Map and Rodrigues' Formula",
+      "recap": "**Lie group / Lie algebra.** $SO(3)$ is a Lie group — a group that is also a smooth manifold. Its Lie algebra is its **tangent space at the identity**:\n$$\\mathfrak{so}(3)=\\{\\hat\\omega\\in\\mathbb{R}^{3\\times3}\\mid\\hat\\omega^\\top=-\\hat\\omega\\},\\qquad\\dim\\mathfrak{so}(3)=3.$$\nDimensions worth memorising: $\\dim\\mathfrak{so}(n)=\\tfrac{n(n-1)}{2}$ (so $\\dim\\mathfrak{so}(2)=1$, $\\dim\\mathfrak{so}(3)=3$), and $\\dim\\mathfrak{se}(n)=\\dim\\mathfrak{so}(n)+n$, so $\\dim\\mathfrak{se}(3)=6$ (**not** $9$) and $\\dim\\mathfrak{se}(n)-\\dim\\mathfrak{so}(n)=n$.\n**Where it comes from.** Differentiating $R(t)R(t)^\\top=I$ gives $\\dot RR^\\top=-(\\dot RR^\\top)^\\top$, i.e. $\\dot RR^\\top$ is skew-symmetric — so $\\dot R=\\hat\\omega R$, and the solution through $R(0)=I$ is the matrix exponential.\n**Exponential map.** $\\exp:\\mathfrak{so}(3)\\to SO(3)$, $\\hat\\omega\\mapsto e^{\\hat\\omega}=\\sum_{n=0}^{\\infty}\\frac{\\hat\\omega^n}{n!}$ — note the sum starts at $n=0$ (the $I$ term); starting at $n=1$ is a standard MC decoy. It is **surjective but not injective**: $e^{\\hat\\omega_1}=e^{\\hat\\omega_2}$ does **not** imply $\\omega_1=\\omega_2$ (add $2\\pi$ to the angle). Always true: $\\exp(-\\hat\\omega)=(\\exp\\hat\\omega)^{-1}$. **False in general:** $\\exp(\\hat\\omega_1)\\exp(\\hat\\omega_2)=\\exp(\\hat\\omega_1+\\hat\\omega_2)$ — that only holds when the two commute (see Baker–Campbell–Hausdorff).\n**Powers of $\\hat\\omega$ for $\\|\\omega\\|=1$.** $\\hat\\omega^2=\\omega\\omega^\\top-I$, $\\hat\\omega^3=-\\hat\\omega$, and generally $\\hat\\omega^{2k+1}=(-1)^k\\hat\\omega$ (odd), $\\hat\\omega^{2k}=(-1)^{k-1}\\hat\\omega^2$ for $k\\ge1$ (even).\n**Rodrigues' formula.** Grouping the Taylor series into odd and even powers gives\n$$e^{\\hat\\omega}=I+\\frac{\\hat\\omega}{\\|\\omega\\|}\\sin(\\|\\omega\\|)+\\frac{\\hat\\omega^2}{\\|\\omega\\|^2}\\big(1-\\cos(\\|\\omega\\|)\\big).$$\nWrite $\\omega=\\theta u$ with $\\|u\\|=1$: the rotation is by angle $\\theta=\\|\\omega\\|$ about axis $u$.\n**Logarithm of $SO(3)$.** Given $R\\neq I$, $\\|\\omega\\|=\\theta=\\cos^{-1}\\big(\\tfrac{\\operatorname{trace}(R)-1}{2}\\big)$ and $\\frac{\\omega}{\\|\\omega\\|}=\\frac{1}{2\\sin\\theta}(r_{32}-r_{23},r_{13}-r_{31},r_{21}-r_{12})^\\top$. For $R=I$, $\\omega=0$. The logarithm is **not unique** — $\\theta$ and $\\theta+2\\pi k$, or $\\pm$ the axis at $\\theta=\\pi$, all work.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25RDC 2.1",
+            "24EDC 2.5"
+          ],
+          "q": "Consider the Lie groups $SE(n)$ and $SO(n)$ with $n\\in\\mathbb{N}$, and the corresponding Lie algebras $\\mathfrak{se}(n)$ and $\\mathfrak{so}(n)$. Which of the following statements are correct?",
+          "answer": "Correct: $\\dim(\\mathfrak{so}(2))=1$, $\\dim(\\mathfrak{se}(n))-\\dim(\\mathfrak{so}(n))=n$, $\\dim(\\mathfrak{so}(n))=\\tfrac{n(n-1)}{2}$.\n**Incorrect:** $\\dim(\\mathfrak{se}(3))=9$ — the correct value is $6$ (three rotational plus three translational degrees of freedom).\n**Systematic count.** $\\mathfrak{so}(n)$ = skew-symmetric $n\\times n$ matrices, dimension $\\tfrac{n(n-1)}{2}$; $\\mathfrak{se}(n)$ adds an $n$-vector of translation, so $\\dim\\mathfrak{se}(n)=\\tfrac{n(n-1)}{2}+n$. Hence $\\dim\\mathfrak{so}(2)=1$, $\\dim\\mathfrak{so}(3)=3$, $\\dim\\mathfrak{se}(3)=6$.",
+          "extend": "A twist $\\xi\\in\\mathbb{R}^6$ — 3 for rotation, 3 for translation — is the direct statement of $\\dim\\mathfrak{se}(3)=6$.",
+          "options": [
+            {
+              "text": "$\\dim(\\mathfrak{se}(3))=9$",
+              "correct": false
+            },
+            {
+              "text": "$\\dim(\\mathfrak{so}(2))=1$",
+              "correct": true
+            },
+            {
+              "text": "$\\dim(\\mathfrak{se}(n))-\\dim(\\mathfrak{so}(n))=n$",
+              "correct": true
+            },
+            {
+              "text": "$\\dim(\\mathfrak{so}(n))=\\tfrac{n(n-1)}{2}$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Lie algebra",
+            "Special Euclidean group",
+            "Dimension"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25RDC 2.2"
+          ],
+          "q": "Let $\\xi_1,\\xi_2\\in\\mathbb{R}^6$ represent rigid-body motions, $\\widehat{\\ \\cdot\\ }:\\mathbb{R}^6\\to\\mathfrak{se}(3)$ the mapping to the Lie algebra, and $\\exp:\\mathfrak{se}(3)\\to SE(3)\\subset\\mathbb{R}^{4\\times4}$ the exponential map. Which of the following statements hold?",
+          "answer": "Only $\\exp(-\\hat\\xi_1)=\\big(\\exp\\hat\\xi_1\\big)^{-1}$.\n**Why the others fail.**\n$\\exp(\\hat\\xi_1)=\\exp(\\hat\\xi_2)\\iff\\xi_1=\\xi_2$ is **false** — the exponential map is surjective but **not injective**: adding $2\\pi$ to a rotation angle gives the same group element.\n$\\exp(\\hat\\xi_1)\\exp(\\hat\\xi_2)=\\exp(\\hat\\xi_1+\\hat\\xi_2)$ is **false** in general — it only holds when $\\hat\\xi_1$ and $\\hat\\xi_2$ commute (rigid motions do not).\n$\\exp(\\hat\\xi_1)=\\sum_{n=1}^{\\infty}\\frac{\\hat\\xi_1^n}{n!}$ is **false**: the series starts at $n=0$, contributing the identity term $I$.",
+          "extend": "Two traps in one question: the summation index (must start at $0$) and the non-commutativity of the exponential.",
+          "options": [
+            {
+              "text": "$\\exp(\\hat\\xi_1)=\\exp(\\hat\\xi_2)\\iff\\xi_1=\\xi_2$",
+              "correct": false
+            },
+            {
+              "text": "$\\exp(-\\hat\\xi_1)=(\\exp\\hat\\xi_1)^{-1}$",
+              "correct": true
+            },
+            {
+              "text": "$\\exp(\\hat\\xi_1)\\cdot\\exp(\\hat\\xi_2)=\\exp(\\hat\\xi_1+\\hat\\xi_2)$",
+              "correct": false
+            },
+            {
+              "text": "$\\exp(\\hat\\xi_1)=\\sum_{n=1}^{\\infty}\\dfrac{(\\hat\\xi_1)^n}{n!}$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Exponential map",
+            "Lie algebra",
+            "Special Euclidean group"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 2.4",
+            "24EDC 2.7"
+          ],
+          "q": "Let $R\\in SO(3)$ be a rotation around the $z$-axis with an angle of $\\pi$. Give a vector $v\\in\\mathbb{R}^3$ such that $\\hat v=\\log(R)$, and write down the skew-symmetric matrix $\\hat v$, using $\\hat u=\\begin{pmatrix}0&-u_3&u_2\\\\u_3&0&-u_1\\\\-u_2&u_1&0\\end{pmatrix}$.",
+          "answer": "The rotation axis is $z$ and the angle is $\\pi$, so\n$$v=\\pm\\pi(0,0,1)^\\top,\\qquad \\hat v=\\pm\\pi\\begin{pmatrix}0&-1&0\\\\1&0&0\\\\0&0&0\\end{pmatrix}.$$\n**Why $\\pm$.** At $\\theta=\\pi$ a rotation by $+\\pi$ and by $-\\pi$ about the same axis coincide, so the logarithm is not unique — both signs are accepted.\n**Structure check.** $\\|v\\|=\\pi$ encodes the angle, $v/\\|v\\|=(0,0,1)^\\top$ encodes the axis.",
+          "extend": "In exponential coordinates the *direction* of $\\omega$ is the axis and its *norm* is the angle. That single sentence answers most log/exp questions.",
+          "tags": [
+            "Logarithm",
+            "Lie algebra",
+            "Hat operator"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25EDC 2.5"
+          ],
+          "q": "Compute the rotation matrix $R$ of the previous question ($\\pi$ about the $z$-axis) using Rodrigues' rotation formula $e^{\\hat\\omega}=I+\\frac{\\hat\\omega}{\\|\\omega\\|}\\sin(\\|\\omega\\|)+\\frac{\\hat\\omega^2}{\\|\\omega\\|^2}\\big(1-\\cos(\\|\\omega\\|)\\big)$.",
+          "answer": "With $\\|\\omega\\|=\\pi$: $\\sin(\\pi)=0$ kills the middle term, and $1-\\cos(\\pi)=2$, so\n$$R=e^{\\hat v}=I+\\frac{\\hat v}{\\pi}\\sin(\\pi)+\\frac{\\hat v^2}{\\pi^2}\\big(1-\\cos\\pi\\big)=I+\\frac{2}{\\pi^2}\\hat v^2.$$\n**With** $\\hat v^2=\\pi^2\\begin{pmatrix}-1&0&0\\\\0&-1&0\\\\0&0&0\\end{pmatrix}$:\n$$R=I+2\\begin{pmatrix}-1&0&0\\\\0&-1&0\\\\0&0&0\\end{pmatrix}=\\begin{pmatrix}-1&0&0\\\\0&-1&0\\\\0&0&1\\end{pmatrix}.$$\n**Sanity check.** $R^\\top R=I$, $\\det(R)=+1$, $\\operatorname{trace}(R)=-1=1+2\\cos\\pi$ ✓, and the $z$-axis is fixed ✓.",
+          "extend": "For $\\theta=\\pi$ the $\\sin$ term always vanishes and the formula collapses to $R=I+2\\hat u^2=2uu^\\top-I$ — the reflection-like form of a half-turn.",
+          "tags": [
+            "Rodrigues formula",
+            "Exponential map",
+            "Rotation matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 4g"
+          ],
+          "q": "Let $w\\in\\mathbb{R}^3$ and let $I_{3\\times3}$ be the identity. Consider $\\ ?\\ =I_{3\\times3}+\\frac{\\hat w}{\\|w\\|}\\sin(\\|w\\|)+\\frac{\\hat w^2}{\\|w\\|^2}\\big(1-\\cos(\\|w\\|)\\big)$. Name the equation and complete the left-hand side so that it holds for arbitrary $w$ (the left-hand side may depend only on $\\hat w$, not on $w$).",
+          "answer": "The equation is **Rodrigues' formula**, and the left-hand side is\n$$e^{\\hat w}.$$\n**Reading.** It converts exponential coordinates (axis $w/\\|w\\|$, angle $\\|w\\|$) into the rotation matrix, i.e. it evaluates $\\exp:\\mathfrak{so}(3)\\to SO(3)$ in closed form instead of summing the infinite series.",
+          "tags": [
+            "Rodrigues formula",
+            "Exponential map"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 4"
+          ],
+          "q": "Consider $\\omega\\in\\mathbb{R}^3$ with $\\|\\omega\\|=1$ and its skew-symmetric matrix $\\hat\\omega$. (a) Show $\\hat\\omega^2=\\omega\\omega^\\top-I$ and $\\hat\\omega^3=-\\hat\\omega$. (b) Find simple rules for $\\hat\\omega^n$ for all $n\\ge1$, distinguishing odd and even $n$. (c) Using $e^A=\\sum_{k\\ge0}\\frac{A^k}{k!}$, derive Rodrigues' formula for arbitrary $\\omega$.",
+          "answer": "**(a)** Using $\\hat\\omega v=\\omega\\times v$ and the BAC–CAB rule,\n$$\\hat\\omega^2v=\\omega\\times(\\omega\\times v)=\\omega(\\omega^\\top v)-v(\\omega^\\top\\omega)=(\\omega\\omega^\\top-I)v.$$\nThen $\\hat\\omega^3=\\hat\\omega(\\omega\\omega^\\top-I)=(\\hat\\omega\\omega)\\omega^\\top-\\hat\\omega=0-\\hat\\omega=-\\hat\\omega$, since $\\hat\\omega\\omega=\\omega\\times\\omega=0$.\n**(b)** Odd powers: $\\hat\\omega^{2k+1}=(-1)^k\\hat\\omega$. Even powers: $\\hat\\omega^{2k}=(-1)^{k-1}\\hat\\omega^2$ for $k\\ge1$.\n**(c)** For $\\|\\omega\\|=1$, split the series into odd and even powers:\n$$e^{\\hat\\omega}=I+\\sum_{k\\ge0}\\frac{\\hat\\omega^{2k+1}}{(2k+1)!}+\\sum_{k\\ge1}\\frac{\\hat\\omega^{2k}}{(2k)!}=I+\\hat\\omega\\sum_{k\\ge0}\\frac{(-1)^k}{(2k+1)!}+\\hat\\omega^2\\sum_{k\\ge1}\\frac{(-1)^{k-1}}{(2k)!}=I+\\hat\\omega\\sin1+\\hat\\omega^2(1-\\cos1).$$\nFor general $\\omega$ write $\\omega=\\theta u$ with $\\|u\\|=1$, $\\theta=\\|\\omega\\|$:\n$$e^{\\hat\\omega}=e^{\\theta\\hat u}=I+\\hat u\\sin\\theta+\\hat u^2(1-\\cos\\theta)=I+\\frac{\\hat\\omega}{\\|\\omega\\|}\\sin\\|\\omega\\|+\\frac{\\hat\\omega^2}{\\|\\omega\\|^2}\\big(1-\\cos\\|\\omega\\|\\big).$$",
+          "extend": "The two power rules are exactly what make the odd sum collapse to $\\sin$ and the even sum to $1-\\cos$ — that is the whole derivation.",
+          "tags": [
+            "Rodrigues formula",
+            "Hat operator",
+            "Exponential map",
+            "Proof"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Why is the Lie algebra $\\mathfrak{so}(3)$ exactly the set of skew-symmetric $3\\times3$ matrices? Derive it.",
+          "answer": "**Setup.** Take a smooth curve $R(t)\\in SO(3)$ with $R(0)=I$. Every point on it satisfies the constraint $R(t)R(t)^\\top=I$.\n**Differentiate.** $\\dot RR^\\top+R\\dot R^\\top=0$, i.e. $\\dot RR^\\top=-\\big(\\dot RR^\\top\\big)^\\top$ — so $\\dot RR^\\top$ is **skew-symmetric**. Call it $\\hat\\omega$.\n**At the identity.** $t=0$ gives $\\dot R(0)=\\hat\\omega$, so the tangent space at $I$ is precisely the skew-symmetric matrices:\n$$\\mathfrak{so}(3)=\\{\\hat\\omega\\mid\\hat\\omega^\\top=-\\hat\\omega\\},\\qquad\\dim=3.$$\n**Consequence.** The ODE $\\dot R=\\hat\\omega R$ with $R(0)=I$ has solution $R(t)=e^{\\hat\\omega t}$ — the exponential map, evaluated in closed form by Rodrigues' formula. Physically $\\hat\\omega$ is the (constant) angular velocity in body coordinates.",
+          "tags": [
+            "Lie algebra",
+            "Skew-symmetric matrix",
+            "Exponential map"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "se3-twists",
+      "title": "SE(3), Twists and Exponential Coordinates",
+      "recap": "**Rigid-body motion in homogeneous coordinates.** For $R\\in SO(3)$, $T\\in\\mathbb{R}^3$:\n$$g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}\\in SE(3),\\qquad g^{-1}=\\begin{pmatrix}R^\\top&-R^\\top T\\\\0&1\\end{pmatrix}.$$\nThe inverse uses $R^\\top$ (= $R^{-1}$) **and** the compensating $-R^\\top T$ — writing $-T$ is the classic error.\n**Composition order matters.** \"Rotate by $R$, then translate by $T$\" is $\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$; \"translate by $T$, then rotate by $R$\" is $\\begin{pmatrix}R&0\\\\0&1\\end{pmatrix}\\begin{pmatrix}I&T\\\\0&1\\end{pmatrix}=\\begin{pmatrix}R&RT\\\\0&1\\end{pmatrix}$ — note the $RT$.\n**Lie algebra of twists.** $\\mathfrak{se}(3)=\\left\\{\\hat\\xi=\\begin{pmatrix}\\hat\\omega&v\\\\0&0\\end{pmatrix}\\ \\middle|\\ \\hat\\omega\\in\\mathfrak{so}(3),\\ v\\in\\mathbb{R}^3\\right\\}$, a $6$-dimensional space. The **twist coordinates** are $\\xi=(v,\\omega)^\\top\\in\\mathbb{R}^6$: $\\omega$ is the angular part, $v$ the linear part (which is **not** simply the translation $T$).\n**Exponential coordinates for $SE(3)$.** $\\exp(\\hat\\xi)=\\begin{pmatrix}e^{\\hat\\omega}&Jv\\\\0&1\\end{pmatrix}$ where, for $\\omega\\neq0$, $J=I+\\frac{\\hat\\omega}{\\|\\omega\\|^2}(1-\\cos\\|\\omega\\|)+\\frac{\\hat\\omega^2}{\\|\\omega\\|^3}(\\|\\omega\\|-\\sin\\|\\omega\\|)$; for $\\omega=0$ it degenerates to pure translation $T=v$. Conversely every $g\\in SE(3)$ has (non-unique) exponential coordinates — $\\exp:\\mathfrak{se}(3)\\to SE(3)$ is surjective but not injective.\n**Why it matters downstream.** Optimising over $SE(3)$ (bundle adjustment, direct SLAM) is done by *left-multiplying* an incremental $\\exp(\\hat\\xi)$: the $6$ twist coordinates are an unconstrained local parameterisation, which is exactly what a Gauss–Newton step needs.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 3,
+          "sources": [
+            "25RDC 2.3",
+            "24EDC 2.2",
+            "22EDC 1f"
+          ],
+          "q": "Given a rotation matrix $R\\in SO(3)$ and a translation vector $T\\in\\mathbb{R}^3$, write down the corresponding rigid-body motion $g\\in SE(3)$ and its inverse $g^{-1}$ in matrix form.",
+          "answer": "$$g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix},\\qquad g^{-1}=\\begin{pmatrix}R^\\top&-R^\\top T\\\\0&1\\end{pmatrix}.$$\n**Check.** $gg^{-1}=\\begin{pmatrix}RR^\\top&-RR^\\top T+T\\\\0&1\\end{pmatrix}=\\begin{pmatrix}I&0\\\\0&1\\end{pmatrix}$ ✓.\n**Two deductions to avoid.** Writing $R^{-1}$ instead of $R^\\top$ loses half a point (they are equal, but the exam wants the orthogonality used); writing $-T$ instead of $-R^\\top T$ loses a full point.",
+          "extend": "Read $g^{-1}$ as \"undo the rotation first, then undo the (rotated) translation\".",
+          "tags": [
+            "Special Euclidean group",
+            "Rigid-body motion",
+            "Homogeneous coordinates"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 2"
+          ],
+          "q": "Write down the $4\\times4$ matrices $M\\in SE(3)$ (for point transformation in homogeneous coordinates) for: (a) translation by $T$; (b) rotation by $R$; (c) rotation by $R$ followed by translation $T$; (d) translation by $T$ followed by rotation $R$.",
+          "answer": "**(a)** $\\begin{pmatrix}I&T\\\\0&1\\end{pmatrix}$\n**(b)** $\\begin{pmatrix}R&0\\\\0&1\\end{pmatrix}$\n**(c)** First rotate, then translate: $\\begin{pmatrix}I&T\\\\0&1\\end{pmatrix}\\begin{pmatrix}R&0\\\\0&1\\end{pmatrix}=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$ — the standard $SE(3)$ form.\n**(d)** First translate, then rotate: $\\begin{pmatrix}R&0\\\\0&1\\end{pmatrix}\\begin{pmatrix}I&T\\\\0&1\\end{pmatrix}=\\begin{pmatrix}R&RT\\\\0&1\\end{pmatrix}$.",
+          "extend": "The order flips the translation block from $T$ to $RT$ — matrices apply **right to left**, so the first transformation is the rightmost factor.",
+          "tags": [
+            "Special Euclidean group",
+            "Homogeneous coordinates",
+            "Composition"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Define the Lie algebra of twists $\\mathfrak{se}(3)$, state its dimension, and explain what the twist coordinates $\\xi=(v,\\omega)^\\top$ mean.",
+          "answer": "**Definition.** $\\mathfrak{se}(3)=\\left\\{\\hat\\xi=\\begin{pmatrix}\\hat\\omega&v\\\\0&0\\end{pmatrix}\\ \\middle|\\ \\hat\\omega\\in\\mathfrak{so}(3),\\ v\\in\\mathbb{R}^3\\right\\}$ — the tangent space of $SE(3)$ at the identity.\n**Dimension.** $\\dim\\mathfrak{se}(3)=3+3=6$.\n**Twist coordinates.** $\\xi=(v,\\omega)^\\top\\in\\mathbb{R}^6$: $\\omega$ is the **angular velocity** (its direction is the rotation axis, its norm the angle) and $v$ is the **linear velocity** at the origin. Careful: $v$ is *not* the translation $T$ of the resulting motion — they are related by $T=Jv$ with $J=I+\\frac{\\hat\\omega}{\\|\\omega\\|^2}(1-\\cos\\|\\omega\\|)+\\frac{\\hat\\omega^2}{\\|\\omega\\|^3}(\\|\\omega\\|-\\sin\\|\\omega\\|)$, and they coincide only when $\\omega=0$.\n**Use.** $\\exp(\\hat\\xi)\\in SE(3)$ gives an unconstrained $6$-parameter local chart, which is how poses are updated in bundle adjustment and direct SLAM.",
+          "tags": [
+            "Twist",
+            "Lie algebra",
+            "Special Euclidean group"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "camera-motion-velocity",
+      "title": "Camera Motion, Concatenation and the Adjoint Map",
+      "recap": "**Motion of the camera.** A moving camera is described by $g(t)=\\begin{pmatrix}R(t)&T(t)\\\\0&1\\end{pmatrix}$, mapping world coordinates $X_0$ to camera coordinates $X(t)=g(t)X_0$, i.e. $X(t)=R(t)X_0+T(t)$.\n**Concatenation over frames.** With $g(t_j,t_i)$ the motion from frame $i$ to frame $j$:\n$$g(t_3,t_1)=g(t_3,t_2)\\,g(t_2,t_1),\\qquad g(t_j,t_i)^{-1}=g(t_i,t_j),$$\nand the consistency rule $g(t_i,t_j)g(t_j,t_k)g(t_k,t_i)=I$ — the loop closes. Read chains right to left.\n**Velocity.** Differentiating $X(t)=g(t)X_0$ and substituting $X_0=g^{-1}X$ gives $\\dot X=\\dot gg^{-1}X=\\hat V X$, with the **twist in spatial (camera) coordinates**\n$$\\hat V(t)=\\dot g(t)g^{-1}(t)=\\begin{pmatrix}\\dot RR^\\top&\\dot T-\\dot RR^\\top T\\\\0&0\\end{pmatrix}\\in\\mathfrak{se}(3),$$\nwhose upper-left block $\\hat\\omega=\\dot RR^\\top$ is the angular velocity.\n**Adjoint map — transferring a twist between frames.** If two frames are related by $g$, a twist expressed in one frame becomes, in the other,\n$$\\hat V_2=g\\,\\hat V_1\\,g^{-1},\\qquad\\text{in coordinates}\\quad \\xi_2=\\operatorname{ad}_g(\\xi_1),\\ \\ \\operatorname{ad}_g=\\begin{pmatrix}R&\\hat TR\\\\0&R\\end{pmatrix}.$$\nSo velocities are **not** simply rotated — the translation between the frames couples the angular part into the linear part via $\\hat TR$. That coupling is the whole content of the adjoint.",
+      "questions": [
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A camera observes a static scene at times $t_1,t_2,t_3$. Which relations between the rigid-body motions $g(t_j,t_i)$ are correct?",
+          "answer": "**Correct.** $g(t_3,t_1)=g(t_3,t_2)g(t_2,t_1)$ — compose right to left, the earlier motion applies first. $g(t_j,t_i)^{-1}=g(t_i,t_j)$ — reversing a motion is inverting it. $g(t_1,t_2)g(t_2,t_3)g(t_3,t_1)=I$ — going round the loop returns the identity.\n**Incorrect.** $g(t_3,t_1)=g(t_2,t_1)g(t_3,t_2)$ reverses the order; $SE(3)$ is not commutative, so the two products differ.",
+          "options": [
+            {
+              "text": "$g(t_3,t_1)=g(t_3,t_2)\\,g(t_2,t_1)$",
+              "correct": true
+            },
+            {
+              "text": "$g(t_j,t_i)^{-1}=g(t_i,t_j)$",
+              "correct": true
+            },
+            {
+              "text": "$g(t_1,t_2)\\,g(t_2,t_3)\\,g(t_3,t_1)=I$",
+              "correct": true
+            },
+            {
+              "text": "$g(t_3,t_1)=g(t_2,t_1)\\,g(t_3,t_2)$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Rigid-body motion",
+            "Composition",
+            "Camera motion"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "State how the velocity of a moving camera is expressed as a twist, and how a twist is transferred between two frames (the adjoint map).",
+          "answer": "**Velocity as a twist.** From $X(t)=g(t)X_0$ and $X_0=g^{-1}(t)X(t)$,\n$$\\dot X(t)=\\dot g(t)g^{-1}(t)X(t)=\\hat V(t)X(t),\\qquad \\hat V=\\dot gg^{-1}=\\begin{pmatrix}\\dot RR^\\top&\\dot T-\\dot RR^\\top T\\\\0&0\\end{pmatrix}\\in\\mathfrak{se}(3).$$\nThe upper-left block $\\hat\\omega=\\dot RR^\\top$ is skew-symmetric — that is why the velocity lives in the Lie algebra.\n**Adjoint map.** If frame 2 is related to frame 1 by $g$, then $\\hat V_2=g\\hat V_1g^{-1}$, which in twist coordinates reads $\\xi_2=\\operatorname{ad}_g(\\xi_1)$ with\n$$\\operatorname{ad}_g=\\begin{pmatrix}R&\\hat TR\\\\0&R\\end{pmatrix}\\in\\mathbb{R}^{6\\times6}.$$\n**Reading.** The angular part is only rotated; the linear part picks up the extra term $\\hat TR\\,\\omega=T\\times(R\\omega)$, the lever-arm effect of observing the same rotation from a displaced origin.",
+          "tags": [
+            "Twist",
+            "Adjoint map",
+            "Velocity"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 2.8",
+            "24EDC 2.9"
+          ],
+          "q": "Two cameras have poses $(R_1,T_1)$ and $(R_2,T_2)$, each transforming a point from world coordinates into that camera's coordinates. (a) Express the rotation $R$ and translation $T$ of the relative pose that maps a point from camera-1 coordinates to camera-2 coordinates. (b) Let $C_1,C_2$ be the positions of the two cameras and $V=\\overrightarrow{C_1C_2}$ the vector between them in the **world** frame; express $V$ in terms of $(R_i,T_i)$.",
+          "answer": "**(a)** From $X_i=R_iX_w+T_i$ we get $X_w=R_1^\\top(X_1-T_1)$, and substituting into the second camera's equation:\n$$X_2=R_2R_1^\\top X_1+\\big(T_2-R_2R_1^\\top T_1\\big),$$\nso\n$$R=R_2R_1^\\top,\\qquad T=T_2-R_2R_1^\\top T_1.$$\n**(b)** A camera centre satisfies $0=R_iC_i+T_i$, i.e. $C_i=-R_i^\\top T_i$. Hence\n$$V=C_2-C_1=-R_2^\\top T_2+R_1^\\top T_1=R_1^\\top T_1-R_2^\\top T_2.$$",
+          "extend": "Camera **pose** $(R_i,T_i)$ and camera **centre** $C_i=-R_i^\\top T_i$ are different objects — this pair of sub-questions exists precisely to test that distinction.",
+          "tags": [
+            "Camera motion",
+            "Extrinsics",
+            "Special Euclidean group"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "euler-quaternions",
+      "title": "Alternative Representations: Euler Angles and Quaternions",
+      "recap": "**Why alternatives at all.** A rotation matrix has $9$ numbers with $6$ constraints — redundant and awkward to optimise over. The alternatives trade redundancy for singularities.\n**Comparison table (worth memorising).**\n$\\bullet$ **Rotation matrix** — $9$ parameters, $6$ constraints ($R^\\top R=I$, $\\det R=1$), **no** singularities.\n$\\bullet$ **Axis-angle / exponential coordinates** — $3$ parameters, $0$ constraints, singular at $\\theta=0$ and $\\theta=2\\pi$.\n$\\bullet$ **Euler angles** — $3$ parameters, $0$ constraints, singular at **gimbal lock**.\n$\\bullet$ **Unit quaternion** — $4$ parameters, $1$ constraint ($\\|q\\|=1$), **no** singularities.\n**Euler angles.** Many conventions; the ZYX one is $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$. **Gimbal lock:** at $\\theta=\\pi/2$ the matrix depends only on $(\\psi-\\phi)$, so one degree of freedom is lost — two of the three axes align and the parameterisation degenerates.\n**Quaternions.** $q=w+xi+yj+zk$ with $i^2=j^2=k^2=ijk=-1$, giving the cyclic rules $ij=k,\\ jk=i,\\ ki=j$ and the anti-cyclic $ji=-k,\\ kj=-i,\\ ik=-j$. Multiplication is **associative but not commutative**. Conjugate $q^*=w-xi-yj-zk$, norm $\\|q\\|=\\sqrt{w^2+x^2+y^2+z^2}$, and $\\|q_1q_2\\|=\\|q_1\\|\\|q_2\\|$ — hence the unit quaternions form a group with $q^{-1}=q^*$.\n**Rotating with quaternions.** Embed $v\\in\\mathbb{R}^3$ as a pure quaternion $p=v_xi+v_yj+v_zk$ and use the **sandwich product** $p\\mapsto qpq^*$. Left-multiplication alone does not work: it rotates the $(w,z)$-plane too and the result stops being pure. In $qpq^*$ the $(w,z)$ rotations of $L_q$ and $R_{q^*}$ cancel while the $(x,y)$ rotations add, so the imaginary part is rotated by $2\\alpha$ — which is exactly why the **half-angle** appears: $q=\\cos\\tfrac{\\theta}{2}+\\sin\\tfrac{\\theta}{2}(u_xi+u_yj+u_zk)$ for a rotation by $\\theta$ about the unit axis $u$.\n**Double cover.** $q$ and $-q$ give the same rotation, $(-q)p(-q)^*=qpq^*$: $S^3\\to SO(3)$ is a $2{:}1$ cover.\n**Why SLAM systems prefer quaternions.** Compact ($4$ vs $9$ numbers), singularity-free, trivially renormalised ($q/\\|q\\|$ instead of Gram–Schmidt), smooth interpolation via SLERP, and cheap composition.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 11"
+          ],
+          "q": "(a) For the ZYX convention, write the rotation matrix $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$. (b) Show that for $\\theta=\\tfrac\\pi2$ the matrix depends only on $(\\psi-\\phi)$ — gimbal lock. (c) Why don't quaternions suffer from gimbal lock?",
+          "answer": "**(a)** With $c_\\alpha=\\cos\\alpha$, $s_\\alpha=\\sin\\alpha$:\n$$R=\\begin{pmatrix}c_\\psi c_\\theta&c_\\psi s_\\theta s_\\phi-s_\\psi c_\\phi&c_\\psi s_\\theta c_\\phi+s_\\psi s_\\phi\\\\s_\\psi c_\\theta&s_\\psi s_\\theta s_\\phi+c_\\psi c_\\phi&s_\\psi s_\\theta c_\\phi-c_\\psi s_\\phi\\\\-s_\\theta&c_\\theta s_\\phi&c_\\theta c_\\phi\\end{pmatrix}.$$\n**(b)** At $\\theta=\\pi/2$, $c_\\theta=0$ and $s_\\theta=1$, so\n$$R=\\begin{pmatrix}0&c_\\psi s_\\phi-s_\\psi c_\\phi&c_\\psi c_\\phi+s_\\psi s_\\phi\\\\0&s_\\psi s_\\phi+c_\\psi c_\\phi&s_\\psi c_\\phi-c_\\psi s_\\phi\\\\-1&0&0\\end{pmatrix}=\\begin{pmatrix}0&-\\sin(\\psi-\\phi)&\\cos(\\psi-\\phi)\\\\0&\\cos(\\psi-\\phi)&\\sin(\\psi-\\phi)\\\\-1&0&0\\end{pmatrix}.$$\nOnly the difference $(\\psi-\\phi)$ appears: one degree of freedom is lost.\n**(c)** Quaternions parameterise $SO(3)$ as $S^3/\\{\\pm1\\}$, and the map $S^3\\to SO(3)$ is smooth everywhere with no coordinate singularity. This is possible because they use $4$ parameters with $1$ constraint, avoiding the topological obstruction that forces a singularity in **any** $3$-parameter representation of $SO(3)$.",
+          "extend": "Gimbal lock is not a numerical accident — it is a topological necessity for every 3-parameter chart of $SO(3)$.",
+          "tags": [
+            "Euler angles",
+            "Gimbal lock",
+            "Quaternion"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 12"
+          ],
+          "q": "Fill in the comparison table (parameters / constraints / singularities) for rotation matrix, axis-angle, Euler angles and quaternion, and briefly explain why quaternions are often preferred in SLAM systems.",
+          "answer": "**Rotation matrix** — $9$ parameters, $6$ constraints ($R^\\top R=I$, $\\det R=1$), no singularities.\n**Axis-angle** — $3$ parameters, $0$ constraints, singular at $\\theta=0$ and $\\theta=2\\pi$.\n**Euler angles** — $3$ parameters, $0$ constraints, gimbal lock.\n**Quaternion** — $4$ parameters, $1$ constraint ($\\|q\\|=1$), no singularities.\n**Why SLAM prefers quaternions.** (1) Compact — $4$ numbers instead of $9$. (2) No singularities. (3) Easy to renormalise ($q/\\|q\\|$) instead of re-orthogonalising with Gram–Schmidt. (4) Smooth interpolation via SLERP. (5) Cheap composition — quaternion multiplication is a handful of multiply–adds.",
+          "tags": [
+            "Quaternion",
+            "Euler angles",
+            "Axis-angle",
+            "SLAM"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 5"
+          ],
+          "q": "Using only $i^2=j^2=k^2=ijk=-1$, associativity and distributivity: (a) derive the products $ij,ji,jk,kj,ki,ik$; (b) derive the general multiplication formula $q_1q_2=w'+x'i+y'j+z'k$; (c) find $q_1,q_2$ with $q_1q_2\\neq q_2q_1$.",
+          "answer": "**(a)** From $ijk=-1$, right-multiplying by $k$ gives $ij(-1)=-k$, so $ij=k$. Left-multiplying $ijk=-1$ by $-i$ gives $jk=i$. From $ij=k$, left-multiplying by $-i$ gives $ik=-j$; right-multiplying by $-j$ gives $kj=-i$. From $jk=i$, left-multiplying by $-j$ gives $ji=-k$, and similarly $ki=j$.\n**Summary:** cyclic $ij=k$, $jk=i$, $ki=j$; anti-cyclic $ji=-k$, $kj=-i$, $ik=-j$.\n**(b)** Expanding $(w_1+x_1i+y_1j+z_1k)(w_2+x_2i+y_2j+z_2k)$:\n$$w'=w_1w_2-x_1x_2-y_1y_2-z_1z_2$$\n$$x'=w_1x_2+x_1w_2+y_1z_2-z_1y_2$$\n$$y'=w_1y_2-x_1z_2+y_1w_2+z_1x_2$$\n$$z'=w_1z_2+x_1y_2-y_1x_2+z_1w_2$$\n**(c)** $q_1=i$, $q_2=j$: $q_1q_2=ij=k$ but $q_2q_1=ji=-k\\neq k$.",
+          "extend": "The scalar part is $w_1w_2-\\langle\\mathbf{v}_1,\\mathbf{v}_2\\rangle$ and the vector part is $w_1\\mathbf{v}_2+w_2\\mathbf{v}_1+\\mathbf{v}_1\\times\\mathbf{v}_2$ — the cross product is precisely what breaks commutativity.",
+          "tags": [
+            "Quaternion",
+            "Multiplication"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 6"
+          ],
+          "q": "(a) Verify associativity for $q_1=i,q_2=j,q_3=k$. (b) For a unit quaternion $q$, show $qq^*=1$. (c) Show $\\|q_1q_2\\|=\\|q_1\\|\\|q_2\\|$ and conclude that the unit quaternions form a group under multiplication.",
+          "answer": "**(a)** $(ij)k=k\\cdot k=k^2=-1$ and $i(jk)=i\\cdot i=i^2=-1$. Equal ✓.\n**(b)** $qq^*=(w+xi+yj+zk)(w-xi-yj-zk)$. Using the multiplication formula with $q_2=(w,-x,-y,-z)$: $w'=w^2+x^2+y^2+z^2=1$ and $x'=y'=z'=0$. Hence $qq^*=1$.\n**(c)** $\\|q_1q_2\\|^2=(q_1q_2)(q_1q_2)^*=q_1q_2q_2^*q_1^*=q_1\\|q_2\\|^2q_1^*=\\|q_2\\|^2q_1q_1^*=\\|q_1\\|^2\\|q_2\\|^2$.\n**Group.** Closure: $\\|q_1q_2\\|=1\\cdot1=1$. Associativity: inherited from quaternion multiplication. Identity: $q=1$. Inverse: $q^{-1}=q^*$ since $qq^*=1$.",
+          "extend": "$(q_1q_2)^*=q_2^*q_1^*$ — the conjugate reverses the order, exactly like the transpose of a matrix product.",
+          "tags": [
+            "Quaternion",
+            "Group",
+            "Norm"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 9"
+          ],
+          "q": "Explain why quaternion rotation uses the sandwich product $p\\mapsto qpq^*$ rather than plain left-multiplication, and why the half-angle $\\alpha=\\theta/2$ appears.",
+          "answer": "**Why not left-multiplication.** Take $q=\\cos\\alpha+\\sin\\alpha\\,k$ and the pure quaternion $p=k$ representing $e_3$. Then $L_qp=(-\\sin\\alpha,0,0,\\cos\\alpha)^\\top$, whose real part $-\\sin\\alpha\\neq0$ — the result has \"leaked\" out of the pure (3D) subspace, so it no longer represents a 3D vector.\n**What the sandwich does.** $L_q$ rotates the $(x,y)$-plane by $+\\alpha$ and the $(w,z)$-plane by $+\\alpha$; right-multiplication $R_{q^*}$ rotates $(x,y)$ by $+\\alpha$ and $(w,z)$ by $-\\alpha$. Composing them, the $(w,z)$ rotations **cancel** (so pure quaternions stay pure) while the $(x,y)$ rotations **add** to $2\\alpha$.\n**Half angle.** To realise a rotation by $\\theta$ we need $2\\alpha=\\theta$, i.e. $\\alpha=\\theta/2$:\n$$q=\\cos\\tfrac{\\theta}{2}+\\sin\\tfrac{\\theta}{2}\\,(u_xi+u_yj+u_zk)$$\nfor a rotation by $\\theta$ about the unit axis $u$.",
+          "extend": "The doubling is also why $q$ and $-q$ give the same rotation: shifting $\\theta/2$ by $\\pi$ shifts $\\theta$ by $2\\pi$.",
+          "tags": [
+            "Quaternion",
+            "Rotation",
+            "Sandwich product"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 10"
+          ],
+          "q": "(a) Show that $q$ and $-q$ give the same rotation. (b) State the $3\\times3$ rotation matrix $R(q)$ for $q=(w,x,y,z)$.",
+          "answer": "**(a)** $(-q)p(-q)^*=(-1)q\\cdot p\\cdot(-1)q^*=(-1)^2qpq^*=qpq^*$. So each rotation in $SO(3)$ corresponds to **two** unit quaternions $\\pm q$ — the double cover $S^3\\to SO(3)$.\n**(b)** Computing $qpq^*$ for $p=i,j,k$ and reading off the columns:\n$$R=\\begin{pmatrix}1-2(y^2+z^2)&2(xy-wz)&2(xz+wy)\\\\2(xy+wz)&1-2(x^2+z^2)&2(yz-wx)\\\\2(xz-wy)&2(yz+wx)&1-2(x^2+y^2)\\end{pmatrix}.$$\n**Structure.** The diagonal is $1-2(\\text{sum of the other two squares})$; the off-diagonal pairs differ only in the sign of the $w$-term, which encodes the skew (rotation-angle) part.",
+          "extend": "$\\operatorname{trace}(R)=3-4(x^2+y^2+z^2)=4w^2-1=1+2\\cos\\theta$, recovering $w=\\cos(\\theta/2)$.",
+          "tags": [
+            "Quaternion",
+            "Rotation matrix",
+            "Double cover"
+          ]
+        }
+      ]
+    }
+  ]
+}

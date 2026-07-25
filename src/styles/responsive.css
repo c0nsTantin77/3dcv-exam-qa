@@ -1,0 +1,72 @@
+/* responsive.css — Responsive media queries + live presence banner. (Kept last to preserve cascade order.)
+   Extracted verbatim from the original style.css; load order preserved. */
+/* ---- responsive ------------------------------------------------------ */
+@media(max-width:860px){
+  .layout{grid-template-columns:1fr;gap:18px}
+  .sidebar{position:static;max-height:none}
+  .filters{width:100%;margin-left:0}
+  #search{flex:1;min-width:0}
+  .sources-cols{grid-template-columns:1fr;gap:20px}
+}
+/* ---- back-to-top floating button (mobile) ---- */
+#toTop{position:fixed;right:14px;bottom:16px;z-index:50;width:46px;height:46px;border-radius:50%;
+  border:none;background:var(--tum);color:#fff;font-size:1.3rem;line-height:1;cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,51,89,.35);display:none;align-items:center;justify-content:center}
+#toTop[hidden]{display:none}
+#toTop:active{transform:scale(.94)}
+
+@media(max-width:860px){
+  /* mobile: TOC becomes a tap-to-open panel so questions are reachable fast */
+  .toc-wrap{border:1px solid var(--line);border-radius:10px;background:#fff;margin-bottom:14px}
+  .toc-wrap>summary{display:flex;justify-content:space-between;align-items:center;
+    list-style:none;cursor:pointer;padding:11px 14px;font-weight:600;color:var(--tum);font-size:.95rem}
+  .toc-wrap>summary::-webkit-details-marker{display:none}
+  .toc-wrap>summary::after{content:"▾";transition:transform .2s}
+  .toc-wrap[open]>summary::after{transform:rotate(180deg)}
+  .toc-wrap>.toc{padding:0 14px 10px}
+  .toc-wrap:not([open])>.toc{display:none}       /* mobile: actually collapse when closed (overrides the desktop always-show) */
+  .toc-title{display:none}                       /* summary already serves as the heading */
+  .toc a{font-size:.96rem;padding:10px 6px}       /* taller rows = easier taps */
+  .legend{display:none}                          /* legend duplicated in footer; hide to save space */
+  .ch-blurb{display:none}                        /* keep the mobile header tight */
+  #toTop:not([hidden]){display:flex}             /* show only after scrolling (JS toggles [hidden]) */
+}
+@media(max-width:560px){
+  .hero{padding:40px 18px 40px}
+  .hub{padding:6px 14px 44px}
+  .gsearch{margin-top:18px}                          /* top gap (6+18) = bottom gap (18+6) */
+  .cards,.examgrid{grid-template-columns:1fr 1fr;gap:11px}
+  .poptags-row .ptag:nth-child(n+4){display:none}   /* phones: keep the top 3 tags */
+  .layout{padding:16px 13px 70px}
+  .topbar{padding:9px 13px;gap:10px}
+  .brand-full{display:none}                     /* small screens: show "← All", drop "chapters" */
+  #search{min-width:0;font-size:16px}           /* 16px stops iOS zoom-on-focus */
+  .filters{gap:9px}
+  .filters label{font-size:.9rem}
+  #expandAll{padding:8px 12px}
+  .q-head{gap:6px}
+  .q-src{width:100%;margin-left:0;margin-top:2px}/* source tags wrap under the badges */
+  .q-text{font-size:1rem}                        /* readable question size */
+  .sources-inner{flex-direction:column;gap:16px;padding:26px 18px 22px}
+  .src-list{grid-template-columns:1fr}
+  .q summary{padding:14px 13px}
+  .q-body{padding:0 13px 14px}
+  /* bigger tap targets for the quiz */
+  .options.interactive .opt label{padding:12px 13px;min-height:46px;align-items:center}
+  .options.interactive input{width:20px;height:20px}
+  .opt-text{font-size:.96rem}
+  .quiz-actions{flex-wrap:wrap}
+  .check-btn,.reset-btn{flex:1;min-width:130px;padding:11px 14px;font-size:.9rem}
+  .kp>h2{font-size:1.18rem}
+}
+@media(max-width:380px){
+  .cards,.examgrid{grid-template-columns:1fr}
+}
+
+/* ---- live "people online now" banner -------------------------------- */
+#presence-bar{
+  display:none;text-align:center;font-size:.86rem;font-weight:600;
+  color:#0b6b2e;background:linear-gradient(90deg,#e6f7ec,#d3f0dd);
+  border-bottom:1px solid #b7e3c6;padding:5px 12px;letter-spacing:.01em;
+}
+#presence-bar.show{display:block}

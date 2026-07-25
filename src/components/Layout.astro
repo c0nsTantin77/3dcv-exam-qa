@@ -1,0 +1,44 @@
+---
+import "katex/dist/katex.min.css";
+// Imported in original cascade order — do not reorder (responsive overrides
+// depend on coming after their base rules).
+import "../styles/base.css";
+import "../styles/home.css";
+import "../styles/chapter.css";
+import "../styles/question.css";
+import "../styles/footer.css";
+import "../styles/study.css";
+import "../styles/responsive.css";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Google Analytics 4 — add a measurement id for this site here (the I2DL
+         property was deliberately not reused, so the two sites stay separate). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <!-- set study mode before paint (default: review = answers shown) -->
+    <script is:inline>
+      try {
+        document.documentElement.dataset.mode =
+          localStorage.getItem("cv2_mode") === "test" ? "test" : "review";
+      } catch (e) {
+        document.documentElement.dataset.mode = "review";
+      }
+    </script>
+  </head>
+  <body>
+    <div id="presence-bar" aria-live="polite"></div>
+    <slot />
+    <script>
+      import "../lib/client/main.ts";
+    </script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+---
+import { url } from "../lib/paths";
+interface Props {
+  class?: string;
+}
+const { class: cls } = Astro.props;
+---
+
+<img
+  class:list={["tum-logo", cls]}
+  src={url("/assets/tum.svg")}
+  alt="TUM"
+  width="44"
+  height="23"
+/>

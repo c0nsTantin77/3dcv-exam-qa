@@ -1,0 +1,33 @@
+/* footer.css — Source / attribution footer + share pill.
+   Extracted verbatim from the original style.css; load order preserved. */
+/* ---- source / attribution footer ------------------------------------ */
+.sources{background:var(--tum-dark);color:#cfe0f2;margin-top:48px}
+.sources-inner{max-width:980px;margin:0 auto;padding:34px 24px 26px;display:flex;gap:24px;align-items:flex-start}
+.sources .tum-logo{filter:brightness(0) invert(1);height:30px;flex:none;margin-top:4px}
+.sources-cols{display:grid;grid-template-columns:1fr 1.2fr;gap:32px;flex:1;min-width:0}
+.sources h4{color:#fff;font-size:.95rem;margin:0 0 .6em;letter-spacing:.02em}
+.sources p{font-size:.85rem;line-height:1.55;margin:.4em 0}
+.sources a{color:#9ec5ef}
+.src-line{font-size:.84rem;line-height:1.7;color:#b9cee6;margin:.2em 0 .4em}
+.src-line .src{background:rgba(255,255,255,.12);color:#dce9f7;margin:0 1px}
+.coverage{margin-top:16px}
+.coverage p{font-size:.84rem;line-height:1.5;margin:.3em 0 .6em}
+.coverage b{color:#fff}
+.cov-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cov-chip{font-size:.72rem;font-weight:700;background:rgba(255,255,255,.12);color:#dce9f7;border-radius:999px;padding:2px 9px}
+.cov-chip-full{background:rgba(126,224,210,.18);color:#7fe0d2}
+.sources .src-ai{background:transparent;color:#7fe0d2;border-color:#7fe0d2}
+.gh-star{display:inline-flex;align-items:center;gap:7px;margin-top:6px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff !important;border-radius:999px;padding:6px 14px;font-size:.82rem;font-weight:600}
+.gh-star:hover{background:rgba(255,255,255,.2);text-decoration:none}
+.share-pill{display:inline-flex;align-items:center;gap:7px;margin:6px 0 0 8px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  color:#fff;border-radius:999px;padding:6px 14px;font:inherit;font-size:.82rem;font-weight:600;
+  cursor:pointer;text-decoration:none;transition:background .12s,border-color .12s}
+.share-pill:hover{background:rgba(255,255,255,.2);text-decoration:none}
+.share-pill.copied{background:rgba(86,204,140,.28);border-color:rgba(120,230,170,.6)}
+.sources-bar{border-top:1px solid rgba(255,255,255,.14);text-align:center;
+  font-size:.76rem;color:#8fb0d4;padding:12px 24px}
+.sources-bar a{color:#9ec5ef}
+

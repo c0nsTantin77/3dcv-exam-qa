@@ -1,0 +1,89 @@
+---
+import Layout from "../../components/Layout.astro";
+import Topbar from "../../components/Topbar.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import KnowledgePoint from "../../components/KnowledgePoint.astro";
+import type { TocItem } from "../../components/Topbar.astro";
+import { getOrderedChapters, chapterStats, type Chapter } from "../../lib/content";
+import { chapterNumber } from "../../lib/manifest";
+import { url } from "../../lib/paths";
+
+export async function getStaticPaths() {
+  const chapters = await getOrderedChapters();
+  return chapters.map((ch) => ({ params: { id: ch.data.id }, props: { ch } }));
+}
+
+interface Props {
+  ch: Chapter;
+}
+const { ch } = Astro.props;
+const data = ch.data;
+const chnum = chapterNumber(data.id);
+const stats = chapterStats(ch);
+
+const toc: TocItem[] = data.knowledge_points.map((kp, i) => ({
+  id: kp.id,
+  num: `${chnum}.${i + 1}`,
+  label: kp.title,
+  n: kp.questions.length,
+}));
+---
+
+<Layout title={`${data.roman}. ${data.title} · 3DCV Exam Q&A`}>
+  <Topbar backHref={url("/")} backFull=" chapters" toc={toc}>
+    <div class="filters" slot="filters">
+      <div class="mode-toggle" role="group" aria-label="Study mode">
+        <button type="button" class="mode-btn" data-set-mode="review" title="Show answers">📖 Review</button>
+        <button type="button" class="mode-btn" data-set-mode="test" title="Hide answers — select / write, then check">📝 Test</button>
+      </div>
+      <input id="search" type="search" placeholder="Search questions…" autocomplete="off" />
+      <label><input type="checkbox" class="ftype" value="mc" checked /> MC</label>
+      <label><input type="checkbox" class="ftype" value="open" checked /> Open</label>
+      <label><input type="checkbox" class="ftype" value="ai" checked /> AI</label>
+      <button id="expandAll" type="button">Expand all</button>
+    </div>
+  </Topbar>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="ch-tag">Chapter {data.roman}</div>
+      <h1>{data.title}</h1>
+      <p class="ch-blurb">{data.blurb}</p>
+      <div class="stat-row">
+        <span class="stat"><b>{stats.questions}</b> questions</span>
+        <span class="stat"><b>{stats.topics}</b> topics</span>
+        <span class="stat"><b>{stats.ai}</b> AI practice</span>
+      </div>
+      <div class="ch-progress" data-ch={data.id}></div>
+      <p class="hint">
+        Knowledge points follow the lecture syllabus. Within each point, papers by the
+        <b>current examiner</b> come first, then the rest by exam frequency. Click any question to
+        reveal the answer.
+      </p>
+      <div class="legend">
+        <div><span class="badge freq-hot">🔥 n×</span> high frequency</div>
+        <div>
+          <span class="src src-primary">25EDC 1.1</span> year · kind · examiner + problem no.
+        </div>
+        <div><span class="examiner-badge">★ Cremers</span> written by the current examiner</div>
+        <div><span class="src-ai">AI-generated</span> AI practice question</div>
+        <div>
+          <span class="tag" style="cursor:default">tag</span> click to find related Qs site-wide
+        </div>
+        <div>✅ correct option &nbsp; ❌ wrong option</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      {
+        data.knowledge_points.map((kp, i) => (
+          <KnowledgePoint kp={kp} kpnum={`${chnum}.${i + 1}`} />
+        ))
+      }
+      <p class="noresults" hidden>No questions match your filter.</p>
+    </main>
+  </div>
+
+  <button id="toTop" type="button" aria-label="Back to top" hidden>↑</button>
+  <SiteFooter />
+</Layout>

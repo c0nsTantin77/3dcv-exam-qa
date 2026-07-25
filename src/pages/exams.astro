@@ -1,0 +1,17 @@
+---
+import Layout from "../components/Layout.astro";
+import Topbar from "../components/Topbar.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import ExamBrowser from "../components/islands/ExamBrowser.vue";
+import { url } from "../lib/paths";
+---
+
+<Layout title="Browse by exam · 3DCV Exam Q&A">
+  <Topbar backHref={`${url("/")}#by-exam`} backFull=" exams" contentsPlaceholder>
+    <div class="filters" slot="filters"><div id="tp-filter-slot"></div></div>
+  </Topbar>
+  <main class="tagpage">
+    <ExamBrowser client:load />
+  </main>
+  <SiteFooter />
+</Layout>

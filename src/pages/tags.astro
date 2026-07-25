@@ -1,0 +1,17 @@
+---
+import Layout from "../components/Layout.astro";
+import Topbar from "../components/Topbar.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import TagBrowser from "../components/islands/TagBrowser.vue";
+import { url } from "../lib/paths";
+---
+
+<Layout title="Concept tags · 3DCV Exam Q&A">
+  <Topbar backHref={url("/")} backFull=" chapters" contentsPlaceholder>
+    <div class="filters" slot="filters"><div id="tp-filter-slot"></div></div>
+  </Topbar>
+  <main class="tagpage">
+    <TagBrowser client:load />
+  </main>
+  <SiteFooter />
+</Layout>

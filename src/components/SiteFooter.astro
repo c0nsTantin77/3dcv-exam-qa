@@ -1,0 +1,59 @@
+---
+import TumLogo from "./TumLogo.astro";
+import coverage from "../../data/coverage-summary.json";
+
+const rows = [...coverage.per_exam].sort((a, b) => b.pct - a.pct);
+---
+
+<footer class="sources">
+  <div class="sources-inner">
+    <TumLogo />
+    <div class="sources-cols">
+      <div>
+        <h4>Sources</h4>
+        <p class="src-line">
+          Twelve past IN2228 papers (2020–2025) plus all eight SS26 exercise sheets with their
+          official solutions. Codes read <b>year · kind · examiner</b>:
+          <span class="src">25EDC</span> = 2025 <b>E</b>ndterm, examiner <b>DC</b> (Prof. Daniel
+          Cremers) · <span class="src">23RLI</span> = 2023 <b>R</b>etake, <b>LI</b> (Dr. Haoang Li)
+          · <span class="src">20MFB</span> = 2020 <b>M</b>idterm, <b>FB</b> (Florian Bernard) ·
+          <span class="src">EX05</span> = exercise sheet 5.
+        </p>
+        <div class="coverage">
+          <h4>Coverage</h4>
+          <p>
+            <b>{coverage.overall_pct}%</b> of past-exam sub-questions are cited directly ({
+              coverage.cited
+            }/{coverage.detected}), and <b>89–98%</b> of every Cremers paper; the rest are folded
+            into merged cards or covered by the recaps. The 2022 endterm is a scan with no text
+            layer — it is covered, but cannot be measured automatically.
+          </p>
+          <div class="cov-chips">
+            {rows.map((r) => <span class="cov-chip">{r.exam} {r.pct}%</span>)}
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4>About</h4>
+        <p>
+          Revision deck for <b>3D Computer Vision (IN2228)</b>, TU&nbsp;München. Answers follow the
+          <b>official sample solutions</b>; for variant phrasings the scoring points are merged.
+          Items tagged <span class="src-ai">AI-generated</span> are model-written practice and are
+          not from past exams.
+        </p>
+        <p>
+          Every examiner writes a different paper, so each question carries the examiner's initials
+          and the ones by the <b>current examiner</b> are marked ★ and sorted first.
+        </p>
+        <p>
+          Formulas rendered with <a href="https://katex.org/" rel="noopener">KaTeX</a> at build
+          time. Built from the official course materials for personal study.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="sources-bar">
+    TUM IN2228 · 3DCV Exam Q&amp;A · for educational use only — not affiliated with or endorsed by
+    TUM.
+  </div>
+</footer>

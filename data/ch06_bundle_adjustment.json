@@ -1,0 +1,721 @@
+{
+  "id": "ch06",
+  "roman": "VI",
+  "title": "Bundle Adjustment & Nonlinear Optimization",
+  "blurb": "Nonlinear least squares done properly: Gauss–Newton and Levenberg–Marquardt, the reprojection error, the sparse Jacobian of bundle adjustment, the Schur complement that makes it tractable, and the constrained-optimisation identities that keep reappearing.",
+  "knowledge_points": [
+    {
+      "id": "nonlinear-least-squares",
+      "title": "Quadratic Approximation, Gauss–Newton and Levenberg–Marquardt",
+      "recap": "**Setting.** Minimise $f(x)=\\|r(x)\\|_2^2$ with a differentiable residual $r:\\mathbb{R}^n\\to\\mathbb{R}^m$.\n**Second-order Taylor of $f$.** At $x=x_0+\\Delta x$:\n$$f(x)\\approx f(x_0)+\\nabla f(x_0)^\\top\\Delta x+\\tfrac12\\Delta x^\\top H(x_0)\\Delta x.$$\n**First-order Taylor of $r$** instead (this is the Gauss–Newton idea):\n$$f(x)=\\|r(x)\\|_2^2\\approx\\|r(x_0)+J_r\\Delta x\\|_2^2=\\|r(x_0)\\|_2^2+2r(x_0)^\\top J_r\\Delta x+\\|J_r\\Delta x\\|_2^2.$$\nMatching terms with the Taylor expansion identifies the **approximate Hessian**\n$$H\\approx2J_r^\\top J_r,$$\ni.e. second derivatives of $r$ are dropped. Note $J_r^\\top J_r$ is **not** the Hessian of $r$ — it is an approximation of the Hessian of $f$.\n**The two update problems.**\n$$\\text{Gauss–Newton:}\\quad\\min_{\\Delta x}\\ \\|r(x_0)+J_r\\Delta x\\|_2^2,$$\n$$\\text{Levenberg–Marquardt:}\\quad\\min_{\\Delta x}\\ \\|r(x_0)+J_r\\Delta x\\|_2^2+\\lambda\\|D\\Delta x\\|_2^2,$$\nwith a diagonal $D$ and weight $\\lambda$. Solving them gives $\\Delta x=-(J^\\top J)^{-1}J^\\top r$ and $\\Delta x=-(J^\\top J+\\lambda D^\\top D)^{-1}J^\\top r$.\n**Role of $\\lambda$.** $\\lambda\\to0$ ⇒ pure Gauss–Newton (large, fast steps). $\\lambda\\to\\infty$ ⇒ the step becomes small and aligns with the **negative gradient** — a trust region. High $\\lambda$ therefore keeps $\\Delta x$ small and **stabilises the inversion** when $J^\\top J$ is (near-)singular: $J^\\top J+\\lambda D^\\top D$ is positive definite, hence invertible, for any $\\lambda>0$ with $D$ of full rank.\n**Both are iterative** and both find only a **local** minimum — never a guaranteed global one, and not a saddle point.\n**Newton's method** uses the exact Hessian; Gauss–Newton is an *approximation of Newton*, not the other way round. Newton needs an invertible Hessian, so it cannot be applied to every problem. On a quadratic it converges in **one** step: for $\\min(x-2)^2$ with $\\gamma=1$ from $x_0=-2$, one Newton step lands exactly on $x=2$.\n**1D Gauss–Newton.** For $E(x)=r(x)^2$ the step is\n$$\\Delta_t=-r(x_t)\\big(r'(x_t)\\big)^{-1}$$\n— the Newton step on $r$ itself. Examples from $x_0=2$: $r(x)=x^2$ gives $\\Delta=-x/2$, so $2\\to1\\to\\tfrac12$ (halving, never reaching 0); $r(x)=\\operatorname{sign}(x)|x|^{1/3}$ gives $\\Delta=-3x$, so $2\\to-4\\to8$ (**divergence**); $r(x)=\\max(x,2x-1)$ gives $\\Delta=-r/2$ on the linear piece, so $2\\to\\tfrac12\\to0$ (**finite convergence**).",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 6.1",
+            "24EDC 6.1"
+          ],
+          "q": "With $r:\\mathbb{R}^n\\to\\mathbb{R}^m$ differentiable, when optimising $f(x)=\\|r(x)\\|_2^2$ a common approach is to approximate the function locally by a quadratic. What does the quadratic approximation of $f(x)$ for $x=x_0+\\Delta x$ look like if we apply the Taylor expansion of $f(x)$ at $x_0$? Express it in terms of the Hessian $H$, the gradient $\\nabla f$ and the function value $f$ at $x_0$.",
+          "answer": "$$f(x)\\approx f(x_0)+\\nabla f(x_0)^\\top\\Delta x+\\tfrac12\\Delta x^\\top H(x_0)\\Delta x.$$\n**Reading.** This is the standard second-order Taylor expansion: a constant, a linear term from the gradient, and a quadratic term from the Hessian — all evaluated at the current iterate $x_0$.",
+          "extend": "Note the $\\tfrac12$ on the Hessian term; forgetting it propagates a factor 2 into the identification $H\\approx2J^\\top J$ later.",
+          "tags": [
+            "Nonlinear optimisation",
+            "Taylor expansion",
+            "Hessian"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 6.2",
+            "24EDC 6.2"
+          ],
+          "q": "What does the quadratic approximation of $f(x)=\\|r(x)\\|_2^2$ look like if we apply the **first-order** Taylor expansion of $r(x)$ at $x_0$? Express it in terms of the residual $r$ and the Jacobian $J_r$ at $x_0$. By identifying terms with the previous answer: what is the approximation of the Hessian $H$ of $f$?",
+          "answer": "$$f(x)=\\|r(x)\\|_2^2\\approx\\|r(x_0)+J_r\\Delta x\\|_2^2=\\|r(x_0)\\|_2^2+2r(x_0)^\\top J_r\\Delta x+\\|J_r\\Delta x\\|_2^2.$$\n**Identifying terms** with $f(x_0)+\\nabla f^\\top\\Delta x+\\tfrac12\\Delta x^\\top H\\Delta x$: the linear term gives $\\nabla f=2J_r^\\top r(x_0)$, and the quadratic term $\\|J_r\\Delta x\\|^2=\\Delta x^\\top J_r^\\top J_r\\Delta x$ gives\n$$H\\approx2J_r^\\top J_r.$$\n**Meaning.** The second derivatives of $r$ are discarded — cheap, and accurate when the residual is small or nearly linear.",
+          "extend": "$J_r^\\top J_r$ approximates the Hessian **of $f$**, not of $r$. Calling it \"the Hessian of the residual function\" is a marked-wrong MC option.",
+          "tags": [
+            "Gauss-Newton",
+            "Jacobian",
+            "Hessian"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 6.3",
+            "24EDC 6.3"
+          ],
+          "q": "When optimising $f(x)=\\|r(x)\\|_2^2$ with a general nonlinear $r:\\mathbb{R}^n\\to\\mathbb{R}^m$, state the two optimisation problems whose solutions give the update step of the Gauss–Newton and the Levenberg–Marquardt algorithm respectively. Use a diagonal matrix $D\\in\\mathbb{R}^{n\\times n}$ and weight $\\lambda\\in\\mathbb{R}$ for the regularisation term.",
+          "answer": "**Gauss–Newton:**\n$$\\min_{\\Delta x}\\ \\big\\|r(x_0)+J_r\\Delta x\\big\\|_2^2.$$\n**Levenberg–Marquardt:**\n$$\\min_{\\Delta x}\\ \\big\\|r(x_0)+J_r\\Delta x\\big\\|_2^2+\\lambda\\|D\\Delta x\\|_2^2.$$\n**Difference.** LM adds a damping / trust-region term that penalises large steps; solving the normal equations gives $\\Delta x=-(J^\\top J)^{-1}J^\\top r$ and $\\Delta x=-(J^\\top J+\\lambda D^\\top D)^{-1}J^\\top r$ respectively.",
+          "tags": [
+            "Gauss-Newton",
+            "Levenberg-Marquardt",
+            "Nonlinear optimisation"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 6.4",
+            "24EDC 6.4"
+          ],
+          "q": "Are the Gauss–Newton and Levenberg–Marquardt methods iterative optimisation algorithms?",
+          "answer": "**Yes, both are iterative optimisation algorithms.** Each computes a local linearisation at the current estimate, takes a step, and repeats until convergence — neither produces a closed-form solution.",
+          "tags": [
+            "Gauss-Newton",
+            "Levenberg-Marquardt"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25EDC 6.5",
+            "24EDC 6.6"
+          ],
+          "q": "Using the notation of the previous questions, which of the following is correct?",
+          "answer": "**For high values of $\\lambda$, the update step $\\Delta x$ will be small — we stay in the trust region.**\n**Why.** The damping term $\\lambda\\|D\\Delta x\\|^2$ penalises large steps, so increasing $\\lambda$ shrinks $\\Delta x$; in the limit the step direction also tends towards the negative gradient.\n**Why the others fail.** For high $\\lambda$ with $D=I$ the step **does** approach the gradient direction (the first option states the opposite). The regularisation **does** help to stabilise the inversion — $J^\\top J+\\lambda D^\\top D$ is positive definite for $\\lambda>0$. And $J_r^\\top J_r$ approximates the Hessian of $f$, **not** the Hessian of the residual function $r$.",
+          "options": [
+            {
+              "text": "For high values of $\\lambda$, and $D$ the identity, the update step will not become closer to the direction of the gradient of $\\|r(x)\\|^2$.",
+              "correct": false
+            },
+            {
+              "text": "For high values of $\\lambda$, the update step $\\Delta x$ will be small, we stay in the trust region.",
+              "correct": true
+            },
+            {
+              "text": "The regularisation does not help to stabilise the computation of the inverse of $J_r^\\top J_r$.",
+              "correct": false
+            },
+            {
+              "text": "The term $J_r^\\top J_r$ is the Hessian of the residual function $r$.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Levenberg-Marquardt",
+            "Trust region",
+            "Hessian"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 6.6"
+          ],
+          "q": "Are we guaranteed to find the global minimum of $f(x)$ when using the Gauss–Newton or Levenberg–Marquardt algorithm?",
+          "answer": "**No — the algorithms only find a local minimum.**\n**Why.** Both are local descent methods based on a linearisation around the current iterate. On a non-convex problem (and bundle adjustment is non-convex) the result depends on the initialisation, which is precisely why a linear algorithm such as the eight-point algorithm is used to initialise.\n**Not a saddle point.** With a proper line search / damping the methods converge to a local **minimum**, not to a saddle.",
+          "options": [
+            {
+              "text": "No, the algorithms only find a local minimum.",
+              "correct": true
+            },
+            {
+              "text": "No, the algorithms only find a saddle point.",
+              "correct": false
+            },
+            {
+              "text": "Yes, the algorithms always find the global minimum.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Gauss-Newton",
+            "Levenberg-Marquardt",
+            "Local minimum"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 6.7"
+          ],
+          "q": "Which of the following statements is true?",
+          "answer": "**Newton's method applied to $\\min_{x\\in\\mathbb{R}}(x-2)^2$ with step size $\\gamma=1$ and initialisation $x_0=-2$ converges to the global minimum in one step.**\n**Why.** The objective is exactly quadratic, so its second-order Taylor expansion is exact and one Newton step jumps straight to the vertex $x=2$.\n**Why the others fail.** **Gauss–Newton is an approximation of Newton's method**, not the reverse. There **are** non-convex problems solvable to global optimality (e.g. many with hidden convexity or closed-form spectral solutions). Gauss–Newton is for **unconstrained** least squares and cannot be applied directly to a constrained problem. And Newton's method needs an invertible Hessian, so it cannot be applied to *any* optimisation problem.",
+          "options": [
+            {
+              "text": "Newton's method is an approximation of the Gauss-Newton algorithm",
+              "correct": false
+            },
+            {
+              "text": "There are no non-convex optimisation problems that can be solved to global optimality",
+              "correct": false
+            },
+            {
+              "text": "Newton's method applied to $\\min_{x\\in\\mathbb{R}}(x-2)^2$, with step size $\\gamma=1$ and initialisation $x_0=-2$, converges to the problem's global minimum in 1 step",
+              "correct": true
+            },
+            {
+              "text": "The Gauss-Newton algorithm can be directly applied to solve a constrained optimisation problem",
+              "correct": false
+            },
+            {
+              "text": "Newton's method can be applied to solve any optimisation problem",
+              "correct": false
+            },
+            {
+              "text": "None of the other options",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Newton's method",
+            "Gauss-Newton",
+            "Convexity"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "22RDC 6d",
+            "20EFB 10d"
+          ],
+          "q": "The Gauss–Newton method is used to minimise $E(x)=(r(x))^2$ with $x\\in\\mathbb{R}$, $r:\\mathbb{R}\\to\\mathbb{R}$. One step is $x_{t+1}=x_t+\\Delta_t$, at points where $r'(x_t)$ is defined, $r(x_t)\\neq0$ and $r'(x_t)\\neq0$. What is the correct expression for $\\Delta_t$?",
+          "answer": "$$\\Delta_t=-r(x_t)\\big(r'(x_t)\\big)^{-1}.$$\n**Derivation.** In one dimension the Jacobian is $J=r'(x_t)$, so the Gauss–Newton step $\\Delta=-(J^\\top J)^{-1}J^\\top r$ becomes $-\\big(r'(x_t)^2\\big)^{-1}r'(x_t)r(x_t)=-\\dfrac{r(x_t)}{r'(x_t)}$.\n**Recognise it.** This is exactly Newton's root-finding step applied to $r$ — Gauss–Newton on a squared residual drives the residual itself to zero.",
+          "extend": "Residual in the numerator, derivative in the denominator. The decoys swap them or square the wrong factor.",
+          "options": [
+            {
+              "text": "$\\Delta_t=-r'(x_t)\\big(r(x_t)\\big)^{-1}$",
+              "correct": false
+            },
+            {
+              "text": "$\\Delta_t=-r(x_t)\\big(r'(x_t)\\big)^{-2}$",
+              "correct": false
+            },
+            {
+              "text": "$\\Delta_t=-r'(x_t)\\big(r(x_t)\\big)^{-2}$",
+              "correct": false
+            },
+            {
+              "text": "$\\Delta_t=-r(x_t)\\big(r'(x_t)\\big)^{-1}$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Gauss-Newton",
+            "Nonlinear optimisation"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "22RDC 6e",
+            "22RDC 6f",
+            "22RDC 6g",
+            "20EFB 10e",
+            "20EFB 10f",
+            "20EFB 10g"
+          ],
+          "q": "Gauss–Newton is applied to $E(x)=r(x)^2$ from $x_0=2$ with $r_1(x)=\\operatorname{sign}(x)|x|^{1/3}$, $r_2(x)=x^2$, $r_3(x)=\\max(x,2x-1)$. Match each residual to its step sequence: **A**: $2,1,\\tfrac12$; **B**: $2,-4,8$; **C**: $2,\\tfrac12,0$.",
+          "answer": "Using $\\Delta_t=-r(x_t)/r'(x_t)$:\n**$r_1(x)=\\operatorname{sign}(x)|x|^{1/3}$ → sequence B ($2,-4,8$).** Here $r'=\\tfrac13|x|^{-2/3}$, so $\\Delta=-\\dfrac{|x|^{1/3}}{\\tfrac13|x|^{-2/3}}=-3x$, giving $x_{t+1}=x_t-3x_t=-2x_t$: $2\\to-4\\to8$ — the iterates **diverge**, doubling in magnitude and alternating sign.\n**$r_2(x)=x^2$ → sequence A ($2,1,\\tfrac12$).** $\\Delta=-\\dfrac{x^2}{2x}=-\\dfrac{x}{2}$, so $x_{t+1}=\\tfrac{x_t}{2}$: $2\\to1\\to\\tfrac12$ — halving, converging to $0$ but never reaching it.\n**$r_3(x)=\\max(x,2x-1)$ → sequence C ($2,\\tfrac12,0$).** For $x>1$ the active branch is $2x-1$ with $r'=2$, so $\\Delta=-\\tfrac{2x-1}{2}$ and $x_1=2-\\tfrac32=\\tfrac12$. For $x<1$ the branch is $x$ with $r'=1$, so $\\Delta=-x$ and $x_2=0$ — **exact convergence in two steps** once a linear piece is active.\n**Lesson.** Gauss–Newton converges in one step on a linear residual, converges slowly on a flat-minimum residual, and **diverges** when the residual has infinite slope at the root.",
+          "extend": "A cube-root residual has $r'\\to\\infty$ at the root, which makes the Newton step overshoot by a constant factor — the textbook divergence example.",
+          "tags": [
+            "Gauss-Newton",
+            "Convergence",
+            "Nonlinear optimisation"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 4c"
+          ],
+          "q": "Let $r:\\mathbb{R}^n\\to\\mathbb{R}^m$ with Jacobian $J_r$, and consider $\\min_{x\\in\\mathbb{R}^n}\\tfrac12\\|r(x)\\|^2$. State the name of the algorithm whose update is $x^{(k+1)}=\\arg\\min_{x}\\tfrac12(x-x^{(k)})^\\top J_r^\\top J_r(x-x^{(k)})+(x-x^{(k)})^\\top J_r^\\top r$, with $r,J_r$ evaluated at $x^{(k)}$.",
+          "answer": "**Gauss–Newton.**\n**Why.** The expression is exactly the expansion of $\\tfrac12\\|r(x^{(k)})+J_r(x-x^{(k)})\\|^2$ up to a constant: the quadratic term uses the **approximate** Hessian $J_r^\\top J_r$ and the linear term the gradient $J_r^\\top r$. Adding a damping term $\\tfrac{\\lambda}{2}\\|D(x-x^{(k)})\\|^2$ would turn it into Levenberg–Marquardt.",
+          "tags": [
+            "Gauss-Newton",
+            "Jacobian"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX07 1",
+            "EX07 2"
+          ],
+          "q": "(a) Derive the Gauss–Newton update step by minimising the linearised cost. (b) When can $J^\\top J$ be singular and what goes wrong in practice? (c) Derive the Levenberg–Marquardt update, state what happens as $\\lambda\\to0$ and $\\lambda\\to\\infty$, and explain why $J^\\top J+\\lambda D^\\top D$ is always invertible for $\\lambda>0$ with $D$ of full rank.",
+          "answer": "**(a)** Minimise $\\|r+J\\Delta x\\|^2=r^\\top r+2r^\\top J\\Delta x+\\Delta x^\\top J^\\top J\\Delta x$. Setting the gradient $2J^\\top r+2J^\\top J\\Delta x$ to zero gives the normal equations $J^\\top J\\Delta x=-J^\\top r$, hence\n$$\\Delta x=-(J^\\top J)^{-1}J^\\top r.$$\n**(b)** $J^\\top J$ is singular exactly when $J$ does not have full column rank — i.e. when some parameter direction does not affect the residual (gauge freedom: the global similarity of a reconstruction, an unobserved landmark, a degenerate configuration). In practice the linear solve blows up or produces enormous, meaningless steps, and near-singularity makes the step direction extremely noise-sensitive.\n**(c)** Adding $\\lambda\\|D\\Delta x\\|^2$ gives $(J^\\top J+\\lambda D^\\top D)\\Delta x=-J^\\top r$. As $\\lambda\\to0$ this becomes pure Gauss–Newton (large steps, fast near the optimum); as $\\lambda\\to\\infty$ the step tends to $-\\tfrac{1}{\\lambda}(D^\\top D)^{-1}J^\\top r$, i.e. a **small step along the negative gradient** — gradient descent with a tiny step. Invertibility: $J^\\top J\\succeq0$ always, and $\\lambda D^\\top D\\succ0$ for $\\lambda>0$ with $D$ full rank; the sum of a positive semi-definite and a positive definite matrix is positive definite, hence invertible.",
+          "extend": "LM is the interpolation between the two classical extremes: trust the model ($\\lambda$ small, Gauss–Newton) or trust only the slope ($\\lambda$ large, gradient descent).",
+          "tags": [
+            "Gauss-Newton",
+            "Levenberg-Marquardt",
+            "Positive definite"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "24EDC 6.5",
+            "22EDC 6a"
+          ],
+          "q": "Let $g(\\Delta x)=\\|r(x_0)+J_r\\Delta x\\|_2^2$ approximate $f$ locally at $x_0$, with gradient $\\nabla g=J_r^\\top r(x_0)+J_r^\\top J_r\\Delta x$. Compute the gradient of the objective when the Levenberg–Marquardt regulariser $\\lambda\\|D\\Delta x\\|_2^2$ is present, and state the update step.",
+          "answer": "**Gradient with the regulariser.** Differentiating $\\lambda\\|D\\Delta x\\|_2^2=\\lambda\\Delta x^\\top D^\\top D\\Delta x$ adds $\\lambda D^\\top D\\Delta x$ (up to the same factor convention), so\n$$\\nabla g+\\lambda D^\\top D\\Delta x=J_r^\\top r(x_0)+J_r^\\top J_r\\Delta x+\\lambda D^\\top D\\Delta x.$$\n**Update step.** Setting the gradient to zero and solving for $\\Delta x$:\n$$\\Delta x=-\\big(J_r^\\top J_r+\\lambda D^\\top D\\big)^{-1}J_r^\\top r(x_0).$$\n**Sanity check.** With $\\lambda=0$ this reduces to the Gauss–Newton step $\\Delta x=-(J_r^\\top J_r)^{-1}J_r^\\top r$; as $\\lambda\\to\\infty$ the step shrinks and turns towards $-J_r^\\top r$, the negative gradient direction.",
+          "extend": "The damping enters **only** in the matrix to be inverted, never in the right-hand side — that is what guarantees invertibility without changing the descent direction at $\\lambda=0$.",
+          "tags": [
+            "Levenberg-Marquardt",
+            "Gauss-Newton",
+            "Nonlinear optimisation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bundle-adjustment",
+      "title": "Bundle Adjustment: Energy, Properties and the Jacobian",
+      "recap": "**What it minimises.** Bundle adjustment minimises the **(re-)projection error** — Euclidean distances between observed and projected image points. Contrast: **direct image alignment** minimises the **photometric error** (intensity differences); the **eight-point algorithm** minimises **neither** (it minimises an algebraic residual).\n**Two-view energy.**\n$$E(R,T,X^1,\\dots,X^N)=\\sum_{j=1}^{N}\\big\\|\\tilde x_1^j-\\pi(X^j)\\big\\|^2+\\big\\|\\tilde x_2^j-\\pi(R,T,X^j)\\big\\|^2.$$\nThis is an **indirect** (feature-based) approach: it compares *geometric* positions, not intensities.\n$\\pi(R,T,X^j)$ first transforms $X^j$ into the frame of camera 2 via $\\lambda x=RX^j+T$ and then projects, i.e. takes the first two components of the right-hand side divided by the third (no $K$ in normalised coordinates). The first term has no pose parameters because the **world frame is chosen to coincide with camera 1** — an active modelling choice, not a necessity.\n**Properties (a recurring MC block).** Bundle adjustment: jointly estimates structure **and** motion; is **non-convex**; **requires initialisation** (typically from a linear algorithm); can be formulated for different noise models; and has **no closed-form solution** — it is minimised by nonlinear least-squares algorithms. Also: **direct** methods give a *dense* or semi-dense reconstruction, not a sparse one, and tend to be more robust in low-texture regions.\n**Projective bundle adjustment.** Instead of $SE(3)$ poses plus known $K$ (metric reconstruction), one can optimise full $3\\times4$ projective camera matrices $P_i$ — an **unconstrained projective** reconstruction, appropriate for **uncalibrated** structure-from-motion.\n**Sizes (worth practising).** With $n_c$ cameras, $n_l$ landmarks and every camera seeing every landmark: residual $r\\in\\mathbb{R}^{2n_cn_l}$; camera Jacobian $J_p\\in\\mathbb{R}^{2n_cn_l\\times12n_c}$ (12 entries per $P_i$); landmark Jacobian $J_\\ell\\in\\mathbb{R}^{2n_cn_l\\times3n_l}$ (3 unknowns per $X_j$, the homogeneous coordinate being fixed). E.g. 10 cameras, 100 landmarks ⇒ $r\\in\\mathbb{R}^{2000}$, $J_p\\in\\mathbb{R}^{2000\\times120}$, $J_\\ell\\in\\mathbb{R}^{2000\\times300}$, $J\\in\\mathbb{R}^{2000\\times420}$.\n**Sparsity.** Residual $r_{ij}$ depends only on camera $i$ and landmark $j$, so each row block of $J_p$ has non-zeros in **one** camera block and each row block of $J_\\ell$ in **one** landmark block. That block-sparsity is what the Schur complement exploits.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 3,
+          "sources": [
+            "25EDC 6.8",
+            "22RDC 6b",
+            "20EFB 10b"
+          ],
+          "q": "Which statement about **Bundle Adjustment** is true?",
+          "answer": "**Bundle Adjustment minimises the (re-)projection error** — the Euclidean distances between observed image points and the projections of the estimated 3D points.\n**Contrast the three classics.** *Direct image alignment* minimises the **photometric** error (intensity differences). *Bundle adjustment* minimises the **reprojection** error. The *eight-point algorithm* minimises **neither** — only an algebraic residual.",
+          "extend": "Geometric error ⇒ bundle adjustment. Photometric error ⇒ direct methods. Algebraic error ⇒ linear (eight-point) algorithms.",
+          "options": [
+            {
+              "text": "Bundle Adjustment minimises the (re-)projection error (Euclidean point distances).",
+              "correct": true
+            },
+            {
+              "text": "Bundle Adjustment minimises neither the (re-)projection error nor the photometric error.",
+              "correct": false
+            },
+            {
+              "text": "Bundle Adjustment minimises the photometric error (intensity differences).",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Bundle adjustment",
+            "Reprojection error"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "22RDC 6a",
+            "20EFB 10a"
+          ],
+          "q": "Which statement about **Direct Image Alignment** is true?",
+          "answer": "**Direct Image Alignment minimises the photometric error** (intensity differences between corresponding pixels).\n**Why.** Direct methods skip feature extraction entirely and optimise pose and geometry so that the warped image intensities match — the residual is $I_2(w(x,\\xi))-I_1(x)$, not a point distance.",
+          "options": [
+            {
+              "text": "Direct Image Alignment minimises the (re-)projection error (Euclidean point distances).",
+              "correct": false
+            },
+            {
+              "text": "Direct Image Alignment minimises neither the (re-)projection error nor the photometric error.",
+              "correct": false
+            },
+            {
+              "text": "Direct Image Alignment minimises the photometric error (intensity differences).",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Direct methods",
+            "Photometric error"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25EDC 6.10",
+            "21EFB 8a"
+          ],
+          "q": "Which of the following statements about bundle adjustment is **wrong**?",
+          "answer": "**Wrong:** \"The bundle adjustment problem can be solved in closed form.\"\n**Why.** Bundle adjustment is a difficult **non-convex** problem for which no closed-form solution is known; it is solved iteratively by nonlinear least-squares algorithms (Gauss–Newton, Levenberg–Marquardt).\n**All the others are true.** It can be defined for different noise models; it is non-convex; it can estimate structure and motion **simultaneously**; it **requires initialisation**; and a linear algorithm (e.g. the eight-point algorithm) is the standard way to provide that initialisation.",
+          "options": [
+            {
+              "text": "We can define bundle adjustment for different noise models",
+              "correct": false
+            },
+            {
+              "text": "Bundle adjustment is a non-convex problem",
+              "correct": false
+            },
+            {
+              "text": "The bundle adjustment problem can be solved in closed-form",
+              "correct": true
+            },
+            {
+              "text": "Bundle adjustment can estimate structure and motion simultaneously",
+              "correct": false
+            },
+            {
+              "text": "Bundle adjustment requires initialisation",
+              "correct": false
+            },
+            {
+              "text": "We can use a linear algorithm to initialise bundle adjustment",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Bundle adjustment",
+            "Convexity",
+            "Initialisation"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25EDC 6.9",
+            "22EDC 6c"
+          ],
+          "q": "Which of the following statements is **wrong**?",
+          "answer": "**Wrong:** \"Direct methods provide a sparse geometric reconstruction of the scene.\"\n**Why.** Direct methods operate on image intensities over (semi-)dense pixel sets, so they yield a **dense or semi-dense** reconstruction. It is the *indirect*, feature-based pipeline (keypoints + bundle adjustment) that produces a **sparse** point cloud.\n**The others are true.** Bundle-adjustment-type costs are minimised by nonlinear least-squares algorithms; bundle adjustment jointly estimates pose and landmark updates; it needs initialisation; and direct methods, using all the photometric information rather than a few keypoints, tend to be more robust to noise and low texture.",
+          "extend": "Direct ⇒ dense/semi-dense, photometric. Indirect ⇒ sparse, geometric. Do not swap them.",
+          "options": [
+            {
+              "text": "Bundle adjustment type cost functions are typically minimised by nonlinear least squares algorithms",
+              "correct": false
+            },
+            {
+              "text": "Bundle adjustment jointly estimates the pose and the landmark updates",
+              "correct": false
+            },
+            {
+              "text": "Direct methods provide a sparse geometric reconstruction of the scene",
+              "correct": true
+            },
+            {
+              "text": "Bundle adjustment problem needs to be initialised",
+              "correct": false
+            },
+            {
+              "text": "Direct methods tend to be more robust to noise",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Direct methods",
+            "Bundle adjustment",
+            "SLAM"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21EFB 8b",
+            "21EFB 8c",
+            "21EFB 8d"
+          ],
+          "q": "Consider the two-view bundle adjustment energy $E(R,T,X^1,\\dots,X^N)=\\sum_{j=1}^{N}\\|\\tilde x_1^j-\\pi(X^j)\\|^2+\\|\\tilde x_2^j-\\pi(R,T,X^j)\\|^2$ in normalised coordinates. (a) Does it define a **direct** approach? (b) What does $\\pi(R,T,X^j)$ represent, and what steps evaluate it? (c) Why does $\\pi(X^j)$ not depend on the pose parameters?",
+          "answer": "**(a) No — it is an indirect approach.** A direct approach would compare **image intensities**; this energy minimises a **geometric** error (the reprojection error between observed and projected feature positions).\n**(b)** $\\pi(R,T,X^j)$ first **transforms** the point $X^j$ into the coordinate system of camera 2 and then **projects** it onto the image plane. Concretely, from\n$$\\lambda x=RX^j+T,$$\nthe result is the first two components of the right-hand side divided by its third component. (No intrinsics $K$ appears because we work in normalised coordinates.)\n**(c)** Because the **world coordinate system is chosen to coincide with camera 1**, i.e. the $X^j$ are already expressed in the first camera's frame, so no coordinate transform is needed before projecting into image 1.\n*Remark:* the world frame need not coincide with camera 1 — that is an active modelling choice which produces exactly this form of the energy.",
+          "extend": "Fixing the world frame to camera 1 also fixes the gauge freedom of the problem — otherwise $J^\\top J$ would be singular by construction.",
+          "tags": [
+            "Bundle adjustment",
+            "Reprojection error",
+            "Direct methods"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 6.1"
+          ],
+          "q": "In projective bundle adjustment the residual is $r_{ij}=\\Pi(P_i,X_j)-m_{ij}$ with $P_i\\in\\mathbb{R}^{3\\times4}$ and $X_j\\in\\mathbb{R}^4$ homogeneous. What is the difference between these residuals and those of traditional bundle adjustment? In which practical situations should the projective formulation be used?",
+          "answer": "**Traditional bundle adjustment.** Poses are parameterised by $SE(3)$ and the intrinsics $K$ are known, giving a **metric** reconstruction (correct up to a similarity).\n**Here.** The full $3\\times4$ **projective camera matrices** are optimised directly, with no constraint tying them to a rotation, translation and calibration — an **unconstrained projective** reconstruction.\n**Use case.** **Uncalibrated structure-from-motion** / projective bundle adjustment: when the intrinsics are unknown, one first recovers a projective reconstruction and later upgrades it to metric via self-calibration.",
+          "tags": [
+            "Bundle adjustment",
+            "Projective geometry",
+            "Calibration"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 6.2"
+          ],
+          "q": "With 10 cameras, 100 landmarks and every camera seeing every landmark, what is the dimension of the residual vector $r$ and of the Jacobian $J=[J_p\\ \\ J_\\ell]$, where $J_p$ is w.r.t. all camera matrices $\\{P_i\\}$ and $J_\\ell$ w.r.t. all landmarks $\\{X_j\\}$?",
+          "answer": "**Residual vector.** Each observation contributes a $2$-vector, and there are $10\\times100=1000$ observations:\n$$r\\in\\mathbb{R}^{2\\cdot10\\cdot100}=\\mathbb{R}^{2000}.$$\n**Camera Jacobian.** $10$ cameras $\\times$ $12$ entries per $3\\times4$ matrix $=120$ unknowns:\n$$J_p\\in\\mathbb{R}^{2000\\times120}.$$\n**Landmark Jacobian.** $100$ landmarks $\\times$ $3$ unknowns each (the homogeneous coordinate is fixed to 1):\n$$J_\\ell\\in\\mathbb{R}^{2000\\times300}.$$\n**Full Jacobian.** $J=[J_p\\ \\ J_\\ell]\\in\\mathbb{R}^{2000\\times420}$.",
+          "extend": "Rows = 2 × observations. Columns = parameters. The landmark count uses 3, not 4 — the fourth homogeneous coordinate is not a free unknown.",
+          "tags": [
+            "Bundle adjustment",
+            "Jacobian",
+            "Dimensions"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 6.3"
+          ],
+          "q": "Derive the per-observation Jacobians $J^{(p)}_{ij}=\\frac{\\partial r_{ij}}{\\partial\\operatorname{vec}(P_i)}$ and $J^{(\\ell)}_{ij}=\\frac{\\partial r_{ij}}{\\partial X_j}$ for $\\Pi(P_i,X_j)=\\big(\\tfrac{P_{i,0:}X_j}{P_{i,2:}X_j},\\ \\tfrac{P_{i,1:}X_j}{P_{i,2:}X_j}\\big)^\\top$.",
+          "answer": "Write the rows of $P_i$ as $p_0,p_1,p_2\\in\\mathbb{R}^4$ and set $x_c=p_0\\!\\cdot\\!X_j$, $y_c=p_1\\!\\cdot\\!X_j$, $z_c=p_2\\!\\cdot\\!X_j$, so $\\Pi=(x_c/z_c,\\ y_c/z_c)^\\top$.\n**W.r.t. the landmark** (3 unknowns, since the last coordinate of $X_j$ is fixed), by the quotient rule:\n$$J^{(\\ell)}_{ij}=\\begin{pmatrix}\\dfrac{p_0^{(xyz)}z_c-p_2^{(xyz)}x_c}{z_c^2}\\\\[2mm]\\dfrac{p_1^{(xyz)}z_c-p_2^{(xyz)}y_c}{z_c^2}\\end{pmatrix}\\in\\mathbb{R}^{2\\times3},$$\nwhere $p_k^{(xyz)}$ denotes the first three components of row $p_k$.\n**W.r.t. the camera** (12 vectorised entries):\n$$J^{(p)}_{ij}=\\begin{pmatrix}\\dfrac{\\partial u}{\\partial p_0}&\\dfrac{\\partial u}{\\partial p_1}&\\dfrac{\\partial u}{\\partial p_2}\\\\[2mm]\\dfrac{\\partial v}{\\partial p_0}&\\dfrac{\\partial v}{\\partial p_1}&\\dfrac{\\partial v}{\\partial p_2}\\end{pmatrix}=\\begin{pmatrix}X_j^\\top/z_c&0&-x_cX_j^\\top/z_c^2\\\\0&X_j^\\top/z_c&-y_cX_j^\\top/z_c^2\\end{pmatrix}\\in\\mathbb{R}^{2\\times12}.$$\nThe three blocks correspond to the derivatives w.r.t. $p_0$, $p_1$ and $p_2$ respectively.",
+          "extend": "Every entry carries a $1/z_c$ or $1/z_c^2$ — the quotient rule on the perspective division. That $1/z^2$ is also why points near $z_c\\approx0$ destabilise bundle adjustment.",
+          "tags": [
+            "Bundle adjustment",
+            "Jacobian",
+            "Matrix calculus"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 6.4"
+          ],
+          "q": "In the Levenberg–Marquardt algorithm, how is the approximate Hessian of the minimisation problem associated with the residual $r$ expressed in terms of the Jacobian $J$?",
+          "answer": "$$H\\approx J^\\top J+\\lambda\\operatorname{diag}(J^\\top J)=\\begin{pmatrix}J_p^\\top J_p&J_p^\\top J_\\ell\\\\J_\\ell^\\top J_p&J_\\ell^\\top J_\\ell\\end{pmatrix}+\\lambda\\operatorname{diag}(\\cdot).$$\n**Reading the blocks.** $J_p^\\top J_p$ couples cameras with cameras, $J_\\ell^\\top J_\\ell$ landmarks with landmarks (block-**diagonal**, since each landmark is independent given the cameras), and the off-diagonal $J_p^\\top J_\\ell$ couples the two. That structure is exactly what the Schur complement exploits.",
+          "tags": [
+            "Levenberg-Marquardt",
+            "Hessian",
+            "Bundle adjustment"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX07 4"
+          ],
+          "q": "In bundle adjustment the Jacobian is $J=[J_p\\ \\ J_\\ell]$. Why are $J_p$ and $J_\\ell$ sparse? Describe their sparsity pattern.",
+          "answer": "**Reason.** The residual $r_{ij}$ of observation $(i,j)$ depends **only** on camera $i$ and landmark $j$ — the projection of one point into one image involves no other parameter.\n**Pattern.** In the row block belonging to $r_{ij}$: $J_p$ has non-zeros only in the $12$ (or $6$) columns of camera $i$, and $J_\\ell$ only in the $3$ columns of landmark $j$; everything else is zero. So both are **block-sparse**, with exactly one non-zero block per row block.\n**Consequence for $J^\\top J$.** $J_\\ell^\\top J_\\ell$ is **block-diagonal** with $3\\times3$ blocks (landmarks do not interact directly), and $J_p^\\top J_\\ell$ has a non-zero block only where camera $i$ actually observes landmark $j$ — the visibility pattern of the dataset. Real problems observe each landmark in only a handful of images, so the density is very low.",
+          "extend": "Sparsity is not an optimisation nicety here — a dense solve on $10^5$ landmarks is impossible, so exploiting it is what makes bundle adjustment run at all.",
+          "tags": [
+            "Bundle adjustment",
+            "Jacobian",
+            "Sparsity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "schur-complement",
+      "title": "The Schur Complement and Marginalising Landmarks",
+      "recap": "**The normal equations in block form.** Splitting the unknowns into cameras $\\Delta x_p$ and landmarks $\\Delta x_\\ell$,\n$$\\begin{pmatrix}U&W\\\\W^\\top&V\\end{pmatrix}\\begin{pmatrix}\\Delta x_p\\\\\\Delta x_\\ell\\end{pmatrix}=\\begin{pmatrix}b_p\\\\b_\\ell\\end{pmatrix},$$\nwith $U=J_p^\\top J_p+\\lambda D_p^\\top D_p$, $W=J_p^\\top J_\\ell$, $V=J_\\ell^\\top J_\\ell+\\lambda D_\\ell^\\top D_\\ell$, $b_p=-J_p^\\top r$, $b_\\ell=-J_\\ell^\\top r$.\n**Eliminate the landmarks.** From the second block row, $\\Delta x_\\ell=V^{-1}(b_\\ell-W^\\top\\Delta x_p)$. Substituting into the first gives the **reduced camera system**\n$$\\underbrace{\\big(U-WV^{-1}W^\\top\\big)}_{S:\\ \\text{Schur complement}}\\Delta x_p=b_p-WV^{-1}b_\\ell.$$\n**Why landmarks and not cameras.** $V$ is **block-diagonal** with tiny $3\\times3$ blocks (one per landmark), so $V^{-1}$ is obtained by inverting each block independently — trivially cheap and parallel. $U$ is not block-diagonal (cameras are coupled through shared landmarks), so eliminating cameras would require a genuinely large inverse. Moreover there are typically far more landmarks than cameras, so $S$ (size = number of camera parameters) is *much* smaller than the full system.\n**Power-series / iterative Schur.** For $\\|M\\|<1$ the geometric series gives $(I-M)^{-1}=\\sum_{i=0}^{m}M^i+R$ with $R\\to0$. Writing $S=C_0-E_S$ with $C_0$ the **block-diagonal** part of $C$ and $E_S=C_0-S$:\n$$S=C_0\\big(I-C_0^{-1}E_S\\big)\\ \\Longrightarrow\\ S^{-1}=\\big(I-C_0^{-1}E_S\\big)^{-1}C_0^{-1}\\approx\\sum_{i=0}^{m}\\big(C_0^{-1}E_S\\big)^iC_0^{-1}=:\\hat S(m).$$\n**Convergence condition:** $\\|C_0^{-1}E_S\\|<1$. **Why $C_0$:** being block-diagonal it is far faster to invert than $C$ itself. **Error:** $P(m)=S^{-1}-\\hat S(m)$ satisfies $SP(m)=\\big(E_SC_0^{-1}\\big)^{m+1}$, which decays geometrically.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX07 5"
+          ],
+          "q": "For the damped normal equations $\\begin{pmatrix}U&W\\\\W^\\top&V\\end{pmatrix}\\begin{pmatrix}\\Delta x_p\\\\\\Delta x_\\ell\\end{pmatrix}=\\begin{pmatrix}b_p\\\\b_\\ell\\end{pmatrix}$: (a) identify $U,W,V,b_p,b_\\ell$ in terms of $J_p,J_\\ell,r,\\lambda,D$; (b) eliminate $\\Delta x_\\ell$ and derive the Schur complement system; (c) what are the dimensions of $S$, and why is inverting $V$ cheap? (d) Why do we eliminate landmarks rather than cameras?",
+          "answer": "**(a)** $U=J_p^\\top J_p+\\lambda D_p^\\top D_p$, $W=J_p^\\top J_\\ell$, $V=J_\\ell^\\top J_\\ell+\\lambda D_\\ell^\\top D_\\ell$, $b_p=-J_p^\\top r$, $b_\\ell=-J_\\ell^\\top r$.\n**(b)** The second block row gives $W^\\top\\Delta x_p+V\\Delta x_\\ell=b_\\ell$, i.e. $\\Delta x_\\ell=V^{-1}\\big(b_\\ell-W^\\top\\Delta x_p\\big)$. Substituting into the first row $U\\Delta x_p+W\\Delta x_\\ell=b_p$:\n$$\\big(U-WV^{-1}W^\\top\\big)\\Delta x_p=b_p-WV^{-1}b_\\ell,$$\nwith $S=U-WV^{-1}W^\\top$ the **Schur complement**. Solve for $\\Delta x_p$, then back-substitute for $\\Delta x_\\ell$.\n**(c)** $S$ has the size of the **camera** parameter block ($6n_c$ or $12n_c$) — far smaller than the full system. $V$ is **block-diagonal** with one small $3\\times3$ block per landmark, so $V^{-1}$ is just those blocks inverted independently: $O(n_l)$ work and trivially parallel.\n**(d)** Because only the landmark block is block-diagonal. Landmarks do not interact with each other directly (they are coupled only through the cameras), whereas cameras *are* coupled through shared landmarks, so $U$ is not block-diagonal and eliminating cameras would require inverting a large dense matrix. Additionally $n_l\\gg n_c$ in practice, so eliminating the landmarks removes by far the most unknowns.",
+          "extend": "The Schur complement is exactly \"marginalising out\" the landmarks — the same operation appears in sliding-window SLAM when old keyframes are marginalised.",
+          "tags": [
+            "Schur complement",
+            "Bundle adjustment",
+            "Sparsity"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25EDC 7.1",
+            "25EDC 7.2",
+            "25EDC 7.3"
+          ],
+          "q": "Let $S=C-E^\\top B^{-1}E$ be the Schur complement of $\\begin{pmatrix}B&E\\\\E^\\top&C\\end{pmatrix}$, and let $C_0$ be the block-diagonal part of $C$, $E_S=C_0-S$. (a) Approximate $S^{-1}$ by a power series of order $m$ depending only on $C_0$ and $E_S$. (b) What condition ensures convergence? (c) Why is it useful to introduce $C_0$?",
+          "answer": "**(a)** Write $S=C_0-E_S=C_0\\big(I-C_0^{-1}E_S\\big)$. Therefore\n$$S^{-1}=\\big(I-C_0^{-1}E_S\\big)^{-1}C_0^{-1}\\approx\\hat S(m)=\\sum_{i=0}^{m}\\big(C_0^{-1}E_S\\big)^iC_0^{-1},$$\nusing the geometric series $(I-M)^{-1}\\approx\\sum_{i=0}^{m}M^i$.\n**(b)** Convergence requires\n$$\\big\\|C_0^{-1}E_S\\big\\|<1.$$\n**(c)** Because $C_0$ is **block-diagonal**, it is much faster to invert than $C$ (or than $S$ itself): each small diagonal block is inverted independently. The power series then replaces one expensive inverse with a few cheap block inversions and matrix–vector products — the basis of the \"power Schur complement\" / iterative Schur solvers used in large-scale bundle adjustment.",
+          "extend": "Same idea as a preconditioned iterative solve: $C_0^{-1}$ is the preconditioner, and $m$ trades accuracy against cost.",
+          "tags": [
+            "Schur complement",
+            "Power series",
+            "Bundle adjustment"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25EDC 7.4"
+          ],
+          "q": "Let $P(m)=S^{-1}-\\hat S(m)$ be the error induced by the power-series approximation. Find the matrix $A$ and the scalar $l$ such that $SP(m)=A^l$.",
+          "answer": "$$SP(m)=\\big(E_SC_0^{-1}\\big)^{m+1},$$\nso $A=E_SC_0^{-1}$ and $l=m+1$.\n**Derivation.**\n$$SP(m)=I-S\\hat S(m)=I-(C_0-E_S)\\sum_{i=0}^{m}\\big(C_0^{-1}E_S\\big)^iC_0^{-1}$$\n$$=I-C_0\\sum_{i=0}^{m}\\big(C_0^{-1}E_S\\big)^iC_0^{-1}+E_S\\sum_{i=0}^{m}\\big(C_0^{-1}E_S\\big)^iC_0^{-1}$$\n$$=I-\\sum_{i=0}^{m}\\big(E_SC_0^{-1}\\big)^i+\\sum_{i=1}^{m+1}\\big(E_SC_0^{-1}\\big)^i=\\big(E_SC_0^{-1}\\big)^{m+1},$$\nsince the two sums telescope, leaving only the last term of the second minus the first term ($I$) of the first.\n**Reading.** The error decays like the $(m{+}1)$-st power of $E_SC_0^{-1}$ — geometric convergence, provided the norm condition $\\|C_0^{-1}E_S\\|<1$ holds.",
+          "extend": "The telescoping trick — pushing $C_0$ through $(C_0^{-1}E_S)^i$ to turn it into $(E_SC_0^{-1})^i$ — is the whole computation.",
+          "tags": [
+            "Schur complement",
+            "Power series",
+            "Error analysis"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "constrained-optimisation",
+      "title": "Constrained Optimisation Identities and Projected Gradient Descent",
+      "recap": "**The Rayleigh identity, reused constantly.** For a symmetric $A$ with eigenvalues $\\lambda_1\\ge\\dots\\ge\\lambda_n$:\n$$\\min_{\\|x\\|=1}\\langle x,Ax\\rangle=\\lambda_n,\\qquad \\max_{\\|x\\|=1}\\langle x,Ax\\rangle=\\lambda_1,$$\nattained at the corresponding unit eigenvectors. Two consequences the exam uses repeatedly:\n$\\bullet$ On the unit sphere $\\langle x,x\\rangle=1$, so any additive $c\\langle x,x\\rangle$ term is a **constant** $c$: $\\min_{\\|x\\|=1}\\langle x,Ax\\rangle+5\\langle x,x\\rangle=\\lambda_n+5$.\n$\\bullet$ Minimising $-\\langle x,Ax\\rangle$ maximises $\\langle x,Ax\\rangle$, so the minimiser is the eigenvector of the **largest** eigenvalue and the value is $-\\lambda_1$.\n**Newton on a quadratic.** For $f(x)=\\langle x,(A+cI)x\\rangle$: $\\nabla f=2(A+cI)x$, $H=2(A+cI)$. If $A+cI$ has no zero eigenvalue it is invertible, so Newton always applies, and the step with size $t$ is\n$$x_{k+1}=x_k-tH^{-1}\\nabla f=x_k-t\\big(2(A+cI)\\big)^{-1}2(A+cI)x_k=(1-t)x_k.$$\nWith $t=1$ it converges in **one** step, as it must on a quadratic.\n**Projected gradient descent.** For $\\min_{x\\in\\mathcal{C}}f(x)$ alternate a gradient step and a projection:\n$$x_l=x_k-\\tau\\nabla f(x_k),\\qquad x_{k+1}=\\arg\\min_{x\\in\\mathcal{C}}\\|x_l-x\\|_2^2.$$\nFor the interval constraint $\\|x\\|_2^2\\le4$ in $\\mathbb{R}$ the projection is simply clamping:\n$$x_{k+1}=\\begin{cases}2&x_l>2\\\\-2&x_l<-2\\\\x_l&|x_l|\\le2\\end{cases}$$\nThe same pattern reappears throughout the course: project onto $O(n)$/$SO(n)$ with the SVD (Ch. 1), project onto the essential space (Ch. 5), clamp onto a box here.",
+      "questions": [
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 9a"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{n\\times n}$ be symmetric with eigenvalues $0.9=\\lambda_1\\ge\\lambda_2\\ge\\dots\\ge\\lambda_n=0.2$. What is the value of $a^\\star=\\min_{\\|x\\|_2=1}\\langle x,Ax\\rangle+5\\langle x,x\\rangle$?",
+          "answer": "$a^\\star=5.2$.\n**Computation.** On the unit sphere $\\langle x,x\\rangle=\\|x\\|^2=1$, so the second term is the constant $5$:\n$$a^\\star=\\min_{\\|x\\|=1}\\langle x,Ax\\rangle+5=\\lambda_n+5=0.2+5=5.2,$$\nusing $\\min_{\\|x\\|=1}\\langle x,Ax\\rangle=\\lambda_{\\min}$ (Rayleigh quotient).",
+          "extend": "First simplify with $\\|x\\|=1$, then apply the Rayleigh bound. Almost every \"optimisation\" MC on these papers is this two-step move.",
+          "options": [
+            {
+              "text": "The given information is insufficient",
+              "correct": false
+            },
+            {
+              "text": "$0.7$",
+              "correct": false
+            },
+            {
+              "text": "$3.2$",
+              "correct": false
+            },
+            {
+              "text": "$5.2$",
+              "correct": true
+            },
+            {
+              "text": "$2.2$",
+              "correct": false
+            },
+            {
+              "text": "$0.2$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Rayleigh quotient",
+            "Eigenvalues",
+            "Constrained optimisation"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 6j"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{n\\times n}$ be symmetric with eigenvalues ordered $0.6=\\lambda_1\\ge\\lambda_2\\ge\\dots\\ge\\lambda_n=0.4$. What is the value of $a^\\star=\\min_{\\|x\\|=1}\\langle3x,-Ax+x\\rangle$?",
+          "answer": "$a^\\star=1.2$.\n**Computation.** Expand: $\\langle3x,-Ax+x\\rangle=3\\big(-\\langle x,Ax\\rangle+\\langle x,x\\rangle\\big)=3\\big(1-\\langle x,Ax\\rangle\\big)$ on the unit sphere. Minimising this means **maximising** $\\langle x,Ax\\rangle$, whose maximum is the **largest** eigenvalue $\\lambda_1=0.6$. Hence\n$$a^\\star=3(1-0.6)=3\\cdot0.4=1.2.$$",
+          "extend": "The minus sign flips min into max — so it is $\\lambda_{\\max}$ here, not $\\lambda_{\\min}$. That flip is the entire question.",
+          "options": [
+            {
+              "text": "$7.6$",
+              "correct": false
+            },
+            {
+              "text": "$0.4$",
+              "correct": false
+            },
+            {
+              "text": "None of the other values",
+              "correct": false
+            },
+            {
+              "text": "$2.4$",
+              "correct": false
+            },
+            {
+              "text": "$1.2$",
+              "correct": true
+            },
+            {
+              "text": "$9.4$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Rayleigh quotient",
+            "Eigenvalues",
+            "Constrained optimisation"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21EFB 9b",
+            "21EFB 9c",
+            "21EFB 9d"
+          ],
+          "q": "For $A$ symmetric with eigenvalues $0.9=\\lambda_1\\ge\\dots\\ge\\lambda_n=0.2$: (a) can Newton's method always be applied to $\\min_{x\\in\\mathbb{R}^n}\\langle x,Ax\\rangle+5\\langle x,x\\rangle$? Write the update step with step size $t$. (b) What is the solution of $x^\\star=\\arg\\min_{\\|x\\|_2=1}\\langle x,x\\rangle-\\langle x,Ax\\rangle$ in terms of eigenvectors of $A$, and (c) the value of the objective at $x^\\star$?",
+          "answer": "**(a)** Rewrite the objective as $\\langle x,(A+5I)x\\rangle$. Its gradient is $g=2(A+5I)x$ and its Hessian $H=2(A+5I)$. Since $A+5I$ is symmetric with eigenvalues $\\lambda_i+5\\in[5.2,5.9]$, all non-zero, it is **invertible** — so Newton's method can always be applied. The update:\n$$x_{k+1}=x_k-tH^{-1}g=x_k-t\\big(2(A+5I)\\big)^{-1}2(A+5I)x_k=(1-t)x_k.$$\n**(b)** On the unit sphere $\\langle x,x\\rangle=1$, so $\\arg\\min_{\\|x\\|=1}\\big(1-\\langle x,Ax\\rangle\\big)=\\arg\\min_{\\|x\\|=1}-\\langle x,Ax\\rangle=\\arg\\max_{\\|x\\|=1}\\langle x,Ax\\rangle$. The minimiser is therefore the **eigenvector corresponding to the largest eigenvalue of $A$** (equivalently, the eigenvector of the smallest eigenvalue of $-A$).\n**(c)** The value is $1-\\lambda_1=1-0.9=0.1$.",
+          "extend": "With $t=1$ the Newton update gives $x_1=0$ — the exact minimiser of the (positive definite) quadratic in a single step, as expected.",
+          "tags": [
+            "Newton's method",
+            "Rayleigh quotient",
+            "Eigenvalues"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 6h",
+            "22RDC 6i"
+          ],
+          "q": "For $x^\\star=\\arg\\min_{\\|x\\|_2^2\\le4,\\ x\\in\\mathbb{R}}f(x)$ with $f(x)=-\\cos(8x)e^{-4x^2}$, projected gradient descent alternates $x_l=x_k-\\tau\\nabla f(x_k)$ and $x_{k+1}=\\arg\\min_{\\|x\\|_2^2\\le4}\\|x_l-x\\|_2^2$. Write down both update steps explicitly.",
+          "answer": "**Gradient step.** Differentiating $f(x)=-\\cos(8x)e^{-4x^2}$ by the product rule gives $\\nabla f(x)=8e^{-4x^2}\\big(\\sin(8x)+x\\cos(8x)\\big)$, hence\n$$x_l=x_k-8\\tau e^{-4x_k^2}\\big(\\cos(8x_k)\\,x_k+\\sin(8x_k)\\big).$$\n**Projection step.** The constraint $\\|x\\|_2^2\\le4$ is the interval $[-2,2]$, and the Euclidean projection onto it is a clamp:\n$$x_{k+1}=\\begin{cases}2&\\text{if }x_l>2\\\\-2&\\text{if }x_l<-2\\\\x_l&\\text{if }|x_l|\\le2.\\end{cases}$$",
+          "extend": "Projected gradient descent = unconstrained step, then the nearest point of the feasible set. The projection is the only place the constraint enters.",
+          "tags": [
+            "Projected gradient descent",
+            "Constrained optimisation"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 6b"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{n\\times n}$ be symmetric with eigenvalues ordered $0.8=\\lambda_1\\ge\\lambda_2\\ge\\dots\\ge\\lambda_n=0.4$. What is the value of $a^\\star=\\min_{\\|x\\|=1}\\langle2x,-Ax+x\\rangle$?",
+          "answer": "$a^\\star=0.4$.\n**Computation.** Expand on the unit sphere, where $\\langle x,x\\rangle=1$:\n$$\\langle2x,-Ax+x\\rangle=2\\big(-\\langle x,Ax\\rangle+\\langle x,x\\rangle\\big)=2\\big(1-\\langle x,Ax\\rangle\\big).$$\nMinimising this means **maximising** $\\langle x,Ax\\rangle$, whose maximum is $\\lambda_1=0.8$. Hence\n$$a^\\star=2(1-0.8)=2\\cdot0.2=0.4.$$",
+          "extend": "The same template appears in three different papers: pull out the constant from $\\|x\\|=1$, watch the sign, then read off $\\lambda_{\\max}$ or $\\lambda_{\\min}$.",
+          "options": [
+            {
+              "text": "$7.6$",
+              "correct": false
+            },
+            {
+              "text": "$9.4$",
+              "correct": false
+            },
+            {
+              "text": "$2.4$",
+              "correct": false
+            },
+            {
+              "text": "$0.4$",
+              "correct": true
+            },
+            {
+              "text": "None of the other values",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Rayleigh quotient",
+            "Eigenvalues",
+            "Constrained optimisation"
+          ]
+        }
+      ]
+    }
+  ]
+}

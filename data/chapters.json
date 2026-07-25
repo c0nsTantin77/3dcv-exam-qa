@@ -1,0 +1,91 @@
+{
+  "course": "3D Computer Vision (IN2228)",
+  "subtitle": "TUM · Exam Q&A Review",
+  "exams": [
+    "25EDC",
+    "25RDC",
+    "24EDC",
+    "22EDC",
+    "22RDC",
+    "23ELI",
+    "23RLI",
+    "21EFB",
+    "21RFB",
+    "20EFB",
+    "20RFB",
+    "20MFB",
+    "EX01",
+    "EX02",
+    "EX03",
+    "EX04",
+    "EX05",
+    "EX06",
+    "EX07",
+    "EX08"
+  ],
+  "chapters": [
+    {
+      "id": "ch01",
+      "roman": "I",
+      "title": "Mathematical Background: Linear Algebra",
+      "file": "ch01_linear_algebra.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch02",
+      "roman": "II",
+      "title": "Representing a Moving Scene",
+      "file": "ch02_moving_scene.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch03",
+      "roman": "III",
+      "title": "Perspective Projection",
+      "file": "ch03_perspective_projection.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch04",
+      "roman": "IV",
+      "title": "Estimating Point Correspondence",
+      "file": "ch04_point_correspondence.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch05",
+      "roman": "V",
+      "title": "Reconstruction from Two Views: Linear Algorithms",
+      "file": "ch05_two_view_reconstruction.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch06",
+      "roman": "VI",
+      "title": "Bundle Adjustment & Nonlinear Optimization",
+      "file": "ch06_bundle_adjustment.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch07",
+      "roman": "VII",
+      "title": "Direct Methods for Visual SLAM",
+      "file": "ch07_direct_slam.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch08",
+      "roman": "VIII",
+      "title": "3D Computer Vision in Practice",
+      "file": "ch08_practice.json",
+      "status": "ready"
+    },
+    {
+      "id": "ch09",
+      "roman": "IX",
+      "title": "Recent Developments in 3D Computer Vision",
+      "file": "ch09_recent_developments.json",
+      "status": "ready"
+    }
+  ]
+}

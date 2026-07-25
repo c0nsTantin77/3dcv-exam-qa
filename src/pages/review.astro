@@ -1,0 +1,37 @@
+---
+import Layout from "../components/Layout.astro";
+import Topbar from "../components/Topbar.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import ReviewPage from "../components/islands/ReviewPage.vue";
+import { url } from "../lib/paths";
+---
+
+<Layout title="Review · 3DCV Exam Q&A">
+  <Topbar backHref={url("/")} backFull=" chapters">
+    <div class="filters" slot="filters">
+      <button id="exportBtn" type="button" class="io-btn">⬇ Export</button>
+      <label class="io-btn" for="importFile">⬆ Import</label>
+      <input id="importFile" type="file" accept="application/json" hidden />
+      <button id="resetBtn" type="button" class="io-btn danger">⟳ Reset</button>
+    </div>
+  </Topbar>
+  <main class="tagpage">
+    <ReviewPage client:load />
+  </main>
+
+  <dialog id="resetDlg" class="reset-dlg">
+    <h3>Reset all study progress?</h3>
+    <p>
+      This permanently clears your <b>reviewed</b>, <b>wrong book</b>, <b>notes</b> and
+      <b>spaced-repetition</b> data <b>in this browser</b>. It cannot be undone — consider
+      <b>⬇ Export</b> first.
+    </p>
+    <label class="reset-ack"><input type="checkbox" id="resetAck" /> I understand this erases everything.</label>
+    <div class="reset-actions">
+      <button id="resetCancel" type="button" class="io-btn">Cancel</button>
+      <button id="resetConfirm" type="button" class="io-btn danger" disabled>Confirm reset</button>
+    </div>
+  </dialog>
+
+  <SiteFooter />
+</Layout>

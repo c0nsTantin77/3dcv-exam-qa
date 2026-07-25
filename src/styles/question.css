@@ -1,0 +1,197 @@
+/* question.css — Question cards, MC quiz, answers, concept tags, exam/tag browse, dashboard tagpage.
+   Extracted verbatim from the original style.css; load order preserved. */
+/* ---- question cards -------------------------------------------------- */
+.qlist{margin-top:14px;display:grid;gap:12px}
+details.q{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);overflow:hidden}
+details.q[open]{border-color:#bcd4f0}
+.q summary{list-style:none;cursor:pointer;padding:14px 16px;display:block}
+.q summary::-webkit-details-marker{display:none}
+.q summary:hover{background:#fafcff}
+.q-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.q-num{font-size:.72rem;font-weight:800;color:#5b6470;background:#f0f3f8;border:1px solid var(--line);
+  border-radius:6px;padding:1px 7px;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.qtype{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:2px 8px;border-radius:999px}
+.t-mc{background:#e7f0ff;color:var(--mid)}
+.t-open{background:#f3f0ff;color:var(--low)}
+.t-ai{background:#e6fcf5;color:var(--ai)}
+.fmt-badge{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  padding:2px 9px;border-radius:999px;background:#eef2f7;color:var(--muted)}
+.q-src{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap}
+.src,.src-ai{font-size:.72rem;font-weight:600;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.src{background:#eef2f7;color:#475569}
+.src-ai{background:#e6fcf5;color:var(--ai);border:1px dashed var(--ai)}
+/* source chips carry the examiner: papers by the current examiner (Cremers)
+   are the highest-value revision, so they get the accent chip + a ★ badge. */
+.src-primary{background:#fff4e0;color:#9a5b00;border:1px solid #f0c476}
+.src-exercise{background:#eef7ff;color:#2f6ea8;border:1px solid #cbe1f5}
+.examiner-badge{font-size:.68rem;font-weight:800;letter-spacing:.03em;padding:2px 8px;
+  border-radius:999px;background:#ffb703;color:#3b2400;white-space:nowrap}
+details.q[data-primary]{border-left:3px solid #ffb703}
+.q-text{font-weight:600;font-size:.98rem}
+.q-text code{font-weight:500}
+.q-text p{margin:0}
+.q-text pre.code{font-weight:400;margin:.5em 0 0}
+.badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff}
+.freq-hot{background:var(--hot)}
+.freq-mid{background:var(--mid)}
+.freq-low{background:var(--low)}
+.freq-ai{background:var(--ai)}
+
+.q-body{padding:0 16px 16px;border-top:1px solid var(--line)}
+.q-figure{margin:14px 0 0;text-align:center}
+.q-figure img{max-width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:#fff;padding:6px}
+.q-figure figcaption{margin-top:6px;font-size:.78rem;color:var(--muted)}
+
+/* ---- interactive MC quiz ---- */
+.quiz{margin-top:14px}
+.quiz-hint{font-size:.82rem;color:var(--muted);margin:.2em 0 .7em}
+.options.interactive{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.options.interactive .opt label{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;
+  border:1px solid var(--line);border-radius:9px;font-size:.92rem;cursor:pointer;background:#fff;transition:background .12s,border-color .12s}
+.options.interactive .opt label:hover{background:#f7faff;border-color:#bcd4f0}
+.options.interactive input{margin:.2em 0 0;flex:none;width:16px;height:16px;accent-color:var(--tum);cursor:pointer}
+.opt-letter{flex:none;font-weight:700;color:var(--muted);min-width:1.1em}
+.opt-text{flex:1}
+.opt-mark{flex:none;font-size:.95rem}
+.correct-line{background:#ebfbee;border:1px solid #b2f2bb;border-radius:9px;
+  padding:8px 12px;font-size:.92rem;margin-bottom:8px}
+.correct-line b{letter-spacing:.04em}
+.quiz.done .opt label{cursor:default}
+.opt.is-correct label{background:#ebfbee;border-color:#b2f2bb}
+.opt.is-wrong label{background:#fff7f7;border-color:#ffd9d9}
+.opt.picked-right label{box-shadow:0 0 0 2px #69db7c inset}
+.opt.picked-wrong label{box-shadow:0 0 0 2px #ff8787 inset}
+.opt.missed label{box-shadow:0 0 0 2px #ffd43b inset}   /* correct but not picked */
+.quiz-actions{margin-top:11px;display:flex;gap:8px}
+.check-btn,.reset-btn{border:1px solid var(--tum);background:var(--tum);color:#fff;border-radius:9px;
+  padding:7px 16px;font-size:.85rem;font-weight:600;cursor:pointer}
+.check-btn:disabled{background:#cdd7e3;border-color:#cdd7e3;color:#fff;cursor:not-allowed}
+.reset-btn{background:#fff;color:var(--tum)}
+.verdict{font-weight:700;font-size:.92rem;margin:14px 0 4px}
+.verdict.ok{color:var(--ok)}
+.verdict.no{color:var(--no)}
+.reveal{margin-top:6px}
+
+.answer{margin-top:12px;background:#f8fbff;border:1px solid #e2edfb;border-radius:10px;padding:12px 14px}
+.answer-label,.extend-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tum);margin-bottom:4px}
+.answer p,.extend p{margin:.4em 0}
+.extend{margin-top:10px;background:#fffdf3;border:1px solid #ffeec2;border-radius:10px;padding:10px 14px;font-size:.92rem}
+.extend-label{color:#b8860b}
+.noresults{text-align:center;color:var(--muted);padding:30px}
+
+/* ---- open-question self-test ---- */
+.selftest{margin-top:14px}
+.self-area{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:.92rem;
+  font-family:inherit;resize:vertical;background:#fffdf7}
+.self-area:focus{outline:2px solid var(--tum);border-color:var(--tum)}
+.self-area[readonly]{background:#f5f7fa;color:var(--ink);cursor:default}
+.calc-fields{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 2px}
+.calc-field{display:inline-flex;align-items:center;gap:6px;font-size:.9rem}
+.calc-label{font-weight:600;color:var(--muted)}
+.calc-in{width:90px;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.92rem;
+  font-family:inherit;background:#fffdf7;font-variant-numeric:tabular-nums}
+.calc-in:focus{outline:2px solid var(--tum);border-color:var(--tum)}
+.calc-in.ok{border-color:#69db7c;background:#ebfbee}
+.calc-in.bad{border-color:#ff8787;background:#fff5f5}
+.calc-mark{font-weight:800;font-size:.95rem}
+.calc-in.ok~.calc-mark{color:var(--ok)}
+.calc-in.bad~.calc-mark{color:var(--no)}
+.open-reveal mark.kw-hit{background:#c3fae8;color:inherit;border-radius:3px;padding:0 2px;font-weight:600}
+.self-assess{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line);
+  display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.self-assess-q{font-size:.84rem;font-weight:600;color:var(--muted)}
+.self-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 13px;
+  font-size:.82rem;font-weight:600;cursor:pointer}
+.got-btn{color:var(--ok)}
+.got-btn:hover{border-color:var(--ok);background:#ebfbee}
+.miss-btn{color:var(--no)}
+.miss-btn:hover{border-color:var(--no);background:#fff5f5}
+.self-assess[data-done] .self-btn{opacity:.5;pointer-events:none}
+.self-assess[data-done="got"] .got-btn,.self-assess[data-done="miss"] .miss-btn{opacity:1;font-weight:800}
+.self-assess[data-done]::after{font-size:.8rem;font-weight:700}
+.self-assess[data-done="got"]::after{content:"✓ marked reviewed";color:var(--ok)}
+.self-assess[data-done="miss"]::after{content:"★ added to wrong book";color:var(--no)}
+
+/* ---- review mode: reveal every answer, hide the interactive controls ---- */
+[data-mode="review"] .quiz-hint{display:none}
+[data-mode="review"] .quiz-actions{display:none}
+[data-mode="review"] .options.interactive{pointer-events:none}
+/* must beat base.css `[hidden]{display:none!important}` */
+[data-mode="review"] .reveal[hidden],
+[data-mode="review"] .open-reveal[hidden]{display:block!important}
+[data-mode="review"] .verdict:empty{display:none}
+[data-mode="review"] .self-area{display:none}
+[data-mode="review"] .calc-fields{display:none}
+[data-mode="review"] .self-assess{display:none}
+[data-mode="review"] .opt input[data-correct="true"]~.opt-mark::after{content:"✅"}
+[data-mode="review"] .opt input[data-correct="false"]~.opt-mark::after{content:"❌";opacity:.45}
+[data-mode="review"] .opt:has(input[data-correct="true"]) label{background:#ebfbee;border-color:#b2f2bb}
+
+/* ---- concept tags ---- */
+.tags{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tags-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:2px}
+.tag{display:inline-block;font-size:.74rem;font-weight:600;color:var(--tum);
+  background:#eef5ff;border:1px solid #d6e6ff;border-radius:999px;padding:2px 9px}
+a.tag:hover{background:var(--tum);color:#fff;text-decoration:none}   /* only clickable (link) tags react to hover */
+.gcount{padding:8px 14px;font-size:.74rem;color:var(--muted);background:#f7faff;border-bottom:1px solid var(--line)}
+/* ---- popular concept tags (index) ---- */
+.poptags{margin:6px 0 24px}
+.poptags-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;padding:0 2px}
+.poptags-label{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.poptags-links{display:flex;gap:9px}
+.poptags-all{font-size:.79rem;font-weight:600;color:var(--tum);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px;background:#fff;transition:border-color .12s,background .12s}
+.poptags-all:hover{border-color:var(--tum);background:#f0f6ff;text-decoration:none}
+
+/* ---- browse-by-exam page ---- */
+.examgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.examcard{display:flex;flex-direction:column;gap:3px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow);color:inherit;
+  transition:transform .12s,box-shadow .12s}
+.examcard:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(16,24,40,.12);text-decoration:none}
+.examcard-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:38px}
+.examcard-code{font-size:1.15rem;font-weight:800;color:var(--tum);letter-spacing:.02em}
+.examcard-name{font-size:.84rem;color:var(--ink)}
+.examcard-n{font-size:.78rem;color:var(--muted);margin-top:4px}
+/* papers by the current examiner (Cremers) — the ones that actually predict SS26 */
+.examcard-primary{border-color:#f0c476;background:linear-gradient(#fffaf0,var(--card))}
+.examcard-primary .examcard-code{color:#9a5b00}
+.exam-legend{font-size:.86rem;line-height:1.65;color:var(--muted);margin:0 0 14px;
+  background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:11px 14px}
+.exam-legend b{color:var(--ink)}
+.exam-legend .src,.exam-legend .src-primary{margin:0 1px}
+.gbanner{display:block;padding:11px 14px;background:#eef5ff;border-bottom:1px solid #d6e6ff;
+  font-weight:600;font-size:.9rem;color:var(--tum)}
+.gbanner:hover{background:#e3eeff;text-decoration:none}
+.poptags-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-start}
+.ptag{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:6px 8px 6px 13px;font-size:.85rem;font-weight:600;color:var(--ink);
+  box-shadow:0 1px 2px rgba(16,24,40,.05);transition:border-color .12s,background .12s,transform .1s}
+.ptag:hover{border-color:var(--tum);background:#f0f6ff;color:var(--tum);text-decoration:none;transform:translateY(-1px)}
+.ptag-n{font-size:.7rem;font-weight:700;color:#fff;background:var(--tum);border-radius:999px;padding:1px 7px}
+
+/* ---- standalone tags page ---- */
+.tagpage{max-width:980px;margin:0 auto;padding:26px 20px 60px}
+.tp-title{font-size:1.6rem;margin:.2em 0 .1em}
+.tp-sub{color:var(--muted);margin:.2em 0 1.2em}
+.tp-back{display:inline-block;margin-bottom:8px;font-weight:600}
+/* topbar filter box on the single tag / exam pages (teleported into the topbar) */
+.tp-search{border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:.9rem;
+  min-width:220px;background:#fff;color:var(--ink)}
+.tp-search::placeholder{color:#9aa6b2}
+.tp-search:focus{outline:2px solid var(--tum);border-color:var(--tum)}
+@media(max-width:860px){.tp-search{flex:1;width:100%;min-width:0}}
+@media(max-width:560px){.tp-search{font-size:16px}}   /* 16px stops iOS zoom-on-focus */
+.tagcloud{display:flex;flex-wrap:wrap;gap:10px}
+.tagbig{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+  border-radius:999px;padding:8px 14px;font-weight:600;color:var(--ink);box-shadow:var(--shadow)}
+.tagbig:hover{border-color:var(--tum);color:var(--tum);text-decoration:none}
+.tagbig-n{font-size:.74rem;font-weight:700;color:#fff;background:var(--tum);border-radius:999px;padding:1px 8px}
+.tp-ch{font-size:1.05rem;border-left:4px solid var(--tum);padding-left:10px;margin:1.4em 0 .6em}
+.tp-list{display:grid;gap:8px}
+.tp-list .ghit{border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.hubnote{max-width:980px;margin:26px auto 0;padding:0 24px;color:var(--muted);font-size:.88rem;text-align:center}
+

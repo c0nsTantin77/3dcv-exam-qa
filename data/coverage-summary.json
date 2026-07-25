@@ -1,0 +1,73 @@
+{
+  "overall_pct": 65,
+  "cited": 286,
+  "detected": 439,
+  "per_exam": [
+    {
+      "exam": "25EDC",
+      "det": 48,
+      "cit": 47,
+      "pct": 98
+    },
+    {
+      "exam": "25RDC",
+      "det": 32,
+      "cit": 31,
+      "pct": 97
+    },
+    {
+      "exam": "24EDC",
+      "det": 45,
+      "cit": 40,
+      "pct": 89
+    },
+    {
+      "exam": "22RDC",
+      "det": 48,
+      "cit": 43,
+      "pct": 90
+    },
+    {
+      "exam": "23ELI",
+      "det": 29,
+      "cit": 7,
+      "pct": 24
+    },
+    {
+      "exam": "23RLI",
+      "det": 27,
+      "cit": 10,
+      "pct": 37
+    },
+    {
+      "exam": "21EFB",
+      "det": 48,
+      "cit": 31,
+      "pct": 65
+    },
+    {
+      "exam": "21RFB",
+      "det": 33,
+      "cit": 15,
+      "pct": 45
+    },
+    {
+      "exam": "20EFB",
+      "det": 57,
+      "cit": 29,
+      "pct": 51
+    },
+    {
+      "exam": "20RFB",
+      "det": 53,
+      "cit": 27,
+      "pct": 51
+    },
+    {
+      "exam": "20MFB",
+      "det": 19,
+      "cit": 6,
+      "pct": 32
+    }
+  ]
+}

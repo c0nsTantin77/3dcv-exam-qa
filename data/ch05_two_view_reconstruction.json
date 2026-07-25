@@ -1,0 +1,1079 @@
+{
+  "id": "ch05",
+  "roman": "V",
+  "title": "Reconstruction from Two Views: Linear Algorithms",
+  "blurb": "The epipolar constraint, the essential and fundamental matrices, the eight-point algorithm and its four-fold pose ambiguity, triangulation and the multiple-view matrix, planar scenes and homographies — the largest and most reliably examined block of the course.",
+  "knowledge_points": [
+    {
+      "id": "epipolar-constraint",
+      "title": "The Epipolar Constraint and Epipolar Lines",
+      "recap": "**Derivation (four steps, each worth a mark).** From $\\lambda_1x_1=X$ and $\\lambda_2x_2=RX+T$:\n1. Eliminate $X$: $\\lambda_2x_2=R(\\lambda_1x_1)+T$.\n2. Eliminate $T$ by taking the cross product with $T$ (i.e. multiplying by $\\hat T$): $\\lambda_2\\hat Tx_2=\\lambda_1\\hat TRx_1$, because $\\hat TT=T\\times T=0$.\n3. Project onto $x_2$: $x_2^\\top\\hat Tx_2=0$ since $\\hat T$ is skew-symmetric, so the left-hand side vanishes.\n4. Divide by $\\lambda_1\\neq0$:\n$$\\boxed{x_2^\\top\\hat TRx_1=0.}$$\n**Geometric meaning.** $x_1$, $x_2$, and the baseline are **coplanar** — the constraint is the triple product $\\langle x_2,T\\times Rx_1\\rangle=0$.\n**Epipolar line.** For a fixed $x_1$, the set of admissible $x_2$ is the line $l_2\\sim Ex_1$ (calibrated) or $l_2\\sim Fx_1'$ (pixel coordinates). Writing $l_2=(l_1,l_2,l_3)^\\top$, the line in the image is $y=-\\tfrac{l_1}{l_2}x-\\tfrac{l_3}{l_2}$.\n**Practical use.** It reduces correspondence search from a 2D image search to a **1D search along a line**: for any pixel in the first image, its match in the second must lie on the corresponding epipolar line. This is what makes stereo matching tractable and what lets RANSAC reject outliers.\n**Epipoles.** $e_1$ and $e_2$ are the projections of the other camera centre, i.e. the points where all epipolar lines meet. They satisfy $Ee_1=0$ and $e_2^\\top E=0$ (likewise for $F$) — so the epipoles span the left/right null spaces.\n**Worked example.** Pure translation $T=(5,4,1)^\\top$, $K_1=K_2=I$, $R=I$. Then $E=\\hat T=\\begin{pmatrix}0&-1&4\\\\1&0&-5\\\\-4&5&0\\end{pmatrix}$ and for $x_1=(40,30,1)^\\top$: $l_2=\\hat Tx_1=(-26,35,-10)^\\top$, i.e. $-26x+35y-10=0$, or $y=\\tfrac{26}{35}x+\\tfrac27$.\n**Uncalibrated case.** With intrinsics the constraint is $x_2'^\\top K_2^{-\\top}\\hat TRK_1^{-1}x_1'=0$, i.e. $x_2'^\\top Fx_1'=0$. If you are given a **normalised** point in image 1 but want the epipolar line in **pixel** coordinates of image 2, only $K_2$ enters: $l'\\sim K_2^{-\\top}\\hat TRx_1$.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 3,
+          "sources": [
+            "25EDC 4.1",
+            "25RDC 5.1",
+            "22EDC 5a"
+          ],
+          "q": "Let $x_1,x_2$ be the observed 2D points of a 3D point $X$ with depths $\\lambda_1,\\lambda_2\\neq0$, so that $\\lambda_1x_1=X$ and $\\lambda_2x_2=RX+T$. Derive the epipolar constraint.",
+          "answer": "**Step 1 — eliminate $X$.** Substituting $X=\\lambda_1x_1$ into the second equation:\n$$\\lambda_2x_2=R(\\lambda_1x_1)+T.$$\n**Step 2 — eliminate $T$.** Take the cross product of both sides with $T$, i.e. multiply by $\\hat T$ (where $\\hat Tv\\equiv T\\times v$). Since $\\hat TT=T\\times T=0$:\n$$\\lambda_2\\hat Tx_2=\\lambda_1\\hat TRx_1.$$\n**Step 3 — project onto $x_2$.** Multiplying from the left by $x_2^\\top$ makes the left-hand side vanish, because $x_2^\\top\\hat Tx_2=0$ for the skew-symmetric matrix $\\hat T$:\n$$0=\\lambda_1x_2^\\top\\hat TRx_1.$$\n**Step 4 — divide by $\\lambda_1\\neq0$:**\n$$x_2^\\top\\hat TRx_1=0.$$",
+          "extend": "Skipping the justification of why $x_2^\\top\\hat Tx_2=0$ costs half a point — it is the skew-symmetry result $z^\\top Yz=0$ from Chapter 1.",
+          "tags": [
+            "Epipolar constraint",
+            "Essential matrix",
+            "Skew-symmetric matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "22RDC 4a",
+            "20EFB 9a"
+          ],
+          "q": "Describe briefly how the epipolar line can be used in practice.",
+          "answer": "The epipolar line is used to **find correspondences**.\n**How.** For any given pixel in the first image, the corresponding pixel in the second image is constrained to lie **on** its epipolar line. That turns a 2D search over the whole second image into a **1D search along a line** — dramatically cheaper and far less ambiguous.\n**Also.** The same constraint is a consistency test: a putative match that lies far from the epipolar line is an **outlier** and can be rejected (this is the residual RANSAC scores).",
+          "tags": [
+            "Epipolar constraint",
+            "Correspondence",
+            "Stereo"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22RDC 4c"
+          ],
+          "q": "Two cameras differ only by a translation $T=(5,4,1)^\\top$ (so $X_2=X_1+T$), with $K_1=K_2=I_{3\\times3}$. What is the equation of the epipolar line associated with the pixel $x_1=(40,30)^\\top$ of the first image?",
+          "answer": "$y=\\dfrac{26}{35}x+\\dfrac{2}{7}$.\n**Computation.** With $R=I$, $E=\\hat T=\\begin{pmatrix}0&-1&4\\\\1&0&-5\\\\-4&5&0\\end{pmatrix}$. In homogeneous coordinates $x_1=(40,30,1)^\\top$, so\n$$l_2=Ex_1=\\begin{pmatrix}-30+4\\\\40-5\\\\-160+150\\end{pmatrix}=\\begin{pmatrix}-26\\\\35\\\\-10\\end{pmatrix}.$$\n**Convert to slope-intercept.** $l_2^\\top(x,y,1)^\\top=0$ gives $-26x+35y-10=0$, hence\n$$y=\\frac{26}{35}x+\\frac{10}{35}=\\frac{26}{35}x+\\frac27.$$",
+          "extend": "From $l=(a,b,c)^\\top$: slope $m=-a/b$, intercept $=-c/b$. Do not forget to homogenise $x_1$ first.",
+          "options": [
+            {
+              "text": "$y=\\tfrac12x+\\tfrac32$",
+              "correct": false
+            },
+            {
+              "text": "$y=\\tfrac{12}{25}x-5$",
+              "correct": false
+            },
+            {
+              "text": "$y=\\tfrac{26}{35}x+\\tfrac27$",
+              "correct": true
+            },
+            {
+              "text": "$y=\\tfrac{3}{25}x-\\tfrac12$",
+              "correct": false
+            },
+            {
+              "text": "$y=-\\tfrac12x+\\tfrac25$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Epipolar line",
+            "Essential matrix"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "20EFB 9c"
+          ],
+          "q": "For the same two cameras ($T=(5,4,1)^\\top$, $K_1=K_2=I$), what is the equation of the epipolar line associated with the pixel $x_1=(50,20)^\\top$?",
+          "answer": "$y=\\dfrac{16}{45}x+\\dfrac{20}{9}$.\n**Computation.** $l_2=\\hat Tx_1$ with $x_1=(50,20,1)^\\top$:\n$$l_2=\\begin{pmatrix}0&-1&4\\\\1&0&-5\\\\-4&5&0\\end{pmatrix}\\begin{pmatrix}50\\\\20\\\\1\\end{pmatrix}=\\begin{pmatrix}-20+4\\\\50-5\\\\-200+100\\end{pmatrix}=\\begin{pmatrix}-16\\\\45\\\\-100\\end{pmatrix}.$$\nSo $-16x+45y-100=0$, i.e. $y=\\tfrac{16}{45}x+\\tfrac{100}{45}=\\tfrac{16}{45}x+\\tfrac{20}{9}$.",
+          "extend": "Same $E$, different pixel — practise the $\\hat T x_1$ multiplication until it is automatic; it appears in nearly every paper.",
+          "options": [
+            {
+              "text": "$y=\\tfrac{12}{25}x-5$",
+              "correct": false
+            },
+            {
+              "text": "$y=\\tfrac12x+\\tfrac32$",
+              "correct": false
+            },
+            {
+              "text": "$y=\\tfrac{16}{45}x+\\tfrac{20}{9}$",
+              "correct": true
+            },
+            {
+              "text": "$y=\\tfrac32x-\\tfrac12$",
+              "correct": false
+            },
+            {
+              "text": "$y=-\\tfrac12x+\\tfrac25$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Epipolar line",
+            "Essential matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "22RDC 4d",
+            "20EFB 9d"
+          ],
+          "q": "Given two cameras related by a pure translation $T=(5,4,1)^\\top$ with $K_1=K_2=I$, how do you decide which of several candidate pairs $(x_1,x_2)$ can be a pair of corresponding pixels?",
+          "answer": "**Test the epipolar constraint** $x_2^\\top\\hat TRx_1=0$ (here $R=I$, so $x_2^\\top\\hat Tx_1=0$) for each candidate pair, using **homogeneous** coordinates $x=(u,v,1)^\\top$.\n**Efficient procedure.** Compute the epipolar line once per $x_1$: $l_2=\\hat Tx_1$. Then a candidate $x_2$ matches iff $l_2^\\top x_2=0$, i.e. iff $x_2$ lies exactly on that line.\n**Worked example.** For $x_1=(40,10,1)^\\top$, $l_2=\\hat Tx_1=(-10+4,\\ 40-5,\\ -160+50)^\\top=(-6,35,-110)^\\top$, so the line is $-6x+35y-110=0$. Substituting $x_2=(20,\\tfrac{46}{7})^\\top$: $-120+35\\cdot\\tfrac{46}{7}-110=-120+230-110=0$ ✓ — this pair is consistent.\n**Note.** The constraint is necessary but not sufficient: a point on the epipolar line need not be the true match (it could be any point along the corresponding ray).",
+          "extend": "Compute $l_2$ once, then just substitute each candidate — far faster than evaluating a full quadratic form per option.",
+          "tags": [
+            "Epipolar constraint",
+            "Epipolar line",
+            "Correspondence"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 5c"
+          ],
+          "q": "Two cameras are related by a pure translation $T=[2,2,-1]^\\top$, with $K_1=\\begin{pmatrix}3&0&0\\\\0&5&0\\\\0&0&1\\end{pmatrix}$, $K_2=\\begin{pmatrix}4&0&0\\\\0&4&0\\\\0&0&1\\end{pmatrix}$. Let $x_1=[4,3,1]^\\top$ be **normalised** coordinates in image 1. Which is the epipolar line in image 2 in **pixel** coordinates?",
+          "answer": "$y=\\dfrac56x-\\dfrac43$.\n**Computation.** Because $x_1$ is already normalised, $K_1$ does **not** enter; only $K_2$ maps the line into pixel coordinates:\n$$l'\\sim K_2^{-\\top}\\hat Tx_1=\\begin{pmatrix}1/4&0&0\\\\0&1/4&0\\\\0&0&1\\end{pmatrix}\\begin{pmatrix}0&1&2\\\\-1&0&-2\\\\-2&2&0\\end{pmatrix}\\begin{pmatrix}4\\\\3\\\\1\\end{pmatrix}=\\begin{pmatrix}5/4\\\\-3/2\\\\-2\\end{pmatrix}.$$\n**Slope–intercept.** $m=-\\tfrac{l'_1}{l'_2}=-\\tfrac{5/4}{-3/2}=\\tfrac56$ and $b=-\\tfrac{l'_3}{l'_2}=-\\tfrac{-2}{-3/2}=-\\tfrac43$.",
+          "extend": "Read the question carefully: normalised in image 1, pixels in image 2 ⇒ apply $K_2^{-\\top}$ only. Applying $K_1^{-1}$ as well is the intended trap.",
+          "options": [
+            {
+              "text": "$y=\\tfrac12x-\\tfrac53$",
+              "correct": false
+            },
+            {
+              "text": "$y=\\tfrac53x-\\tfrac32$",
+              "correct": false
+            },
+            {
+              "text": "$y=\\tfrac43x-\\tfrac13$",
+              "correct": false
+            },
+            {
+              "text": "$y=\\tfrac56x-\\tfrac43$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Epipolar line",
+            "Fundamental matrix",
+            "Intrinsics"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "21EFB 5a",
+            "21EFB 5b",
+            "21RFB 4a"
+          ],
+          "q": "Two cameras with known intrinsics $K_1,K_2$ are related by $X_2=RX_1+T$. Given a pixel $x_1'$ in image 1 and several candidate pixels $x_2'$, describe how to decide which can be a correspondence.",
+          "answer": "**Use the epipolar constraint for uncalibrated cameras:**\n$$x_2'^\\top F x_1'=x_2'^\\top K_2^{-\\top}\\hat TRK_1^{-1}x_1'=0.$$\n**Procedure.** (1) Homogenise both pixels. (2) Build $F=K_2^{-\\top}\\hat TRK_1^{-1}$ — with $R=I$ this reduces to $K_2^{-\\top}\\hat TK_1^{-1}$. (3) Compute the epipolar line $l_2=Fx_1'$ once. (4) A candidate is admissible iff $l_2^\\top x_2'=0$; if none satisfies it, the correct answer is \"none of the other options\".\n**Equivalent calibrated form.** Normalise first, $x_i=K_i^{-1}x_i'$, then test $x_2^\\top\\hat TRx_1=0$ — the same computation, reorganised.",
+          "extend": "Each camera gets its **own** intrinsics: $K_1^{-1}$ on the right, $K_2^{-\\top}$ on the left. Mixing them up flips the whole answer.",
+          "tags": [
+            "Epipolar constraint",
+            "Fundamental matrix",
+            "Correspondence"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 5.5"
+          ],
+          "q": "Two cameras have intrinsics $K_1$ and $K_2$, and the relative pose mapping from camera 1 to camera 2 coordinates is $(R,T)$. State the epipolar constraint between two pixels $p_1\\in\\mathbb{R}^3$ and $p_2\\in\\mathbb{R}^3$ of image 1 and image 2 respectively, in homogeneous coordinates.",
+          "answer": "$$p_2^\\top\\,K_2^{-\\top}\\,\\hat TR\\,K_1^{-1}\\,p_1=0.$$\n**Reading it.** $K_1^{-1}p_1$ and $K_2^{-1}p_2$ convert the pixels into normalised (calibrated) coordinates, where the calibrated constraint $x_2^\\top\\hat TRx_1=0$ holds; moving $K_2^{-1}$ across the transpose gives $K_2^{-\\top}$ on the left.\n**Equivalently** $p_2^\\top Fp_1=0$ with the fundamental matrix $F=K_2^{-\\top}EK_1^{-1}$ and $E=\\hat TR$.",
+          "extend": "Each image gets its own intrinsics: $K_1^{-1}$ on the right, $K_2^{-\\top}$ (inverse **and** transpose) on the left.",
+          "tags": [
+            "Epipolar constraint",
+            "Fundamental matrix",
+            "Intrinsics"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "24EDC 5.6"
+          ],
+          "q": "Assume $[R,T]=\\begin{pmatrix}1&0&0&5\\\\0&1&0&4\\\\0&0&1&1\\end{pmatrix}$, $K_1=I_{3\\times3}$ and $K_2=\\begin{pmatrix}3&0&0\\\\0&2&0\\\\0&0&1\\end{pmatrix}$. What is the equation of the epipolar line associated with the pixel $p_2=(40,30,1)^\\top$ of the second image?",
+          "answer": "**None of the other choices.**\n**Computation.** With $R=I$ and $T=(5,4,1)^\\top$,\n$$\\hat T=\\begin{pmatrix}0&-1&4\\\\1&0&-5\\\\-4&5&0\\end{pmatrix},\\qquad F=K_2^{-\\top}\\hat TK_1^{-1}=\\begin{pmatrix}0&-\\tfrac13&\\tfrac43\\\\ \\tfrac12&0&-\\tfrac52\\\\-4&5&0\\end{pmatrix}.$$\nThe epipolar line in image 1 induced by $p_2$ is $l_1\\sim F^\\top p_2$:\n$$F^\\top p_2=\\begin{pmatrix}0&\\tfrac12&-4\\\\-\\tfrac13&0&5\\\\ \\tfrac43&-\\tfrac52&0\\end{pmatrix}\\begin{pmatrix}40\\\\30\\\\1\\end{pmatrix}=\\begin{pmatrix}11\\\\-\\tfrac{40}{3}+5\\\\ \\tfrac{160}{3}-75\\end{pmatrix}=\\begin{pmatrix}11\\\\-\\tfrac{25}{3}\\\\-\\tfrac{65}{3}\\end{pmatrix},$$\nwhich is the line $11u-\\tfrac{25}{3}v-\\tfrac{65}{3}=0$, i.e. $v=\\tfrac{33}{25}u-\\tfrac{13}{5}$ — a **positive** slope, whereas every offered option has a negative slope. Hence none of them matches.",
+          "extend": "Before grinding through the arithmetic, check the sign of the slope: here it alone rules out all four candidates.",
+          "options": [
+            {
+              "text": "$v=-25u+600$",
+              "correct": false
+            },
+            {
+              "text": "$v=-30u+305$",
+              "correct": false
+            },
+            {
+              "text": "$v=-45u+615$",
+              "correct": false
+            },
+            {
+              "text": "$v=-20u+700$",
+              "correct": false
+            },
+            {
+              "text": "None of the other choices",
+              "correct": true
+            },
+            {
+              "text": "$v=-50u+630$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Epipolar line",
+            "Fundamental matrix",
+            "Intrinsics"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22EDC 5b"
+          ],
+          "q": "Give a geometrical interpretation of the epipolar constraint.",
+          "answer": "The three vectors $\\overrightarrow{o_1X}$, $\\overrightarrow{o_2o_1}$ and $\\overrightarrow{o_2X}$ **form a plane** — i.e. the two viewing rays and the baseline joining the two optical centres are **coplanar**.\n**Why the algebra says exactly that.** $x_2^\\top\\hat TRx_1=\\langle x_2,\\ T\\times Rx_1\\rangle$ is the scalar triple product of the three vectors, and a triple product vanishes precisely when the vectors are coplanar. That plane is the **epipolar plane**, and its intersections with the two image planes are the epipolar lines.",
+          "extend": "Coplanarity is also why the constraint is necessary but not sufficient: it fixes the plane, not the point along the ray.",
+          "tags": [
+            "Epipolar constraint",
+            "Epipolar plane"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "essential-matrix",
+      "title": "The Essential Matrix",
+      "recap": "**Definition.** $E=\\hat TR$ — the middle part of the epipolar constraint $x_2^\\top Ex_1=0$, for **calibrated** cameras (normalised coordinates).\n**Degrees of freedom: 5.** Three from the rotation $R$ plus **two** from the translation $T$ — the scale of $T$ is not observable, so only its direction counts. (Equivalently: 9 entries − 1 scale − 3 constraints.)\n**Characterisation (necessary *and* sufficient).** A non-zero $E\\in\\mathbb{R}^{3\\times3}$ is an essential matrix **iff** its SVD has the form $E=U\\Sigma V^\\top$ with $\\Sigma=\\operatorname{diag}(\\sigma,\\sigma,0)$ for some $\\sigma>0$ and $U,V\\in SO(3)$. So $\\sigma_1=\\sigma_2$, $\\sigma_3=0$, and hence $\\operatorname{rank}(E)=2$ (**not** 3).\n**Projection onto the (normalised) essential space.** Given any full-rank $A=U\\operatorname{diag}(a,b,c)V^\\top$ with $a\\ge b\\ge c>0$, replacing $\\Sigma$ by $\\operatorname{diag}(1,1,0)$ yields the closest normalised essential matrix $U\\operatorname{diag}(1,1,0)V^\\top$. This is step 2 of the eight-point algorithm.\n**Useful identity.** $EE^\\top=\\hat TR(\\hat TR)^\\top=\\hat TRR^\\top\\hat T^\\top=-\\hat T\\hat T$, so $EE^\\top=-\\hat a\\hat a$ for some $a\\in\\mathbb{R}^3$ — it depends only on the translation.\n**Reading motion off $E$'s structure.** $E=\\hat TR$ inherits the zero pattern of $\\hat T$ and $R$. A camera constrained to translate in the $YZ$-plane and rotate about the $X$-axis has $R=\\begin{pmatrix}1&0&0\\\\0&*&*\\\\0&*&*\\end{pmatrix}$ and $T=(0,*,*)^\\top$, giving $E=\\begin{pmatrix}0&*&*\\\\ *&0&0\\\\ *&0&0\\end{pmatrix}$. Conversely $E=\\begin{pmatrix}0&a&0\\\\-a&0&0\\\\0&0&0\\end{pmatrix}$ with $a>0$ corresponds to $R=I$ and $T=(0,0,\\mp a)^\\top$ — pure **forward or backward** motion along the optical axis, with no rotation (both signs give the same $E$ up to the overall sign, which is unobservable).\n**Degenerate case: no translation.** If the two viewpoints coincide, $T=0$, so $E=\\hat TR=0$ and the epipolar constraint becomes trivially $0=0$. **No rotation can be recovered from $E$** and the eight-point algorithm cannot be used — one must instead match directions directly (see the rotation-only knowledge point).",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 5.2",
+            "25EDC 4.2"
+          ],
+          "q": "Which part of the epipolar constraint is the essential matrix $E$? How many degrees of freedom does $E$ have? Explain your answer.",
+          "answer": "**The essential matrix is $E=\\hat TR$**, so the constraint reads $x_2^\\top Ex_1=0$.\n**Degrees of freedom: 5.**\n**Explanation.** Three degrees of freedom come from the rotation $R\\in SO(3)$, and **two** from the translation $T$: although $T\\in\\mathbb{R}^3$, its **scale is not determined** (the whole reconstruction is only defined up to a global scale), so only its direction — two parameters — is observable.\n**Cross-check.** $E$ has 9 entries; subtracting 1 for the overall scale and 3 for the constraints $\\sigma_1=\\sigma_2$, $\\sigma_3=0$ leaves 5.",
+          "extend": "\"Scale of $T$ is free\" and \"$\\hat T$ has rank 2\" are both worth partial credit — say the first explicitly.",
+          "tags": [
+            "Essential matrix",
+            "Degrees of freedom",
+            "Epipolar constraint"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 4.4"
+          ],
+          "q": "Let $E$ be a valid essential matrix with singular value decomposition $E=U\\operatorname{diag}(\\sigma_1,\\sigma_2,\\sigma_3)V^\\top$, $\\sigma_1\\ge\\sigma_2\\ge\\sigma_3$. Which of the following properties hold?",
+          "answer": "**$\\sigma_1=\\sigma_2$** and **$\\sigma_3=0$**.\n**Why.** A non-zero $E$ is an essential matrix iff $E=U\\operatorname{diag}(\\sigma,\\sigma,0)V^\\top$ with $\\sigma>0$ and $U,V\\in SO(3)$: the two largest singular values coincide and the smallest vanishes.\n**Rank.** Consequently $\\operatorname{rank}(E)=2$ — so \"$\\operatorname{rank}(E)=3$\" is false. Note that the option \"$\\operatorname{rank}(E)=2$\" was not among the ticked ones on the paper, but it is an immediate consequence of $\\sigma_3=0$; the two facts $\\sigma_1=\\sigma_2$ and $\\sigma_3=0$ are the defining ones.",
+          "extend": "$E=\\hat TR$: $\\hat T$ is $3\\times3$ skew-symmetric, hence rank 2, and $R$ is invertible — so $E$ has rank 2 no matter what.",
+          "options": [
+            {
+              "text": "$\\sigma_1=\\sigma_2$",
+              "correct": true
+            },
+            {
+              "text": "$\\sigma_3=0$",
+              "correct": true
+            },
+            {
+              "text": "$\\operatorname{rank}(E)=3$",
+              "correct": false
+            },
+            {
+              "text": "$\\operatorname{rank}(E)=2$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Essential matrix",
+            "SVD",
+            "Rank"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 4e"
+          ],
+          "q": "Let $E$ be a non-zero matrix in $\\mathbb{R}^{3\\times3}$. Give a necessary and sufficient condition for $E$ to be an essential matrix.",
+          "answer": "A non-zero $E\\in\\mathbb{R}^{3\\times3}$ is an essential matrix **if and only if** it has a singular value decomposition\n$$E=U\\Sigma V^\\top\\quad\\text{with}\\quad\\Sigma=\\operatorname{diag}(\\sigma,\\sigma,0)\\ \\text{for some }\\sigma>0\\ \\text{and}\\ U,V\\in SO(3).$$\n**In words:** two equal non-zero singular values and one zero singular value, with both singular-vector matrices proper rotations.",
+          "extend": "Say **singular** values, not eigenvalues — the marking scheme deducts for that swap.",
+          "tags": [
+            "Essential matrix",
+            "SVD",
+            "Essential space"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 4a"
+          ],
+          "q": "Let $E$ be a valid non-zero essential matrix and $F$ a valid non-zero fundamental matrix with SVDs $E=U_E\\operatorname{diag}(\\lambda_1,\\lambda_2,\\lambda_3)V_E^\\top$ and $F=U_F\\operatorname{diag}(\\mu_1,\\mu_2,\\mu_3)V_F^\\top$ (values ordered descending). Which property does **not** hold in general?",
+          "answer": "**$\\mu_1=\\mu_2$ does not hold.** The equality of the two largest singular values is a property of the **essential** matrix only; the fundamental matrix $F=K_2^{-\\top}EK_1^{-1}$ is distorted by the intrinsics, which destroys it.\n**The others are all true.** $\\operatorname{rank}(F)=2$ and $\\mu_3=0$: $K$ has full rank, so $F$ has the same rank as $E$. $EE^\\top=-\\hat a\\hat a$: indeed $EE^\\top=\\hat TR R^\\top\\hat T^\\top=-\\hat T\\hat T$. $\\lambda_1=\\lambda_2$ and $\\lambda_3=0$: the definition of an essential matrix.",
+          "extend": "Rank 2 is shared by $E$ and $F$; **equal singular values are not**. That single asymmetry is the whole question.",
+          "options": [
+            {
+              "text": "$\\operatorname{rank}(F)=2$",
+              "correct": false
+            },
+            {
+              "text": "$\\mu_3=0$",
+              "correct": false
+            },
+            {
+              "text": "$EE^\\top=-\\hat a\\hat a$ for some $a\\in\\mathbb{R}^3$",
+              "correct": false
+            },
+            {
+              "text": "$\\lambda_1=\\lambda_2$",
+              "correct": false
+            },
+            {
+              "text": "$\\lambda_3=0$",
+              "correct": false
+            },
+            {
+              "text": "$\\mu_1=\\mu_2$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Essential matrix",
+            "Fundamental matrix",
+            "SVD"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21EFB 4b"
+          ],
+          "q": "Consider $E=\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\end{pmatrix}$. State a full-rank matrix $A\\in\\mathbb{R}^{3\\times3}$ that would yield $E$ when projected onto the normalised essential space. Justify your choice.",
+          "answer": "Any diagonal matrix\n$$A=\\begin{pmatrix}a&0&0\\\\0&b&0\\\\0&0&c\\end{pmatrix}\\quad\\text{with}\\quad a\\ge b\\ge c>0$$\nworks.\n**Justification.** $A=I\\cdot\\operatorname{diag}(a,b,c)\\cdot I$ is already an SVD of $A$ (with $U=V=I\\in SO(3)$). Projecting onto the **normalised essential space** means replacing the singular-value matrix $\\Sigma$ by $\\operatorname{diag}(1,1,0)$ while keeping $U$ and $V$:\n$$I\\operatorname{diag}(1,1,0)I=\\begin{pmatrix}1&0&0\\\\0&1&0\\\\0&0&0\\end{pmatrix}=E.$$\n**$A$ must have full rank**, so $c>0$ strictly; the ordering $a\\ge b\\ge c$ is needed for $\\operatorname{diag}(a,b,c)$ to be a valid (descending) singular-value matrix.",
+          "extend": "Projection onto the essential space never touches $U$ and $V$ — it only overwrites the singular values with $(1,1,0)$ (or $(\\sigma,\\sigma,0)$ for the unnormalised version).",
+          "tags": [
+            "Essential matrix",
+            "Essential space",
+            "SVD",
+            "Projection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21EFB 4c"
+          ],
+          "q": "A camera's motion is constrained to the $YZ$-plane (centre $O=[0,t_1,t_2]$) and its rotation to a rotation about the $X$-axis (both in world coordinates). For $a,\\dots,f\\in\\mathbb{R}$, which form does the essential matrix $E$ take for any two poses of this constrained camera?",
+          "answer": "$E=\\begin{pmatrix}0&a&b\\\\c&0&0\\\\d&0&0\\end{pmatrix}$.\n**Derivation.** A rotation about the $X$-axis fixes points on that axis, so\n$$R=\\begin{pmatrix}1&0&0\\\\0&*&*\\\\0&*&*\\end{pmatrix}.$$\nThe translation is $T=-RO=-R(0,*,*)^\\top=(0,*,*)^\\top$, so its first component vanishes. Then\n$$\\hat T=\\begin{pmatrix}0&*&*\\\\ *&0&0\\\\ *&0&0\\end{pmatrix}\\quad\\Longrightarrow\\quad E=\\hat TR=\\begin{pmatrix}0&*&*\\\\ *&0&0\\\\ *&0&0\\end{pmatrix}.$$\n**Reading it.** Constraining the motion removes degrees of freedom, and that shows up directly as a **zero pattern** in $E$ — which in turn reduces how many correspondences are needed to estimate it.",
+          "extend": "Whenever a paper constrains the motion, compute $\\hat T$ first: its zero pattern usually survives the multiplication by $R$.",
+          "options": [
+            {
+              "text": "$E=\\begin{pmatrix}0&0&a\\\\0&0&b\\\\c&d&0\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$E=\\begin{pmatrix}0&a&b\\\\c&d&0\\\\e&0&f\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$E=\\begin{pmatrix}0&a&0\\\\b&0&c\\\\0&d&0\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$E=\\begin{pmatrix}a&0&b\\\\0&c&d\\\\e&f&0\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$E$ does not have a special structure, all entries can be non-zero",
+              "correct": false
+            },
+            {
+              "text": "$E=\\begin{pmatrix}0&a&b\\\\c&0&0\\\\d&0&0\\end{pmatrix}$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Essential matrix",
+            "Constrained motion"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "25EDC 4.5",
+            "21RFB 4b"
+          ],
+          "q": "Suppose you estimated an essential matrix with a linear algorithm and obtained $E=\\begin{pmatrix}0&a&0\\\\-a&0&0\\\\0&0&0\\end{pmatrix}$ with $a>0$. The camera coordinate system has $z$ towards the scene, $y$ down, and $x$ completing a right-handed system. Which type of motion did the camera undergo?",
+          "answer": "**Forward or backward motion without rotation** — both are consistent.\n**Derivation.** For a translation along the optical axis without rotation, $R=I$ and $T=(0,0,\\mp a)^\\top$, giving\n$$E=\\hat TR=\\hat T=\\begin{pmatrix}0&\\mp(\\mp a)&0\\\\ \\pm a&0&0\\\\0&0&0\\end{pmatrix}=\\begin{pmatrix}0&a&0\\\\-a&0&0\\\\0&0&0\\end{pmatrix}.$$\n**Why both signs.** $E$ is only defined up to scale — including sign — so $T$ and $-T$ give the same (normalised) essential matrix. Resolving forward vs backward requires the **cheirality** check on triangulated points, not $E$ alone.\n**Why not the other options.** A sideways or upward translation would put non-zero entries in the third row/column of $\\hat T$; a $90^\\circ$ rotation about $z$ would destroy the antisymmetric $2\\times2$ block structure.",
+          "extend": "Zeros in the third row and column of $E$ mean $T$ points along $z$ — the epipole is at the image centre, the classic forward-motion \"expanding\" flow field.",
+          "options": [
+            {
+              "text": "Forward motion without rotation",
+              "correct": true
+            },
+            {
+              "text": "Backward motion without rotation",
+              "correct": true
+            },
+            {
+              "text": "Sideways motion in positive $x$ direction, with $+90^\\circ$ rotation around the $z$-axis",
+              "correct": false
+            },
+            {
+              "text": "Upward motion with $+90^\\circ$ rotation around the $z$-axis",
+              "correct": false
+            },
+            {
+              "text": "None of the other options",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Essential matrix",
+            "Camera motion"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 4.3",
+            "24EDC 5.2"
+          ],
+          "q": "If the camera has the same position for the two viewpoints, can the essential matrix $E$ be used to estimate the rotation accurately? Justify your answer.",
+          "answer": "**No.**\n**Reason.** With the same camera position the translation is zero, $T=0$, and therefore\n$$E=\\hat TR=\\hat0R=0.$$\nThe essential matrix vanishes identically, so the epipolar constraint $x_2^\\top Ex_1=0$ is satisfied by **every** pair of points and carries no information. Consequently **no rotation can be estimated from such an essential matrix**.\n**What to do instead.** Match ray *directions* directly: with $K$ known, $w=\\frac{K^{-1}p_2}{\\|K^{-1}p_2\\|}$ and $v=\\frac{K^{-1}p_1}{\\|K^{-1}p_1\\|}$ satisfy $w=Rv$, and two correspondences already determine $R$.",
+          "extend": "Zero translation ⇒ zero parallax ⇒ no depth and no epipolar geometry. This is also why pure-rotation sequences break structure-from-motion initialisation.",
+          "tags": [
+            "Essential matrix",
+            "Degenerate configuration",
+            "Rotation"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "22EDC 5e"
+          ],
+          "q": "A camera's motion is constrained to the $XZ$-plane (centre $O=[t_1,0,t_2]$) and its rotation to a rotation around the $Y$-axis (both in world coordinates). For $a,\\dots,f\\in\\mathbb{R}$, which form does the essential matrix $E$ take for any two poses of this constrained camera?",
+          "answer": "$E=\\begin{pmatrix}0&a&0\\\\b&0&c\\\\0&d&0\\end{pmatrix}$.\n**Derivation.** A rotation about the $Y$-axis fixes the $y$-component, so $R=\\begin{pmatrix}*&0&*\\\\0&1&0\\\\ *&0&*\\end{pmatrix}$. The translation is $T=-RO=(*,0,*)^\\top$, i.e. $T_2=0$, giving\n$$\\hat T=\\begin{pmatrix}0&-T_3&0\\\\T_3&0&-T_1\\\\0&T_1&0\\end{pmatrix}\\quad\\Longrightarrow\\quad E=\\hat TR=\\begin{pmatrix}0&*&0\\\\ *&0&*\\\\0&*&0\\end{pmatrix}.$$\n**Compare with the $YZ$/$X$-axis version,** which gives $\\begin{pmatrix}0&*&*\\\\ *&0&0\\\\ *&0&0\\end{pmatrix}$ — the zero pattern follows the constrained axis, so work it out rather than memorising it.",
+          "extend": "Recipe: write down the zero pattern of $R$, deduce which component of $T$ vanishes, build $\\hat T$, multiply.",
+          "options": [
+            {
+              "text": "$E=\\begin{pmatrix}0&0&a\\\\0&0&b\\\\c&d&0\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$E=\\begin{pmatrix}0&a&b\\\\c&d&0\\\\e&0&f\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$E$ does not have a special structure, all entries can be non-zero",
+              "correct": false
+            },
+            {
+              "text": "$E=\\begin{pmatrix}0&a&0\\\\b&0&c\\\\0&d&0\\end{pmatrix}$",
+              "correct": true
+            },
+            {
+              "text": "$E=\\begin{pmatrix}a&0&b\\\\0&c&d\\\\e&f&0\\end{pmatrix}$",
+              "correct": false
+            },
+            {
+              "text": "$E=\\begin{pmatrix}0&a&b\\\\c&0&0\\\\d&0&0\\end{pmatrix}$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Essential matrix",
+            "Constrained motion"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fundamental-matrix",
+      "title": "The Fundamental Matrix and Epipoles",
+      "recap": "**Definition.** For uncalibrated cameras the epipolar constraint in **pixel** coordinates is\n$$x_2'^\\top Fx_1'=0,\\qquad F=K_2^{-\\top}\\hat TRK_1^{-1}=K_2^{-\\top}EK_1^{-1}.$$\n**$E$ vs $F$.** Both have rank 2 and a zero smallest singular value. But $E$ has the extra structure $\\sigma_1=\\sigma_2$ (5 DOF); $F$ does **not** ($\\mu_1\\neq\\mu_2$ in general) and has **7 DOF** (9 entries − 1 scale − 1 rank constraint). $E$ requires known intrinsics; $F$ does not.\n**Epipoles.** $e_2$ is the image of camera centre 1 in image 2, $e_1$ the image of centre 2 in image 1. They are the null vectors:\n$$Fe_1=0,\\qquad e_2^\\top F=0,$$\nand every epipolar line in image 2 passes through $e_2$.\n**Proof that $e_2^\\top F=0$** (a full exam question):\n(a) The position of camera $C_1$ in the frame of $C_2$ is $T$, so with depth $\\lambda_1$ the epipole is $e_2=\\tfrac1{\\lambda_1}KT$, and $F=K^{-\\top}\\hat TRK^{-1}$ by definition. Hence $e_2^\\top F=\\big(\\tfrac1{\\lambda_1}KT\\big)^\\top\\big(K^{-\\top}\\hat TRK^{-1}\\big)$.\n(b) $(KT)^\\top=T^\\top K^\\top$ — the transpose of a product reverses the order.\n(c) $K^\\top K^{-\\top}=I$ cancels.\n(d) $T^\\top\\hat T=-(\\hat TT)^\\top$, using $\\hat T^\\top=-\\hat T$.\n(e) $\\hat TT=T\\times T=0$, so the whole expression is $0$.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20MFB 6"
+          ],
+          "q": "Let $F$ be the fundamental matrix for cameras $C_1,C_2$ with common intrinsics $K$, let $T$ be the translation between the camera centres as seen in the frame of $C_2$, and let $e_2$ be the epipole in the second image. Prove that $e_2^\\top F=0$, justifying each step.",
+          "answer": "**(a)** $e_2^\\top F=\\Big(\\tfrac{1}{\\lambda_1}KT\\Big)^\\top\\big(K^{-\\top}\\hat TRK^{-1}\\big)$.\n*Why:* the position of camera $C_1$ in the coordinate system of $C_2$ is $T$; with $\\lambda_1$ its depth, the pixel coordinates of the epipole are $e_2=\\tfrac{1}{\\lambda_1}KT$. The second factor is the definition of the fundamental matrix.\n**(b)** $=\\tfrac{1}{\\lambda_1}T^\\top K^\\top K^{-\\top}\\hat TRK^{-1}$.\n*Why:* the transpose of a product is the product of the transposes in reverse order.\n**(c)** $=\\tfrac{1}{\\lambda_1}T^\\top\\hat TRK^{-1}$.\n*Why:* $K^\\top K^{-\\top}=I$, and the identity can be dropped from a product.\n**(d)** $=-\\tfrac{1}{\\lambda_1}(\\hat TT)^\\top RK^{-1}$.\n*Why:* $(\\hat TT)^\\top=T^\\top\\hat T^\\top=-T^\\top\\hat T$, by skew-symmetry of $\\hat T$.\n**(e)** $=0$.\n*Why:* $\\hat TT=T\\times T=0$.",
+          "extend": "$Fe_1=0$ follows symmetrically — the epipoles are exactly the right and left null vectors of $F$, which is why $\\operatorname{rank}(F)=2$.",
+          "tags": [
+            "Fundamental matrix",
+            "Epipole",
+            "Proof"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Compare the essential matrix and the fundamental matrix: definition, degrees of freedom, singular values and when each is used.",
+          "answer": "**Definition.** $E=\\hat TR$ relates **normalised** (calibrated) coordinates: $x_2^\\top Ex_1=0$. $F=K_2^{-\\top}EK_1^{-1}$ relates **pixel** coordinates: $x_2'^\\top Fx_1'=0$.\n**Degrees of freedom.** $E$: **5** (3 rotation + 2 translation direction). $F$: **7** (9 entries − 1 overall scale − 1 rank-2 constraint).\n**Singular values.** Both have $\\sigma_3=0$, i.e. rank 2. Only $E$ additionally satisfies $\\sigma_1=\\sigma_2$ — the intrinsics destroy that symmetry in $F$.\n**Use.** With known calibration, estimate $E$ (five-point or eight-point) and decompose it into $R$ and $T$ directly. Without calibration, estimate $F$; it still gives epipolar lines and epipoles, but the pose can only be recovered up to a projective ambiguity until the intrinsics are known.",
+          "options": [
+            {
+              "text": "$E$ has 5 degrees of freedom and $F$ has 7.",
+              "correct": true
+            },
+            {
+              "text": "Both $E$ and $F$ have rank 2.",
+              "correct": true
+            },
+            {
+              "text": "Both $E$ and $F$ have two equal non-zero singular values.",
+              "correct": false
+            },
+            {
+              "text": "$F=K_2^{-\\top}EK_1^{-1}$.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Essential matrix",
+            "Fundamental matrix",
+            "Degrees of freedom"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22EDC 5c",
+            "22EDC 5d"
+          ],
+          "q": "(a) State the formula for the fundamental matrix $F$ in terms of the essential matrix $E$ and the intrinsic parameter matrix $K$. (b) State the epipolar constraint for uncalibrated cameras using $F$ and the image coordinates $x'_1,x'_2$ associated with the metric coordinates $x_1,x_2$ via the calibration matrix.",
+          "answer": "**(a)** $$F=K^{-\\top}EK^{-1}.$$\n(With different cameras, $F=K_2^{-\\top}EK_1^{-1}$.)\n**(b)** $$x_2'^\\top Fx_1'=0.$$\n**Where it comes from.** The metric (normalised) coordinates are $x_i=K^{-1}x_i'$; substituting into the calibrated constraint $x_2^\\top Ex_1=0$ gives $(K^{-1}x_2')^\\top E(K^{-1}x_1')=x_2'^\\top K^{-\\top}EK^{-1}x_1'=0$.",
+          "extend": "The inverse-transpose on the left comes from moving $K^{-1}$ through the transpose of $x_2$ — that is the whole derivation.",
+          "tags": [
+            "Fundamental matrix",
+            "Essential matrix",
+            "Epipolar constraint"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22EDC 5f",
+            "22EDC 5g"
+          ],
+          "q": "A camera matrix is $P=K[R|t]$, mapping $X$ to $x'$ via $PX\\sim x'$; a pair $(P,P')$ with $P=[I|0]$ and $P'=[A|a]$ (with $K=K'=I$) is called canonical. (a) Let $F$ be a non-zero matrix and $(P,P')$ a camera pair. Show that if $P'^\\top FP$ is skew-symmetric, then $F$ is the fundamental matrix of the pair. (b) Let $F$ be any $3\\times3$ matrix and $S$ any skew-symmetric $3\\times3$ matrix, and let $P=[I|0]$, $P'=[SF|e']$ with $e'$ the epipole satisfying $e'^\\top F=0$ (assume $P'$ has rank 3). Prove that $F$ is the fundamental matrix of $(P,P')$.",
+          "answer": "**(a)** $P'^\\top FP$ is skew-symmetric **iff** $X^\\top P'^\\top FPX=0$ for all $X$ (a quadratic form vanishes identically exactly when its matrix is skew-symmetric — Chapter 2). Writing $x'=P'X$ and $x=PX$, that condition is exactly\n$$x'^\\top Fx=0\\qquad\\forall\\ \\text{corresponding }x,x',$$\nwhich is the defining equation of the fundamental matrix of the pair $(P,P')$.\n**(b)** Invoke (a): it suffices to verify that $P'^\\top FP$ is skew-symmetric. With $P=[I|0]$ and $P'=[SF|e']$,\n$$P'^\\top FP=\\begin{pmatrix}(SF)^\\top\\\\e'^\\top\\end{pmatrix}F\\begin{pmatrix}I&0\\end{pmatrix}=\\begin{pmatrix}F^\\top S^\\top F&0\\\\0^\\top&0\\end{pmatrix},$$\nusing $e'^\\top F=0$ to kill the bottom row. The block $F^\\top S^\\top F$ satisfies $(F^\\top S^\\top F)^\\top=F^\\top SF=-F^\\top S^\\top F$ because $S^\\top=-S$, so the whole matrix is skew-symmetric. By (a), $F$ is the fundamental matrix of $(P,P')$.",
+          "extend": "The bridge \"quadratic form $\\equiv0$ $\\iff$ matrix skew-symmetric\" (Chapters 1–2) is what turns this projective statement into a one-line verification.",
+          "tags": [
+            "Fundamental matrix",
+            "Skew-symmetric matrix",
+            "Projective geometry",
+            "Proof"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22EDC 5h",
+            "22EDC 5i",
+            "22EDC 5j",
+            "22EDC 5k"
+          ],
+          "q": "Let $F$ be a matrix and $(P_1,P'_1),(P_2,P'_2)$ two canonical camera pairs for which $F$ is the fundamental matrix, with $P_1=P_2=[I|0]$, $P'_1=[A_1|a_1]$, $P'_2=[A_2|a_2]$. Prove that there exists a non-singular $4\\times4$ matrix $H$ with $P_2\\sim P_1H$ and $P'_2\\sim P'_1H$.",
+          "answer": "**(h) $\\hat a_1A_1=\\hat a_2A_2$.** Both pairs give the same $F$, and by the definition of the fundamental matrix for a canonical pair $[A|a]$ one has $F=\\hat aA$; equating the two expressions gives $\\hat a_1A_1=\\hat a_2A_2\\ (=F)$.\n**(i) $a_2=u\\,a_1$ for a non-zero scalar $u$.** From $F=\\hat a_1A_1$ we get $a_1^\\top F=a_1^\\top\\hat a_1A_1=0$, since $a_1^\\top\\hat a_1=0$. Likewise $a_2^\\top F=0$. As $F$ has rank 2, its left null space $\\ker(F^\\top)$ is **one-dimensional**, so $a_1$ and $a_2$ are parallel: $a_2=ua_1$.\n**(j) $A_2=u^{-1}\\big(A_1+a_1v^\\top\\big)$ for some 3-vector $v$.** Substituting $a_2=ua_1$ into $\\hat a_1A_1=\\hat a_2A_2=u\\hat a_1A_2$ gives $\\hat a_1(uA_2-A_1)=0$, so every column of $uA_2-A_1$ lies in $\\ker(\\hat a_1)=\\operatorname{span}\\{a_1\\}$, i.e. $uA_2-A_1=a_1v^\\top$ for some $v$. Hence $A_2=u^{-1}(A_1+a_1v^\\top)$.\n**(k) Conclusion.** Take\n$$H=\\begin{pmatrix}u^{-1}I&0\\\\u^{-1}v^\\top&u\\end{pmatrix}.$$\nThen $P_1H=[I|0]H=u^{-1}[I|0]\\sim P_2$, and\n$$P'_1H=[A_1|a_1]H=\\big[u^{-1}(A_1+a_1v^\\top)\\ \\big|\\ ua_1\\big]=[A_2|a_2]=P'_2.$$\nSo the two camera pairs are **projectively related** — which proves the theorem: a fundamental matrix determines the camera pair only up to a projective transformation of space.",
+          "extend": "This is the projective-ambiguity theorem: $F$ alone gives a reconstruction defined only up to a $4\\times4$ homography — knowing $K$ is what upgrades it to metric.",
+          "tags": [
+            "Fundamental matrix",
+            "Projective geometry",
+            "Proof",
+            "Reconstruction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eight-point-algorithm",
+      "title": "The Eight-Point Algorithm",
+      "recap": "**Three main steps.** Given $n\\ge8$ point pairs $(x_1^i,x_2^i)$:\n**1. Approximate $E$** by solving the linear system $\\chi E^s=0$.\n**2. Project onto the essential space** — enforce $\\Sigma=\\operatorname{diag}(\\sigma,\\sigma,0)$.\n**3. Recover the displacement** $(R,T)$ from the essential matrix.\n**Step 1 in detail.** Using $x_2^\\top Ex_1=0$ and the Kronecker identity $u^\\top Av=(v\\otimes u)^\\top A^s$, each correspondence gives one linear equation in the nine entries $E^s=[e_{11},e_{21},e_{31},e_{12},e_{22},e_{32},e_{13},e_{23},e_{33}]^\\top$. Stacking $n$ of them gives $\\chi\\in\\mathbb{R}^{n\\times9}$ whose $i$-th row is\n$$\\big(x_2^ix_1^i,\\ x_2^iy_1^i,\\ x_2^i,\\ y_2^ix_1^i,\\ y_2^iy_1^i,\\ y_2^i,\\ x_1^i,\\ y_1^i,\\ 1\\big).$$\n**Solving in practice.** Take the SVD $\\chi=U_\\chi\\Sigma_\\chi V_\\chi^\\top$; $E^s$ is the **ninth (last) column of $V_\\chi$**, i.e. the right singular vector of the smallest singular value — the minimiser of $\\|\\chi E^s\\|$ subject to $\\|E^s\\|=1$ (Chapter 1).\n**Why step 2 is needed.** The linear solution is **not** guaranteed to be an essential matrix: an essential matrix must have **rank 2** and **two equal non-zero singular values**, and nothing in $\\chi E^s=0$ enforces that. So one replaces $\\Sigma=\\operatorname{diag}(\\sigma_1,\\sigma_2,\\sigma_3)$ by $\\operatorname{diag}\\big(\\tfrac{\\sigma_1+\\sigma_2}{2},\\tfrac{\\sigma_1+\\sigma_2}{2},0\\big)$ (or $\\operatorname{diag}(1,1,0)$ when normalised).\n**Step 3: four solutions.** Decomposing $E$ gives **four** $(R,T)$ candidates — two rotations (from $R=UR_Z^\\top(\\pm\\tfrac\\pi2)V^\\top$) times two translation signs (the scale, hence the sign, of $T$ is free). Only **one** is physically valid; it is selected by the **cheirality condition**: triangulate the points and keep the solution for which the reconstructed 3D points lie **in front of both cameras** (positive depths).\n**What the eight-point algorithm optimises.** It minimises neither the **reprojection error** (Euclidean distances between observed and projected points) nor the **photometric error** — it minimises an **algebraic** residual $\\|\\chi E^s\\|$ with no geometric meaning. That is exactly why it is only used to *initialise* bundle adjustment.\n**Minimal correspondences.** With known calibration: **5** in general (the five-point algorithm, matching the 5 DOF of $E$), **4** for a planar scene (homography). The eight-point algorithm uses 8 because it drops the non-linear constraints to stay linear.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 5a"
+          ],
+          "q": "Give the three main steps of the eight-point algorithm.",
+          "answer": "Given a set of $n\\ge8$ point pairs $(x_1^i,x_2^i)$:\n**1.** Compute an **approximation of the essential matrix** by solving the linear system $\\chi E^s=0$.\n**2.** **Project onto the essential space** — enforce the singular-value structure $\\operatorname{diag}(\\sigma,\\sigma,0)$.\n**3.** **Recover the displacement** $(R,T)$ from the essential matrix.",
+          "extend": "Step 2 is the one candidates forget — without it the \"essential matrix\" from step 1 generally is not one, and step 3 has no valid decomposition.",
+          "tags": [
+            "Eight-point algorithm",
+            "Essential matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 5.3"
+          ],
+          "q": "Given $n\\ge8$ point correspondences $\\{x_1^i,y_1^i,x_2^i,y_2^i\\}_{i=1}^n$, the eight-point algorithm solves $\\chi E^s=0$ with $E^s=[e_{11},e_{21},e_{31},e_{12},e_{22},e_{32},e_{13},e_{23},e_{33}]^\\top$. Write down the shape of $\\chi$ and the expression for the row corresponding to the $i$-th correspondence.",
+          "answer": "**Shape.** $\\chi$ is an $n\\times9$ matrix — one row per correspondence, one column per entry of $E$.\n**Row $i$.**\n$$\\big(\\,x_2^ix_1^i,\\ \\ x_2^iy_1^i,\\ \\ x_2^i,\\ \\ y_2^ix_1^i,\\ \\ y_2^iy_1^i,\\ \\ y_2^i,\\ \\ x_1^i,\\ \\ y_1^i,\\ \\ 1\\,\\big).$$\n**Where it comes from.** Expanding $x_2^\\top Ex_1=0$ with $x_j=(x_j,y_j,1)^\\top$, or equivalently applying the Kronecker identity $x_2^\\top Ex_1=(x_1\\otimes x_2)^\\top E^s$.",
+          "extend": "The row is exactly $x_1\\otimes x_2$ — so the column order of $\\chi$ must match the chosen stacking order of $E^s$.",
+          "tags": [
+            "Eight-point algorithm",
+            "Kronecker product",
+            "Essential matrix"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 5.4",
+            "24EDC 5.1"
+          ],
+          "q": "Once you are given $\\chi$, how do you calculate $E^s$ in practice?",
+          "answer": "Take the singular value decomposition $\\chi=U_\\chi\\Sigma_\\chi V_\\chi^\\top$; then $E^s$ is the **ninth (last) column of $V_\\chi$**.\n**Why.** We seek the non-trivial solution of $\\chi E^s=0$, i.e. $\\min_{\\|E^s\\|=1}\\|\\chi E^s\\|$. As shown in Chapter 1, the minimiser is the right singular vector belonging to the smallest singular value — the last column of $V_\\chi$. With noisy data $\\chi$ has full rank 9 and this gives the least-squares approximation.",
+          "extend": "Last column of $V$, never of $U$: the unknown $E^s$ lives in the input space of $\\chi$.",
+          "tags": [
+            "Eight-point algorithm",
+            "SVD",
+            "Least squares"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 5.5"
+          ],
+          "q": "Is the non-trivial solution of the linear system $\\chi E^s=0$ guaranteed to be an essential matrix? Why?",
+          "answer": "**No.**\n**Why.** An essential matrix must have **rank 2** and **two equal non-zero singular values** ($\\Sigma=\\operatorname{diag}(\\sigma,\\sigma,0)$). The linear system $\\chi E^s=0$ imposes neither condition — it only enforces the epipolar constraint on the given correspondences, so its solution generally lies outside the essential space.\n**Remedy.** Project the solution onto the essential space by replacing its singular values with $\\big(\\tfrac{\\sigma_1+\\sigma_2}{2},\\tfrac{\\sigma_1+\\sigma_2}{2},0\\big)$ — step 2 of the eight-point algorithm.",
+          "extend": "Base the argument on the **structure of the essential space**, not on \"numerical inaccuracies\" — the latter only scores 1 of 3 points.",
+          "tags": [
+            "Eight-point algorithm",
+            "Essential space",
+            "SVD"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 5.6"
+          ],
+          "q": "How many possible solutions for $R$ and $T$ should we get from the essential matrix $E$? What are they? How can you rule out the incorrect solutions?",
+          "answer": "**Four solutions.**\n**Why.** There are **two possible rotations** (the decomposition of $E$ admits $R=UR_Z^\\top(\\pm\\tfrac{\\pi}{2})V^\\top$) and **two possible directions for $T$** (since $T$ is only determined up to scale, including its sign). $2\\times2=4$.\n**Ruling them out.** Use the **cheirality condition**: the reconstructed 3D points must lie **in front of both cameras**. Triangulate the points for each of the four candidates and keep the one for which all (or the large majority of) points have **positive depth** in both views. The other three place points behind one or both cameras.",
+          "extend": "\"Two for $T$\" alone is not enough — say explicitly that the scale/sign of $T$ is free, and name the cheirality check.",
+          "tags": [
+            "Essential matrix",
+            "Eight-point algorithm",
+            "Cheirality"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "25EDC 4.6"
+          ],
+          "q": "Which of the following statements about the eight-point algorithm is correct?",
+          "answer": "**The eight-point algorithm minimises neither the reprojection error nor the photometric error.**\n**Why.** It minimises the **algebraic** residual $\\|\\chi E^s\\|$ subject to $\\|E^s\\|=1$ — a quantity with no direct geometric or photometric meaning. That is precisely why its output is used only to **initialise** a nonlinear refinement.\n**Contrast.** Bundle adjustment minimises the **reprojection error** (Euclidean point distances); direct methods minimise the **photometric error** (intensity differences).",
+          "extend": "Algebraic vs geometric error is a recurring theme: linear algorithms are fast and closed-form but optimise the wrong thing.",
+          "options": [
+            {
+              "text": "The 8-point algorithm minimises the reprojection error (Euclidean distances between observed and projected points).",
+              "correct": false
+            },
+            {
+              "text": "The 8-point algorithm minimises the photometric error (intensity differences between corresponding pixels).",
+              "correct": false
+            },
+            {
+              "text": "The 8-point algorithm minimises neither the reprojection error nor the photometric error.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Eight-point algorithm",
+            "Reprojection error",
+            "Photometric error"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "22RDC 4f",
+            "20RFB 9c"
+          ],
+          "q": "You want to determine the 3D rigid-body motion (with unknown scale) between two images of the same static scene, knowing the intrinsic calibration. What is the minimal number of 2D-to-2D point correspondences needed **for a planar scene**?",
+          "answer": "**4.**\n**Why.** For a planar scene the two views are related by a **homography** $H\\in\\mathbb{R}^{3\\times3}$, which has 8 degrees of freedom (9 entries up to scale). Each point correspondence gives 2 independent equations, so $4$ points give the 8 equations needed.",
+          "extend": "Planar ⇒ homography ⇒ 4 points. General ⇒ essential matrix (5 DOF) ⇒ 5 points.",
+          "options": [
+            {
+              "text": "$4$",
+              "correct": true
+            },
+            {
+              "text": "$5$",
+              "correct": false
+            },
+            {
+              "text": "$6$",
+              "correct": false
+            },
+            {
+              "text": "$7$",
+              "correct": false
+            },
+            {
+              "text": "$8$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Homography",
+            "Planar scene",
+            "Minimal solver"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 3,
+          "sources": [
+            "22RDC 4g",
+            "20RFB 9d",
+            "24EDC 5.4"
+          ],
+          "q": "Same setting — known intrinsics, unknown scale. What is the minimal number of 2D-to-2D point correspondences needed **in general** (non-planar scene)?",
+          "answer": "**5.**\n**Why.** The essential matrix has **5 degrees of freedom** (3 rotation + 2 translation direction), so five correspondences suffice — this is Nistér's five-point algorithm.\n**Contrast with the eight-point algorithm,** which needs 8 because it deliberately ignores the non-linear constraints $\\sigma_1=\\sigma_2,\\ \\sigma_3=0$ in order to keep the estimation linear.",
+          "extend": "Minimal number = degrees of freedom of the model. $E$: 5. $H$: 8 constraints ⇒ 4 points. $F$: 7 ⇒ 7 points.",
+          "options": [
+            {
+              "text": "$4$",
+              "correct": false
+            },
+            {
+              "text": "$5$",
+              "correct": true
+            },
+            {
+              "text": "$6$",
+              "correct": false
+            },
+            {
+              "text": "$7$",
+              "correct": false
+            },
+            {
+              "text": "$8$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Essential matrix",
+            "Minimal solver",
+            "Degrees of freedom"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21RFB 4c"
+          ],
+          "q": "The following MATLAB function takes `pts1`, `pts2` (n points each, homogeneous, size $3\\times n$). What can it be used for?\n```\nA = [];\nfor i = 1:size(pts1, 2)\n    A = [A; kron(pts1(:, i), hat(pts2(:, i)))'];\nend\n[~, ~, V] = svd(A);\nreturn_val = reshape(V(:, end), 3, 3);\n```",
+          "answer": "**It estimates a planar homography matrix.**\n**Why.** The constraint being stacked is $\\widehat{x_2}\\,H\\,x_1=0$ — the homography relation $x_2\\sim Hx_1$ written as a cross product, which removes the unknown scale. Vectorising with the Kronecker identity gives $\\big(x_1\\otimes\\widehat{x_2}\\big)^\\top H^s=0$, exactly the rows being appended. The solution is then the right singular vector of the smallest singular value, reshaped to $3\\times3$.\n**Why not the essential matrix.** The epipolar constraint $x_2^\\top Ex_1=0$ is a **scalar** equation per correspondence, so its rows would be $x_1\\otimes x_2$ (a $1\\times9$ vector), not $x_1\\otimes\\widehat{x_2}$ (which contributes $3$ rows per point).",
+          "extend": "Spot the `hat`: a **scalar** constraint ⇒ essential/fundamental matrix; a **cross-product** constraint ⇒ homography (or a projection matrix).",
+          "options": [
+            {
+              "text": "The code can be used to estimate a planar homography matrix",
+              "correct": true
+            },
+            {
+              "text": "The code can be used to estimate a fundamental matrix",
+              "correct": false
+            },
+            {
+              "text": "The code can be used to estimate motion using the multiple view matrix",
+              "correct": false
+            },
+            {
+              "text": "The code is wrong and does not work",
+              "correct": false
+            },
+            {
+              "text": "The code can be used to estimate the cross correlation between the points",
+              "correct": false
+            },
+            {
+              "text": "The code can be used to estimate an essential matrix",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Homography",
+            "Kronecker product",
+            "SVD"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "structure-triangulation",
+      "title": "Structure Reconstruction and the Multiple-View Matrix",
+      "recap": "**The scale problem.** $E$, and hence $T$, are only defined up to a positive scale $\\gamma$, normalised so that $\\|E\\|=\\|T\\|=1$. After recovering $R$ and $T$ we therefore have, for every correspondence $j$,\n$$\\lambda_2^jx_2^j=\\lambda_1^jRx_1^j+\\gamma T,\\qquad j=1,\\dots,n,$$\nwith the depths $\\lambda_i^j$ and the global scale $\\gamma$ unknown.\n**Linear structure recovery.** Multiplying by $\\widehat{x_2^j}$ removes $\\lambda_2^j$ (since $\\widehat{x_2}x_2=0$), leaving one vector equation per point that is **linear** in $(\\lambda_1^1,\\dots,\\lambda_1^n,\\gamma)$. Stacking gives $M\\vec\\lambda=0$ with $\\vec\\lambda=(\\lambda_1^1,\\dots,\\lambda_1^n,\\gamma)^\\top\\in\\mathbb{R}^{n+1}$ and\n$$M=\\begin{pmatrix}\\widehat{x_2^1}Rx_1^1&0&\\cdots&0&\\widehat{x_2^1}T\\\\0&\\widehat{x_2^2}Rx_1^2&\\cdots&0&\\widehat{x_2^2}T\\\\ \\vdots&&\\ddots&&\\vdots\\\\0&\\cdots&0&\\widehat{x_2^n}Rx_1^n&\\widehat{x_2^n}T\\end{pmatrix}\\in\\mathbb{R}^{3n\\times(n+1)}.$$\nNote the hat sits on $x_2$, **not** on $T$; the last column collects the $\\gamma$ terms. Solve again by the last right singular vector.\n**Multiple views.** For a point seen in $m\\ge2$ images with observations $x_1,\\dots,x_m$ and projection matrices $\\Pi_1,\\dots,\\Pi_m\\in\\mathbb{R}^{3\\times4}$, define\n$$N_p=\\begin{pmatrix}\\Pi_1&x_1&0&\\cdots&0\\\\ \\Pi_2&0&x_2&&0\\\\ \\vdots&&&\\ddots&\\vdots\\\\ \\Pi_m&0&0&\\cdots&x_m\\end{pmatrix}\\in\\mathbb{R}^{3m\\times(m+4)}.$$\n**Its rank decides existence and uniqueness:**\n$\\bullet$ $\\operatorname{rank}(N_p)=m+4$ (full rank) ⇒ **no** solution;\n$\\bullet$ $\\operatorname{rank}(N_p)=m+3$ ⇒ the solution is **unique** (up to scale);\n$\\bullet$ $\\operatorname{rank}(N_p)<m+3$ ⇒ the solution space has dimension greater than 1 (degenerate configuration, e.g. the point lies on the baseline).\n**Three views and coplanarity.** Pairwise epipolar constraints alone are not enough for three views: if $x_1,x_2,x_3$ are **not coplanar**, the pairwise constraints $x_j^\\top F_{ij}x_i=0$ do guarantee a unique common preimage.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 5.7",
+            "24EDC 5.3"
+          ],
+          "q": "After recovering $R$ and $T$ (with $\\|E\\|=\\|T\\|=1$) we have $\\lambda_2^jx_2^j=\\lambda_1^jRx_1^j+\\gamma T$ for $j=1,\\dots,n$. To recover the depths in the first camera frame we solve $M\\vec\\lambda=0$ with $\\vec\\lambda=(\\lambda_1^1,\\dots,\\lambda_1^n,\\gamma)^\\top$. Write down $M\\in\\mathbb{R}^{3n\\times(n+1)}$.",
+          "answer": "$$M=\\begin{pmatrix}\\widehat{x_2^1}Rx_1^1&0&\\cdots&0&\\widehat{x_2^1}T\\\\0&\\widehat{x_2^2}Rx_1^2&\\cdots&0&\\widehat{x_2^2}T\\\\ \\vdots&&\\ddots&&\\vdots\\\\0&0&\\cdots&\\widehat{x_2^n}Rx_1^n&\\widehat{x_2^n}T\\end{pmatrix}.$$\n**Where it comes from.** Multiplying the $j$-th equation by $\\widehat{x_2^j}$ annihilates the left-hand side ($\\widehat{x_2}x_2=0$), giving $0=\\lambda_1^j\\widehat{x_2^j}Rx_1^j+\\gamma\\widehat{x_2^j}T$ — three scalar equations per point, linear in $\\lambda_1^j$ and $\\gamma$.\n**Structure.** Block-diagonal in the per-point depths (each $\\lambda_1^j$ appears in only its own three rows) with a **dense last column** for the shared scale $\\gamma$.",
+          "extend": "The hat goes on $x_2$, never on $T$ — putting it on $T$ costs half a point, as does omitting it entirely.",
+          "tags": [
+            "Triangulation",
+            "Structure reconstruction",
+            "Scale"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 5.8",
+            "24EDC 5.8"
+          ],
+          "q": "A point $X\\in\\mathbb{R}^3$ is observed in $m\\ge2$ images with observations $x_1,\\dots,x_m$ (homogeneous) and projection matrices $\\Pi_1,\\dots,\\Pi_m\\in\\mathbb{R}^{3\\times4}$. For $N_p=\\begin{pmatrix}\\Pi_1&x_1&0&\\cdots&0\\\\ \\Pi_2&0&x_2&&0\\\\ \\vdots&&&\\ddots&\\vdots\\\\ \\Pi_m&0&0&\\cdots&x_m\\end{pmatrix}\\in\\mathbb{R}^{3m\\times(m+4)}$, what does the rank of $N_p$ tell you about the existence and uniqueness of a reconstruction $X$?",
+          "answer": "**$\\operatorname{rank}(N_p)=m+4$ (full rank)** — the only solution is the trivial one, so there are **no** (valid) solutions: the observations are inconsistent, no single 3D point projects to all of them.\n**$\\operatorname{rank}(N_p)=m+3$** — the null space is one-dimensional, so the reconstruction is **unique** (up to scale). This is the generic, well-posed case.\n**$\\operatorname{rank}(N_p)<m+3$** — the solution space has dimension greater than 1: the configuration is **degenerate** and the point is not determined (e.g. it lies on the line joining the camera centres).",
+          "extend": "The $m+4$ unknowns are the 4 homogeneous coordinates of $X$ plus one depth per view; a one-dimensional null space is exactly what a projective point needs.",
+          "tags": [
+            "Triangulation",
+            "Multiple-view matrix",
+            "Rank"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 9a",
+            "20RFB 9b"
+          ],
+          "q": "Three cameras have identity rotations and identity intrinsics. With $F_{ij}$ the fundamental matrix between images $i$ and $j$, and pixels $x_1=(10,6,1)^\\top$, $x_2=(5,15,1)^\\top$, $x_3=(8,9,1)^\\top$ satisfying $x_j^\\top F_{ij}x_i=0$ for all $i<j$: is it true that \"there exists a unique 3D point whose projections in the different images correspond to $x_1,x_2,x_3$\"?",
+          "answer": "**The statement is true.**\n**Explanation.** The vectors $x_1,x_2,x_3$ are **not coplanar**. Together with the pairwise epipolar constraints being satisfied, this guarantees the **existence and uniqueness** of a common preimage: the three viewing rays intersect in exactly one 3D point, so those pixels are indeed the projections of a unique 3D point.\n**Why coplanarity matters.** If the three vectors were coplanar, the pairwise constraints could be satisfied without the three rays meeting at a single point — the classic failure of \"pairwise consistency does not imply triple consistency\", which is what the trifocal tensor / multiple-view matrix is designed to capture.",
+          "extend": "Two views: the epipolar constraint is necessary and sufficient. Three or more: pairwise constraints alone are **not** sufficient in degenerate (coplanar) configurations.",
+          "tags": [
+            "Triangulation",
+            "Fundamental matrix",
+            "Multiple views"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 5.7"
+          ],
+          "q": "Three cameras have rotations all equal to $I_{3\\times3}$; $T_{ij}$ is the translation of the relative pose from camera $i$ to camera $j$ ($1\\le i<j\\le3$). For the homogeneous pixels $p_1=(10,6,1)^\\top$, $p_2=(5,15,1)^\\top$, $p_3=(8,9,1)^\\top$ of images 1, 2, 3 we know $p_j^\\top\\widehat{T_{ij}}p_i=0$ for all $i<j$. Is the statement \"there exists a unique 3D point whose projections in the different images correspond to $p_1,p_2,p_3$\" true, wrong, or impossible to assess? Justify.",
+          "answer": "**We cannot assess the validity of the statement in general** — it depends on the intrinsics, and two cases must be distinguished.\n**Case 1 — all intrinsics are the identity.** Then $p_j^\\top\\widehat{T_{ij}}p_i=0$ *is* the pairwise epipolar constraint. Since the vectors $p_1,p_2,p_3$ are **not coplanar**, these constraints ensure the **existence and uniqueness** of the preimage: the pixels are the projections of a unique 3D point, and the statement is **true**.\n**Case 2 — some intrinsic matrices are not the identity.** Then the given equations have no significant meaning, because the correct epipolar constraint would be\n$$p_j^\\top K_j^{-\\top}\\widehat{T_{ij}}K_i^{-1}p_i=0.$$\nThe stated equations neither imply nor contradict the existence of a common preimage.",
+          "extend": "The trap is that the equation *looks* like the epipolar constraint but is only one when $K=I$. Always check whether you are in pixel or normalised coordinates.",
+          "tags": [
+            "Triangulation",
+            "Epipolar constraint",
+            "Intrinsics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rotation-only",
+      "title": "The Rotation-Only Case and Estimating R from Correspondences",
+      "recap": "**Setting.** Two cameras whose relative motion is a **pure rotation**: $X_2=RX_1$, with the same known intrinsics $K$.\n**The eight-point algorithm fails.** It relies on the epipolar constraint $x_2^\\top\\hat TRx_1=0$, which becomes **trivial** when $T=0$ ($E=\\hat TR=0$). Zero translation means zero parallax, hence no epipolar geometry at all — and there is no \"step at which to insert\" the constraint.\n**What works instead: match directions.** From $\\lambda_2p_2=KX_2=KRX_1=KR\\lambda_1K^{-1}p_1$ we get, after normalising away the unknown depths,\n$$w=Rv\\qquad\\text{with}\\qquad w=\\frac{K^{-1}p_2}{\\|K^{-1}p_2\\|},\\quad v=\\frac{K^{-1}p_1}{\\|K^{-1}p_1\\|}.$$\nBoth the $K^{-1}$ **and** the normalisation are essential: $K^{-1}$ converts pixels to ray directions, and dividing by the norm removes the unknown depth. Normalising $p$ before applying $K^{-1}$ (i.e. $\\tfrac{K^{-1}p}{\\|p\\|}$) is wrong.\n**How many correspondences?** A linear map on $\\mathbb{R}^n$ is determined by its action on $n$ linearly independent vectors, so in principle $3$ pairs $(v_i,w_i)$ determine $R$. But $R$ preserves the cross product,\n$$R(v_1\\times v_2)=(Rv_1)\\times(Rv_2)=w_1\\times w_2,$$\nso the third pair comes **for free** from the first two: the **minimal number of 2D–2D correspondences is 2**.\n**Closed form.** With $V=[v_1,v_2,v_1\\times v_2]$ and $W=[w_1,w_2,w_1\\times w_2]$ (both invertible),\n$$R=WV^{-1}.$$\nNot $V^{-1}W$, not $WV$ — check by applying it to $v_1$.\n**With noise.** $WV^{-1}$ will not be exactly orthogonal; project it back onto $SO(3)$ with the SVD, $R^\\star=U\\operatorname{diag}(1,1,\\det(UV^\\top))V^\\top$ (Chapter 1).",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "22RDC 5b",
+            "20RFB 10a"
+          ],
+          "q": "Two cameras differ only by an unknown rotation $R\\in SO(3)$, i.e. $X_2=RX_1$, with the same known intrinsics $K$. Can the eight-point algorithm be used to estimate $R$? If yes, explain how and at which step the zero-translation constraint must be included; if no, why not?",
+          "answer": "**The eight-point algorithm cannot be used.**\n**Reason.** It makes use of the **epipolar constraint** $x_2^\\top\\hat TRx_1=0$, which becomes **trivial** here: with no translation, $T=0$ gives $E=\\hat TR=0$, so the constraint reads $0=0$ for every pair of points and carries no information about $R$.\n**Consequence.** There is no step at which the zero-translation constraint could be inserted — the entire construction the algorithm rests on has collapsed. One must estimate $R$ directly from ray directions instead.",
+          "extend": "No translation ⇒ no parallax ⇒ no epipolar geometry. The same degeneracy is why SfM pipelines detect and reject pure-rotation image pairs during initialisation.",
+          "tags": [
+            "Eight-point algorithm",
+            "Degenerate configuration",
+            "Rotation"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "22RDC 5c",
+            "20RFB 10b"
+          ],
+          "q": "Let $(p_1,p_2)\\in(\\mathbb{R}^3)^2$ be a pair of corresponding pixels (homogeneous) for two cameras related by a pure rotation $R$ with shared intrinsics $K$. Which pair of vectors $(w,v)$ fulfils $w=Rv$?",
+          "answer": "$$w=\\frac{K^{-1}p_2}{\\|K^{-1}p_2\\|},\\qquad v=\\frac{K^{-1}p_1}{\\|K^{-1}p_1\\|}.$$\n**Derivation (mirrors the epipolar one).** $\\lambda_ip_i=KX_i$ gives $X_i=\\lambda_iK^{-1}p_i$; substituting into $X_2=RX_1$ yields $\\lambda_2K^{-1}p_2=\\lambda_1RK^{-1}p_1$. The depths $\\lambda_i$ are unknown, so normalise both sides to unit length — since $R$ preserves norms, the normalised vectors satisfy exactly $w=Rv$.\n**Why the others fail.** $K$ (not $K^{-1}$) would go the wrong way, from rays to pixels. Dividing by $\\|p_i\\|$ instead of $\\|K^{-1}p_i\\|$ does not produce unit vectors after the $K^{-1}$. And omitting the normalisation leaves the unknown depth ratio in the equation.",
+          "extend": "$K^{-1}$ first, **then** normalise. The order matters and is exactly what separates the correct option from the decoys.",
+          "options": [
+            {
+              "text": "$w=\\tfrac{K^{-1}p_2}{\\|p_2\\|},\\ v=\\tfrac{Kp_1}{\\|p_1\\|}$",
+              "correct": false
+            },
+            {
+              "text": "$w=\\tfrac{Kp_2}{\\|Kp_2\\|},\\ v=\\tfrac{Kp_1}{\\|Kp_1\\|}$",
+              "correct": false
+            },
+            {
+              "text": "$w=K^{-1}p_2,\\ v=K^{-1}p_1$",
+              "correct": false
+            },
+            {
+              "text": "$w=Kp_2,\\ v=Kp_1$",
+              "correct": false
+            },
+            {
+              "text": "$w=\\tfrac{K^{-1}p_2}{\\|K^{-1}p_2\\|},\\ v=\\tfrac{K^{-1}p_1}{\\|K^{-1}p_1\\|}$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Rotation",
+            "Intrinsics",
+            "Correspondence"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "22RDC 5d",
+            "22RDC 5e",
+            "20RFB 10c",
+            "20RFB 10d"
+          ],
+          "q": "(a) Let $f:\\mathbb{R}^n\\to\\mathbb{R}^n$ be a linear transformation. What is the minimum number $N$ of linearly independent vectors $\\{v_i\\}$ with known images $\\{f(v_i)\\}$ needed to compute $f(v)$ for any $v\\in\\mathbb{R}^n$? Justify. (b) For $(w_1,w_2)=(Rv_1,Rv_2)$, express $R(v_1\\times v_2)$ in terms of $w_1,w_2$.",
+          "answer": "**(a) $N=n$.** We need every $v\\in\\mathbb{R}^n$ to be expressible as a linear combination of the $\\{v_i\\}$, i.e. $\\operatorname{span}(v_1,\\dots,v_N)=\\mathbb{R}^n$. Together with linear independence that forces $N=n$ — the vectors must form a basis. Then $f(v)=f(\\sum_i\\alpha_iv_i)=\\sum_i\\alpha_if(v_i)$ by linearity.\n**(b)**\n$$R(v_1\\times v_2)=w_1\\times w_2.$$\n**Consequence.** A rotation preserves the cross product, so knowing the images of $v_1$ and $v_2$ automatically gives the image of $v_1\\times v_2$ — the third basis vector comes for free.",
+          "extend": "That \"free third vector\" is exactly why a rotation needs only **two** correspondences, not three, even though it is a map on $\\mathbb{R}^3$.",
+          "tags": [
+            "Rotation",
+            "Cross product",
+            "Basis"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "22RDC 5f",
+            "20RFB 10e"
+          ],
+          "q": "What is the minimal number of 2D-to-2D correspondences needed to estimate the rotation matrix $R$ between two cameras related by a pure rotation with known intrinsics?",
+          "answer": "**2.**\n**Why.** Each correspondence gives one pair $(v_i,w_i)$ with $w_i=Rv_i$. A linear map on $\\mathbb{R}^3$ would normally need three independent vectors — but since a rotation preserves the cross product, $R(v_1\\times v_2)=w_1\\times w_2$, the third pair is obtained for free from the first two. Two correspondences therefore already determine a full basis and hence $R$.\n**Cross-check with degrees of freedom.** $R$ has 3 DOF and each 2D–2D correspondence provides 2 constraints, so $\\lceil3/2\\rceil=2$.",
+          "options": [
+            {
+              "text": "$2$",
+              "correct": true
+            },
+            {
+              "text": "$3$",
+              "correct": false
+            },
+            {
+              "text": "$4$",
+              "correct": false
+            },
+            {
+              "text": "$5$",
+              "correct": false
+            },
+            {
+              "text": "$8$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Rotation",
+            "Minimal solver",
+            "Cross product"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "22RDC 5g",
+            "20RFB 10f"
+          ],
+          "q": "Let $\\{(w_i,v_i)\\}$ satisfy $w_i=Rv_i$ for all $i$. Let $W$ have the $w_i$ as columns and $V$ the $v_i$ as columns, both invertible. What is the expression for the rotation matrix $R$?",
+          "answer": "$$R=WV^{-1}.$$\n**Derivation.** Collecting the relations column-wise gives $W=RV$; right-multiplying by $V^{-1}$ (which exists by assumption) yields $R=WV^{-1}$.\n**Check.** $Rv_1=WV^{-1}v_1=We_1=w_1$ ✓.\n**In practice.** With noisy measurements $WV^{-1}$ will not be exactly orthogonal — project it back onto $SO(3)$ with the SVD: $R^\\star=U\\operatorname{diag}\\big(1,1,\\det(UV^\\top)\\big)V^\\top$.",
+          "extend": "Order matters: $V^{-1}W$ and $WV$ are both wrong. Verify by applying the candidate to $v_1$ and checking you get $w_1$.",
+          "options": [
+            {
+              "text": "$R=WV^{-1}$",
+              "correct": true
+            },
+            {
+              "text": "$R=V^{-1}WV$",
+              "correct": false
+            },
+            {
+              "text": "$R=WV$",
+              "correct": false
+            },
+            {
+              "text": "$R=W^{-1}VW$",
+              "correct": false
+            },
+            {
+              "text": "$R=VWV^{-1}$",
+              "correct": false
+            },
+            {
+              "text": "$R=V^{-1}W$",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Rotation",
+            "Correspondence",
+            "Special orthogonal group"
+          ]
+        }
+      ]
+    }
+  ]
+}

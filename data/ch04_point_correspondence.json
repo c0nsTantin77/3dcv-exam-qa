@@ -1,0 +1,439 @@
+{
+  "id": "ch04",
+  "roman": "IV",
+  "title": "Estimating Point Correspondence",
+  "blurb": "From photometry to geometry: brightness constancy and the aperture problem, the Lucas–Kanade method and its structure tensor, Harris corners, coarse-to-fine pyramids, and patch matching by NCC — how the correspondences that all reconstruction depends on are actually found.",
+  "knowledge_points": [
+    {
+      "id": "brightness-constancy",
+      "title": "Brightness Constancy, the Optical Flow Constraint and the Aperture Problem",
+      "recap": "**Brightness constancy assumption.** The intensity of a given scene point does not change over time:\n$$I(x(t),t)=\\text{const}\\ \\ \\forall t\\qquad\\Longleftrightarrow\\qquad \\frac{d}{dt}I(x(t),t)=0.$$\nWriting the total derivative out gives the **optical flow constraint**\n$$\\nabla I^\\top\\frac{dx(t)}{dt}+\\frac{\\partial I}{\\partial t}=0,\\qquad\\text{i.e.}\\qquad I_{x_1}v_1+I_{x_2}v_2+I_t=0,$$\nwhere $v=\\frac{dx(t)}{dt}$ is the sought velocity (optical flow) and $\\nabla I=(I_x,I_y)^\\top$ the spatial image gradient.\n**Derivation by Taylor.** From $I(x+v,t{+}1)=I(x,t)$, a first-order expansion gives $I(x,t)+I_{x_1}v_1+I_{x_2}v_2+I_t\\approx I(x,t)$, and the $I(x,t)$ cancels.\n**Aperture problem.** One linear equation, two unknowns ⇒ **infinitely many solutions**, a one-parameter family. Only the component of $v$ **along the gradient** is determined, $v_{\\text{normal}}=-I_t/\\|\\nabla I\\|$; the component **along the edge** (perpendicular to $\\nabla I$) is completely unconstrained. Physically: looking at a moving straight edge through a small aperture, you can only perceive motion perpendicular to the edge.\n**Degenerate case.** If $\\nabla I=0$ (a textureless / uniform region) nothing at all can be inferred — no direction is constrained.\n**Relation to the structure tensor.** The aperture problem is exactly the statement that $M=\\int_{W}\\nabla I\\nabla I^\\top$ loses rank: an edge makes $M$ rank 1, a flat region makes $M\\approx0$.\n**When brightness constancy fails.** (1) Illumination changes — moving light sources, auto-exposure. (2) Specular reflections — highlights move with the viewpoint, not with the surface. (3) Occlusion / disocclusion — the corresponding point simply does not exist. Also transparency, motion blur and non-Lambertian materials.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 5.1",
+            "24EDC 4.1"
+          ],
+          "q": "The Lucas–Kanade optical flow algorithm relies on the brightness constancy assumption: the intensity $I$ of a point $x$ in an image does not change over time $t$. Write down the equation of this assumption, showing the dependencies of the intensity on the related factors.",
+          "answer": "$$I(x(t),t)=\\text{const}\\quad\\forall t\\qquad\\text{or equivalently}\\qquad\\frac{d}{dt}I(x(t),t)=0.$$\n**Note the dependencies.** The position $x$ is itself a function of time — that is what makes the total derivative produce both a spatial and a temporal term. Writing merely $I(x,t)=\\text{const}$ without the $x(t)$ misses the point of the assumption.",
+          "extend": "Expanding $\\tfrac{d}{dt}I(x(t),t)=0$ with the chain rule is exactly the optical flow constraint $\\nabla I^\\top\\dot x+I_t=0$.",
+          "tags": [
+            "Brightness constancy",
+            "Optical flow",
+            "Lucas-Kanade"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25EDC 5.2",
+            "24EDC 4.2"
+          ],
+          "q": "The brightness constancy assumption leads to the optical flow constraint $\\nabla I^\\top\\frac{dx(t)}{dt}+\\frac{\\partial I}{\\partial t}=0$. Which part of the equation is the desired velocity vector $v$ of the point $x$? In which case can we not infer $v$? Explain why $v$ cannot be determined at a pixel using only the image gradient at that pixel, using solely the equation above.",
+          "answer": "**The velocity is** $v=\\dfrac{dx(t)}{dt}$.\n**Cannot be inferred when $\\nabla I=0$** — i.e. when the image intensity is constant in a local neighbourhood (a textureless or uniform-colour region), the constraint degenerates to $I_t=0$ and says nothing about $v$.\n**Why one pixel is never enough.** The equation only contains the **projection** of $v$ onto the gradient, $\\nabla I^\\top v=-I_t$. So we can only determine the velocity component **parallel to the gradient**; the component orthogonal to $\\nabla I$ (i.e. along the edge) drops out of the equation entirely. One scalar equation cannot fix a two-dimensional vector.",
+          "extend": "That missing orthogonal component *is* the aperture problem — and it is why Lucas–Kanade has to bring in a second assumption.",
+          "tags": [
+            "Optical flow",
+            "Aperture problem",
+            "Image gradient"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX04 1"
+          ],
+          "q": "From $I(x+v,t{+}1)=I(x,t)$: (a) apply a first-order Taylor expansion and derive the optical flow constraint $I_{x_1}v_1+I_{x_2}v_2+I_t=0$. (b) How many solutions does this one equation in two unknowns have? Which component of the flow can be determined and which stays unknown? (c) Name three real-world situations where brightness constancy fails.",
+          "answer": "**(a)** $I(x+v,t{+}1)\\approx I(x,t)+I_{x_1}v_1+I_{x_2}v_2+I_t$. Setting this equal to $I(x,t)$ and cancelling gives\n$$I_{x_1}v_1+I_{x_2}v_2+I_t=0.$$\n**(b)** **Infinitely many** solutions — a one-parameter family (a line in $v$-space). Writing the constraint as $\\nabla I^\\top v=-I_t$ shows it fixes the component of $v$ **in the direction of $\\nabla I$**, namely $v_{\\text{normal}}=-I_t/\\|\\nabla I\\|$. The component **perpendicular to $\\nabla I$** — along the image edge — is completely unconstrained. This is the **aperture problem**.\n**(c)** (1) **Illumination changes** — moving light sources or auto-exposure. (2) **Specular reflections** — highlights shift with the viewpoint rather than with the surface. (3) **Occlusion** — surfaces appear or disappear, so no correspondence exists at all.",
+          "extend": "The Taylor expansion is first-order, which is precisely why the whole method only works for **small** displacements — hence the coarse-to-fine pyramid.",
+          "tags": [
+            "Brightness constancy",
+            "Optical flow",
+            "Aperture problem"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "25RDC 4.3"
+          ],
+          "q": "What does the aperture problem state? What is its relation to the matrix $M$?",
+          "answer": "**Statement.** The motion of a one-dimensional pattern (e.g. a straight line or edge) is **ambiguous when viewed through a small aperture**: only the component of motion **perpendicular to the line** can be determined, while the component **parallel to the line** remains unknown.\n**Relation to $M$.** The structure tensor $M=\\int_{W(x)}\\nabla I\\nabla I^\\top dx'$ is built from the image gradients, so it encodes the local image structure. When that structure is degenerate — a single dominant gradient direction (edge) or none at all (flat region) — $M$ **loses rank** and is not invertible, so $\\hat v=-M^{-1}q$ cannot be computed and information about the motion is lost.",
+          "extend": "Answer both halves: describing the edge case *and* tying it to $\\operatorname{rank}(M)$. Explaining the aperture problem without referring to motion estimation loses half a point.",
+          "tags": [
+            "Aperture problem",
+            "Structure tensor",
+            "Lucas-Kanade"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 3,
+          "sources": [
+            "25RDC 4.4",
+            "25EDC 5.3",
+            "24EDC 4.5"
+          ],
+          "q": "What is / are the central assumption(s) in the Lucas–Kanade optical flow algorithm?",
+          "answer": "**Two assumptions.** (1) **Brightness constancy** — the intensity of a given scene point stays constant over time. (2) **Constant motion in a local neighbourhood** (smoothness) — neighbouring pixels move with the same displacement $v$, which is what turns one under-determined equation into an over-determined least-squares problem and resolves the aperture problem.\n**Not assumed.** The scene need not be planar, and moving objects are not excluded per se (they merely violate the local-constancy assumption at motion boundaries).",
+          "extend": "Brightness constancy alone gives one equation for two unknowns; it is the *second* assumption that makes Lucas–Kanade solvable.",
+          "options": [
+            {
+              "text": "The intensity of a given scene point stays constant (brightness constancy).",
+              "correct": true
+            },
+            {
+              "text": "The observed scene is planar (planarity).",
+              "correct": false
+            },
+            {
+              "text": "Neighbouring pixels have the same motion (smoothness).",
+              "correct": true
+            },
+            {
+              "text": "The images show the same scene from different viewpoints (no moving objects).",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Lucas-Kanade",
+            "Brightness constancy",
+            "Optical flow"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lucas-kanade",
+      "title": "The Lucas–Kanade Method and the Structure Tensor",
+      "recap": "**Energy.** Assuming constant flow in a window $W(x)$ (optionally Gaussian-weighted by $G$),\n$$E(v)=\\int_{W(x)}\\big|\\nabla I(x',t)^\\top v+I_t(x',t)\\big|^2dx'.$$\n**Normal equations.** Expanding the square gives $E(v)=v^\\top Mv+2q^\\top v+c$ and $\\frac{dE}{dv}=2Mv+2q=0$, with\n$$M=\\int_{W(x)}\\nabla I\\,\\nabla I^\\top dx'=\\int_{W(x)}\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}dx',\\qquad q=\\int_{W(x)}I_t\\,\\nabla I\\,dx'=\\int_{W(x)}I_t\\begin{pmatrix}I_x\\\\I_y\\end{pmatrix}dx'.$$\n$M$ is the **structure tensor**. Keep the integral — dropping it costs marks.\n**Solution.** $\\hat v=-M^{-1}q$, explicitly $\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2}$, $\\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}$.\n**$M$ is symmetric positive semi-definite** — it is a sum/integral of outer products $\\nabla I\\nabla I^\\top$, so $u^\\top Mu=\\int(\\nabla I^\\top u)^2\\ge0$. Hence $\\lambda_1\\ge\\lambda_2\\ge0$. Note $M\\neq\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int I_x$: $\\int I_x^2\\neq(\\int I_x)^2$ — a favourite MC trap.\n**Rank deficiency.** Ignoring the integral, $M\\nabla I^\\perp=\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}\\begin{pmatrix}-I_y\\\\I_x\\end{pmatrix}=0$, so $\\nabla I^\\perp\\in\\ker(M)$ — a single gradient direction makes $M$ singular. More generally, if $\\nabla I(x')=\\alpha(x')u$ throughout the window then $M=(G*\\alpha^2)uu^\\top$ is rank 1.\n**True local motion vs the translational model.** For a pure translation $X_2=X_1+T$, in normalised coordinates $\\lambda_2x_2=\\lambda_1x_1+T$, so the exact motion is $x_2=\\frac{\\lambda_1}{\\lambda_2}x_1+\\frac{1}{\\lambda_2}T$. The translational model $x_2=x_1+v$ is therefore **exact** only if (i) $\\lambda_1=\\lambda_2=\\text{const}$ over the window — all 3D points on a plane parallel to the image plane — and (ii) $T_3=0$ — the translation is parallel to the image plane.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 4.1",
+            "25EDC 5.4"
+          ],
+          "q": "Expanding $E(v)=\\int_{W(x)}|\\nabla I(x',t)^\\top v+I_t(x',t)|^2dx'$ and setting the derivative to zero gives $\\frac{dE}{dv}=2Mv+2q=0$. With $\\nabla I=(I_x,I_y)^\\top$, write down $M$ and $q$.",
+          "answer": "$$M=\\int_{W(x)}\\nabla I(x',t)\\,\\nabla I(x',t)^\\top dx'=\\int_{W(x)}\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}dx'$$\n$$q=\\int_{W(x)}I_t(x',t)\\,\\nabla I(x',t)\\,dx'=\\int_{W(x)}I_t(x',t)\\begin{pmatrix}I_x\\\\I_y\\end{pmatrix}dx'$$\n$M$ is the **structure tensor** and $q$ the **error vector**; the solution is $\\hat v=-M^{-1}q$.",
+          "extend": "Do not drop the integral over $W(x)$ — that is an automatic half-point deduction, and it is also what makes $M$ full rank in the first place.",
+          "tags": [
+            "Lucas-Kanade",
+            "Structure tensor",
+            "Optical flow"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 2,
+          "sources": [
+            "25RDC 4.2",
+            "24EDC 4.4"
+          ],
+          "q": "Ignoring the integration, show that $\\nabla I^\\perp\\in\\ker(M)$, where $\\nabla I^\\perp$ is a vector orthogonal to $\\nabla I$.",
+          "answer": "Take $\\nabla I^\\perp=(-I_y,I_x)^\\top$. Then\n$$M\\nabla I^\\perp=\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}\\begin{pmatrix}-I_y\\\\I_x\\end{pmatrix}=\\begin{pmatrix}-I_x^2I_y+I_xI_yI_x\\\\-I_xI_yI_y+I_y^2I_x\\end{pmatrix}=\\begin{pmatrix}0\\\\0\\end{pmatrix}.$$\nHence $\\nabla I^\\perp\\in\\ker(M)$.\n**Interpretation.** Without integrating over a window, $M=\\nabla I\\nabla I^\\top$ is a rank-1 outer product whose kernel is exactly the direction orthogonal to the gradient — the aperture problem in matrix form.",
+          "extend": "Write $M\\nabla I^\\perp=0$, not $\\nabla I^\\perp M=0$ — the dimensions of the latter do not even express membership in the kernel, and it costs a full point.",
+          "tags": [
+            "Structure tensor",
+            "Kernel",
+            "Aperture problem"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX04 2"
+          ],
+          "q": "For $E(v)=\\int_{W(x)}G(x-x')\\big(\\nabla I(x',t)^\\top v+I_t(x',t)\\big)^2dx'$: (a) expand the square and write $E(v)=v^\\top Mv+2q^\\top v+c$, identifying $M$ and $q$; (b) derive the optimal flow $\\hat v$; (c) show that a constant gradient direction makes $M$ rank 1; (d) write out $\\hat v_1,\\hat v_2$ explicitly.",
+          "answer": "**(a)** $(\\nabla I^\\top v+I_t)^2=v^\\top(\\nabla I\\nabla I^\\top)v+2I_t(\\nabla I^\\top v)+I_t^2$, so integrating with weight $G$:\n$$M=G*(\\nabla I\\nabla I^\\top)=\\begin{pmatrix}G*I_{x_1}^2&G*(I_{x_1}I_{x_2})\\\\G*(I_{x_1}I_{x_2})&G*I_{x_2}^2\\end{pmatrix},\\qquad q=G*(I_t\\nabla I)=\\begin{pmatrix}G*(I_{x_1}I_t)\\\\G*(I_{x_2}I_t)\\end{pmatrix},\\qquad c=G*I_t^2.$$\n**(b)** $\\frac{\\partial E}{\\partial v}=2Mv+2q=0\\ \\Rightarrow\\ \\hat v=-M^{-1}q$.\n**(c)** If $\\nabla I(x')=\\alpha(x')u$ for all $x'\\in W$ then $M=G*(\\alpha^2uu^\\top)=(G*\\alpha^2)uu^\\top$ — an outer product, hence **rank 1**, with eigenvalues $\\lambda_1=(G*\\alpha^2)\\|u\\|^2$ and $\\lambda_2=0$. $M$ is singular: a straight edge gives a constant gradient direction and Lucas–Kanade cannot determine the flow along the edge.\n**(d)** With $M^{-1}=\\frac{1}{m_{11}m_{22}-m_{12}^2}\\begin{pmatrix}m_{22}&-m_{12}\\\\-m_{12}&m_{11}\\end{pmatrix}$,\n$$\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2},\\qquad \\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}.$$",
+          "extend": "The denominator $m_{11}m_{22}-m_{12}^2=\\det(M)=\\lambda_1\\lambda_2$ — which is precisely the quantity the Harris detector thresholds.",
+          "tags": [
+            "Lucas-Kanade",
+            "Structure tensor",
+            "Least squares"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21RFB 5a"
+          ],
+          "q": "Assume a pure translational motion without rotation, $X_2=X_1+T$. Working in normalised coordinates, which formula describes the **true** local motion in the image, depending on the pose and the depths $\\lambda_1,\\lambda_2$?",
+          "answer": "$$x_2=\\frac{\\lambda_1}{\\lambda_2}x_1+\\frac{1}{\\lambda_2}T.$$\n**Derivation.** In normalised coordinates the projection reads $\\lambda_2x_2=\\lambda_1x_1+T$; dividing by $\\lambda_2$ gives the result.\n**Reading.** The image motion is **not** a pure translation: the first term rescales $x_1$ by the depth ratio, and the second scales $T$ by the inverse depth. Only when $\\lambda_1=\\lambda_2$ does it reduce to $x_2=x_1+\\tfrac{T}{\\lambda}$.",
+          "options": [
+            {
+              "text": "$x_2=\\lambda_1x_1+\\tfrac{1}{\\lambda_2}T$",
+              "correct": false
+            },
+            {
+              "text": "$x_2=\\tfrac{\\lambda_1}{\\lambda_1}x_1+\\tfrac{1}{\\lambda_1}T$",
+              "correct": false
+            },
+            {
+              "text": "$x_2=x_1+\\tfrac{1}{\\lambda_2}T$",
+              "correct": false
+            },
+            {
+              "text": "$x_2=\\tfrac{\\lambda_1}{\\lambda_2}x_1+\\tfrac{1}{\\lambda_2}T$",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Optical flow",
+            "Translational model",
+            "Depth"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21RFB 5b"
+          ],
+          "q": "For pure translational motion, derive conditions on the translation $T$ and on the 3D scene such that the translational model $x_2=x_1+v$ describes the local motion **exactly** (not just approximately). Justify.",
+          "answer": "Start from the exact expression $x_2=\\frac{\\lambda_1}{\\lambda_2}x_1+\\frac{1}{\\lambda_2}T$.\n**Condition on the scene.** For the first term to reduce to $x_1$ we need $\\lambda_1=\\lambda_2$, and for $v$ to be constant over the window $\\lambda_2$ must be the same for all points in it. Hence **all 3D points must lie on a plane parallel to the image plane** (constant depth).\n**Condition on the translation.** With $\\lambda_1=\\lambda_2$ we need $\\lambda_2$ unchanged by the motion, i.e. the third component of $T$ must vanish: $T_3=0$. Equivalently, in homogeneous normalised coordinates the third component must stay $1$. This means the **translation is parallel to the image plane**.\n**Together:** a fronto-parallel plane moving parallel to the image plane produces an exactly translational image motion.",
+          "extend": "This is also the assumption behind block matching in video codecs — and the reason it degrades where depth varies within a block.",
+          "tags": [
+            "Optical flow",
+            "Translational model",
+            "Depth"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 4.3",
+            "24EDC 4.6"
+          ],
+          "q": "(a) Starting from the optimality condition $\\nabla I\\nabla I^\\top v+\\nabla I\\frac{\\partial I}{\\partial t}=0$ at a single pixel (no integration), what are the structure tensor $M'$ and the error vector $q'$? (b) Using the convolution operator $*$ and a Gaussian kernel $G$, state the modified optimisation problem and the corresponding optimality constraint used by the Lucas–Kanade algorithm.",
+          "answer": "**(a) At one pixel, no integration.**\n$$M'=\\nabla I\\,\\nabla I^\\top,\\qquad q'=\\nabla I\\,\\frac{\\partial I}{\\partial t}.$$\nNote $M'$ is a rank-1 outer product — which is exactly why a single pixel is not enough (the aperture problem).\n**(b) With a Gaussian window.**\nOptimisation problem:\n$$\\min_v\\ G*\\Big(\\nabla I^\\top v+\\frac{\\partial I}{\\partial t}\\Big)^2$$\nOptimality constraint:\n$$\\big(G*M'\\big)v=-\\,G*q',$$\ni.e. $Mv=-q$ with the windowed structure tensor $M=G*M'$ and error vector $q=G*q'$. Convolving with $G$ aggregates the gradients over a neighbourhood, which is what can restore the rank of $M$ and make the flow determinable.",
+          "extend": "The single-pixel version is always rank 1; the Gaussian convolution is precisely the \"constant motion in a neighbourhood\" assumption made computational.",
+          "tags": [
+            "Lucas-Kanade",
+            "Structure tensor",
+            "Optical flow"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "structure-tensor",
+      "title": "Reading the Structure Tensor: Flat, Edge, Corner",
+      "recap": "**$M$ is symmetric positive semi-definite,** so it has two real eigenvalues $\\lambda_1\\ge\\lambda_2\\ge0$ with orthogonal eigenvectors. The eigenvector of the **large** eigenvalue points along the dominant **gradient** direction, i.e. **perpendicular** to the edge.\n**The three regimes.**\n$\\bullet$ $\\lambda_1\\approx\\lambda_2\\approx0$ — no dominant gradient direction: a **flat / untextured** region. $M\\approx0$ is not invertible, Lucas–Kanade fails (nothing to track).\n$\\bullet$ $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$ — one dominant gradient direction: an **edge**. $M$ is rank 1 and singular; only the flow perpendicular to the edge can be recovered (aperture problem).\n$\\bullet$ $\\lambda_1\\gg0,\\ \\lambda_2\\gg0$ — more than one dominant gradient direction: a **corner** (or richly textured patch). $M$ is well conditioned and the flow estimate is reliable.\n**Reading off the orientation.** For an edge, the eigenvector $v_1$ of the large eigenvalue is the gradient direction: $v_1\\approx(0,1)^\\top$ (pointing along the image $y$-axis) ⇒ a **horizontal** edge; $v_1\\approx(1,0)^\\top$ ⇒ a **vertical** edge; a diagonal $v_1$ ⇒ a tilted edge.\n**Common MC trap.** $M$ is **not** $\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int_WI_x\\,dx'$, $Y=\\int_WI_y\\,dx'$ — because $\\int I_x^2\\,dx'\\neq\\big(\\int I_x\\,dx'\\big)^2$. The square is inside the integral, and that is exactly what makes $M$ informative.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 3,
+          "sources": [
+            "25EDC 5.5",
+            "EX04 4",
+            "24EDC 4.7"
+          ],
+          "q": "Consider the eigenvalues $\\lambda_1$ and $\\lambda_2$ of the structure tensor $M$. What can we say about the image gradients in the neighbourhood of a pixel in each of the three cases: (1) $\\lambda_1\\approx\\lambda_2\\approx0$; (2) $\\lambda_1\\gg0,\\lambda_2\\approx0$; (3) $\\lambda_1\\gg0,\\lambda_2\\gg0$? Relate each case to whether $M$ is invertible and whether Lucas–Kanade can estimate the flow.",
+          "answer": "**(1) $\\lambda_1\\approx\\lambda_2\\approx0$** — the neighbourhood has **no dominant gradient direction**, i.e. it is a **flat / untextured** region ($\\nabla I\\approx0$, so $M\\approx0$). $M$ is not invertible and Lucas–Kanade fails: there is no texture to track.\n**(2) $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$** — **one dominant gradient direction**, i.e. an **edge**. Here $\\nabla I=\\alpha u$ so $M=(G*\\alpha^2)uu^\\top$ is rank 1 and singular; only the flow component along $u$ (perpendicular to the edge) can be determined — the aperture problem.\n**(3) $\\lambda_1\\gg0,\\ \\lambda_2\\gg0$** — **more than one dominant gradient direction**, i.e. a **corner** (or well-textured patch). $M$ is well conditioned, $\\hat v=-M^{-1}q$ is reliable, and this is exactly what a corner detector selects.",
+          "extend": "The eigenvector of the *large* eigenvalue is the gradient direction, so it is **perpendicular** to the edge: $v_1\\approx(0,1)^\\top$ means a horizontal edge.",
+          "tags": [
+            "Structure tensor",
+            "Eigenvalues",
+            "Corner detection",
+            "Aperture problem"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 3,
+          "sources": [
+            "21EFB 7a",
+            "21EFB 7b",
+            "20RFB 8a",
+            "20RFB 8b",
+            "22EDC 4a"
+          ],
+          "q": "Five structure tensors are computed over five image patches. Given the eigenvalues and eigenvectors, explain how to assign each tensor to the correct patch — e.g. $M^{(1)}$ with $\\lambda_1=5.54,\\lambda_2=3.10$, $v_1=(0.14,0.99)^\\top$; and $M^{(2)}$ with $\\lambda_1=2.07,\\lambda_2=0.07$, $v_1=(0.00,1.00)^\\top$.",
+          "answer": "**$M^{(1)}$ — a corner / richly textured patch.** Both eigenvalues are large, so the patch must have sufficient structure in **both** the $x$- and the $y$-direction, which is the case neither for an edge nor for a plain wall.\n**$M^{(2)}$ — an edge, and specifically a horizontal one.** The larger eigenvalue is large while the smaller is close to zero, so the patch contains an **edge**. The eigenvector of the large eigenvalue points approximately along the **$y$-axis**, and since that eigenvector is the **gradient** direction (perpendicular to the edge), the edge itself must be **horizontal**.\n**General recipe.** (i) Both $\\lambda$ small ⇒ untextured region. (ii) $\\lambda_1\\gg\\lambda_2\\approx0$ ⇒ edge; then read $v_1$: $\\approx(0,1)^\\top$ horizontal edge, $\\approx(1,0)^\\top$ vertical edge, diagonal $v_1$ tilted edge. (iii) Both $\\lambda$ large ⇒ corner.",
+          "extend": "Two independent pieces of information per tensor: the **magnitudes** classify flat/edge/corner, the **dominant eigenvector** gives the edge orientation (rotated by $90^\\circ$).",
+          "tags": [
+            "Structure tensor",
+            "Eigenvalues",
+            "Corner detection"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "21RFB 5c"
+          ],
+          "q": "Consider the structure tensor $M\\in\\mathbb{R}^{2\\times2}$ at a pixel $x$. Which of the following statements does **not** hold true? (\"Vertical\" = direction of the second pixel index, \"horizontal\" = direction of the first.)",
+          "answer": "**False statement:** \"$M$ can be computed as $\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int_{W(x)}I_x\\,dx'$ and $Y=\\int_{W(x)}I_y\\,dx'$.\"\n**Why.** $\\int I_x^2\\,dx'\\neq\\big(\\int I_x\\,dx'\\big)^2$ — the square sits **inside** the integral. The proposed matrix is a rank-1 outer product of the *averaged* gradient, which would destroy exactly the information $M$ is supposed to carry (it could never have two large eigenvalues).\n**The others are all true.** Two small eigenvalues ⇒ untextured region ✓. $\\lambda_1=0.75\\gg\\lambda_2=0.01$ with $v_1\\approx(1,0)^\\top$ ⇒ the gradient is horizontal, so the edge is vertical ✓. At least one large eigenvalue is necessary (though not sufficient) for a corner ✓. And $M$ is positive semi-definite, being an integral of outer products ✓.",
+          "options": [
+            {
+              "text": "If $M$ has two small eigenvalues, the pixel lies in an untextured region",
+              "correct": false
+            },
+            {
+              "text": "If $M$ has $\\lambda_1=0.75$, $\\lambda_2=0.01$ with $v_1=[0.996,0.082]^\\top$, $v_2=[-0.032,0.999]^\\top$, then the image structure resembles a vertical edge",
+              "correct": false
+            },
+            {
+              "text": "If $M$ has at least one large eigenvalue, the pixel can lie on an image corner",
+              "correct": false
+            },
+            {
+              "text": "$M$ can be computed as $\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int_{W(x)}I_x\\,dx'$, $Y=\\int_{W(x)}I_y\\,dx'$",
+              "correct": true
+            },
+            {
+              "text": "$M$ is positive semi-definite",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Structure tensor",
+            "Eigenvalues",
+            "Positive definite"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "24EDC 4.8"
+          ],
+          "q": "An edge detector would like to detect edges in an image. Which of the three structure-tensor regimes ($\\lambda_1\\approx\\lambda_2\\approx0$; $\\lambda_1\\gg0,\\lambda_2\\approx0$; $\\lambda_1\\gg0,\\lambda_2\\gg0$) is of interest for the edge detector?",
+          "answer": "**The second case, $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$.**\n**Why.** One large and one near-zero eigenvalue means the neighbourhood has exactly **one dominant gradient direction** — the signature of a straight edge. The first case is a flat, textureless region (no gradient at all) and the third is a corner (two dominant directions), which is what a *corner* detector wants.\n**Bonus.** The eigenvector of the large eigenvalue gives the gradient direction, so the edge itself runs **perpendicular** to it.",
+          "extend": "Same three regimes, opposite selection: edge detectors want $\\lambda_1\\gg\\lambda_2\\approx0$, corner detectors want both large.",
+          "tags": [
+            "Structure tensor",
+            "Eigenvalues",
+            "Corner detection"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "harris-corner",
+      "title": "The Harris / Förstner Corner Detector",
+      "recap": "**Motivation.** The eigenvalues of $M$ classify the local structure, but computing them at every pixel needs a square root. Harris proposed the cheaper score\n$$C=\\det(M)-\\kappa\\,\\operatorname{trace}(M)^2=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2,$$\ncomputable directly from the entries, $\\det(M)=m_{11}m_{22}-m_{12}^2$ and $\\operatorname{trace}(M)=m_{11}+m_{22}$ — **no eigen-decomposition, no square root**.\n**Signs.** Flat: $\\lambda_1\\approx\\lambda_2\\approx0\\Rightarrow C\\approx0$. Edge: $\\lambda_1\\gg0,\\lambda_2\\approx0\\Rightarrow C\\approx-\\kappa\\lambda_1^2<0$. Corner: $\\lambda_1\\approx\\lambda_2\\approx\\lambda\\Rightarrow C\\approx\\lambda^2(1-4\\kappa)>0$ provided $\\kappa<\\tfrac14$. In general $C>0\\iff\\frac{\\lambda_1\\lambda_2}{(\\lambda_1+\\lambda_2)^2}>\\kappa$.\n**Role of $\\kappa$.** As $\\kappa\\to0$, $C\\to\\det(M)=\\lambda_1\\lambda_2$, which is positive whenever both eigenvalues are non-zero — even strong edges pass, so the detector becomes **less selective**. As $\\kappa\\to\\tfrac14$, only near-perfectly symmetric corners survive ($\\lambda_1=10,\\lambda_2=8$ already gives $C<0$) — **maximally selective**. Typical values are $\\kappa\\in[0.04,0.15]$.\n**Invariance.** Under an image rotation $R\\in SO(2)$: $\\nabla I\\to R\\nabla I$, hence $M\\to RMR^\\top$; since $\\det(RMR^\\top)=\\det M$ and $\\operatorname{trace}(RMR^\\top)=\\operatorname{trace}M$, the score $C$ is **unchanged** — Harris is **rotation invariant**. It is **not scale invariant**: $M$ is computed in a fixed-size window, so zooming changes how much of the scene the window covers — a corner can look like an edge (zoomed in) or like texture (zoomed out), changing the eigenvalues and $C$. Scale invariance requires a scale-space search (SIFT-style).\n**Feature tracking algorithm.** (1) Compute $M$ at every pixel. (2) Keep pixels where the smaller eigenvalue (or $C$) exceeds a threshold. (3) Apply non-maximum suppression. (4) Track each selected point with Lucas–Kanade over the sequence.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX04 4"
+          ],
+          "q": "Harris proposed the score $C=\\det(M)-\\kappa\\operatorname{trace}(M)^2$. (a) Express $\\det(M)$ and $\\operatorname{trace}(M)$ in terms of $\\lambda_1,\\lambda_2$ and explain why $C$ can be computed without eigenvalues. (b) Determine the sign of $C$ for flat, edge and corner, and the condition on $\\kappa$ for a corner to give $C>0$. (c) How does $\\kappa$ trade off corners against strong edges — what happens as $\\kappa\\to0$ and as $\\kappa\\to\\tfrac14$?",
+          "answer": "**(a)** $\\det(M)=\\lambda_1\\lambda_2$ and $\\operatorname{trace}(M)=\\lambda_1+\\lambda_2$, so $C=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2$. But neither quantity needs an eigen-decomposition: $\\det(M)=m_{11}m_{22}-m_{12}^2$ and $\\operatorname{trace}(M)=m_{11}+m_{22}$ come straight from the entries — no square root required.\n**(b)** Flat: $\\lambda_1\\approx\\lambda_2\\approx0\\Rightarrow C\\approx0$. Edge: $\\lambda_1\\gg0$, $\\lambda_2\\approx0\\Rightarrow C\\approx0-\\kappa\\lambda_1^2<0$. Corner with $\\lambda_1\\approx\\lambda_2\\approx\\lambda$: $C\\approx\\lambda^2-\\kappa(2\\lambda)^2=\\lambda^2(1-4\\kappa)$, so $C>0$ requires $\\kappa<\\tfrac14$. In general $C>0\\iff\\frac{\\lambda_1\\lambda_2}{(\\lambda_1+\\lambda_2)^2}>\\kappa$, so a smaller $\\kappa$ accepts corners with more unequal eigenvalues.\n**(c)** As $\\kappa\\to0$: $C\\to\\det(M)=\\lambda_1\\lambda_2$, positive whenever both eigenvalues are non-zero — even strong edges (large $\\lambda_1$, small but non-zero $\\lambda_2$) score positively, so the detector becomes **less selective**. As $\\kappa\\to\\tfrac14$: even $\\lambda_1=10,\\lambda_2=8$ gives $C=80-0.25\\cdot324=-1<0$; only $\\lambda_1=\\lambda_2$ survives, so the detector rejects everything but perfectly symmetric corners.",
+          "extend": "$\\kappa$ is a knob on \"how square must a corner be\": small $\\kappa$ = permissive (edges leak in), large $\\kappa$ = strict.",
+          "tags": [
+            "Harris corner detector",
+            "Structure tensor",
+            "Eigenvalues"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX04 5"
+          ],
+          "q": "(a) An image is rotated by $R\\in SO(2)$. How do $\\nabla I$ and $M$ transform, and is the Harris score $C$ unchanged? (b) The image is uniformly scaled (zoomed in or out). Is $C$ unchanged? Why or why not?",
+          "answer": "**(a)** The gradient rotates, $\\nabla I\\to R\\nabla I$, hence $\\nabla I\\nabla I^\\top\\to R(\\nabla I\\nabla I^\\top)R^\\top$ and $M\\to RMR^\\top$. Since $\\det(RMR^\\top)=\\det(R)\\det(M)\\det(R^\\top)=\\det(M)$ and $\\operatorname{trace}(RMR^\\top)=\\operatorname{trace}(M)$ (cyclic invariance), the score $C=\\det M-\\kappa\\operatorname{trace}(M)^2$ is **unchanged**: Harris is **rotation invariant**.\n**(b)** **No — Harris is not scale invariant.** $M$ is computed within a **fixed-size window**, so when the image is scaled the same window covers a different amount of the scene. A corner at one scale may look like an edge (zoomed in so far that the window sees only one side) or like texture (zoomed out so far that the corner is sub-pixel). The eigenvalues of $M$ change, and so does $C$.",
+          "extend": "Rotation invariance comes free from $\\det$ and $\\operatorname{trace}$ being similarity invariants; scale invariance has to be engineered, e.g. by searching over a scale space as SIFT does.",
+          "tags": [
+            "Harris corner detector",
+            "Invariance",
+            "Structure tensor"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "coarse-to-fine",
+      "title": "Coarse-to-Fine Estimation with Image Pyramids",
+      "recap": "**Why.** The optical flow constraint comes from a **first-order Taylor expansion**, which is only valid for **small** displacements — typically a pixel or two. Real motion is often much larger.\n**Pyramid.** Build a Gaussian pyramid $I^{(0)},\\dots,I^{(L)}$ by repeated smoothing and downsampling by a factor 2. A displacement of $(dx,dy)$ at full resolution appears as $(dx/2^L,\\ dy/2^L)$ at level $L$ — so a large motion becomes small enough for the linearisation to hold at a coarse enough level.\n**Algorithm.** (1) Build the pyramid. (2) At the coarsest level $L$, run Lucas–Kanade initialised with $v=0$. (3) For $l=L{-}1,\\dots,0$: upsample $\\hat v_{l+1}$ by a factor 2, **warp** the second frame by this flow to remove the already-estimated motion, run Lucas–Kanade on the warped pair to obtain a residual correction $\\Delta v_l$, and set $\\hat v_l=2\\hat v_{l+1}+\\Delta v_l$.\n**Maximum displacement.** If a single level can handle at most $d_{\\max}$ pixels, an $L$-level pyramid handles\n$$d_{\\max}2^L+d_{\\max}2^{L-1}+\\dots+d_{\\max}=d_{\\max}(2^{L+1}-1)\\approx2^{L+1}d_{\\max}.$$\n**Trade-off.** More levels extend the range but blur small structures away, so very small or thin objects can be lost at coarse levels — the classic failure mode of coarse-to-fine flow, and one of the reasons learned methods (FlowNet, RAFT) took over.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX04 3"
+          ],
+          "q": "(a) If an image is downscaled by a factor 2 at each pyramid level, what displacement does a motion of $(dx,dy)$ pixels at the original resolution correspond to at level $L$? (b) Describe the complete coarse-to-fine algorithm and how a coarse estimate initialises the next finer level. (c) If Lucas–Kanade can handle at most $d_{\\max}$ pixels at a single level, what is the maximum total displacement with an $L$-level pyramid?",
+          "answer": "**(a)** $\\big(dx/2^L,\\ dy/2^L\\big)$.\n**(b)** 1. Build a Gaussian pyramid $I^{(0)},\\dots,I^{(L)}$ by repeated smoothing and downsampling. 2. At the coarsest level $L$, run Lucas–Kanade initialised at $v=0$. 3. For $l=L{-}1,\\dots,0$: upsample $\\hat v_{l+1}$ by a factor 2, **warp** the second frame by this flow so that the already-estimated motion is removed, run Lucas–Kanade on the warped pair to get a residual correction $\\Delta v_l$, and combine:\n$$\\hat v_l=2\\hat v_{l+1}+\\Delta v_l.$$\n**(c)** $d_{\\max}\\cdot2^L+d_{\\max}\\cdot2^{L-1}+\\dots+d_{\\max}=d_{\\max}(2^{L+1}-1)\\approx2^{L+1}d_{\\max}$.",
+          "extend": "Warping is the essential step — without it the residual at the finer level would re-estimate the whole motion rather than the correction.",
+          "tags": [
+            "Optical flow",
+            "Image pyramid",
+            "Lucas-Kanade"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patch-matching",
+      "title": "Patch Matching: NCC, SSD and Wide Baselines",
+      "recap": "**Small deformation vs wide baseline.** For consecutive video frames the displacement is small and a **translational** model plus Lucas–Kanade suffices. For a **wide baseline** the patch also rotates, scales and shears, so one must either use a full affine model or switch to invariant **descriptors** (SIFT-style) and match them.\n**Normalised cross-correlation (NCC).**\n$$\\text{NCC}=\\frac{\\int_{w(x)}\\big(I_1(x')-\\bar I_1\\big)\\big(I_2(x')-\\bar I_2\\big)dx'}{\\sqrt{\\int_{w(x)}\\big(I_1(x')-\\bar I_1\\big)^2dx'\\ \\int_{w(x)}\\big(I_2(x')-\\bar I_2\\big)^2dx'}}.$$\nIt is the cosine of the angle between the two mean-subtracted patches, so $\\text{NCC}\\in[-1,1]$: $+1$ = perfect match up to an affine intensity change, $0$ = uncorrelated, $-1$ = inverted. Subtracting the mean makes it invariant to additive brightness offsets; dividing by the standard deviations makes it invariant to multiplicative contrast changes. That is exactly why it beats raw SSD under illumination change.\n**Border handling.** With a $3\\times3$ window on a $3\\times3$ image, only the centre pixel has a full neighbourhood — so exactly **one** window contributes.\n**SSD vs inner product.** For $\\ell_2$-normalised descriptors ($\\|p\\|=\\|q\\|=1$),\n$$\\|p-q\\|^2=\\|p\\|^2+\\|q\\|^2-2p^\\top q=2-2p^\\top q,$$\nan affine, strictly decreasing function of $p^\\top q$. Hence $\\arg\\min_q\\|p-q\\|^2=\\arg\\max_qp^\\top q$: nearest-neighbour search under Euclidean distance and under cosine similarity return the **same ranking**, and implementations pick whichever is cheaper.\n**Learned correspondence.** FlowNet showed that a CNN can regress dense optical flow end to end; SuperGlue matches sparse keypoints with an attention-based graph neural network. Both replace hand-crafted descriptors and the brightness-constancy energy with learned matching, and dominate the modern benchmarks.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 3a",
+            "22RDC 3b",
+            "22RDC 3c",
+            "22RDC 3d",
+            "22RDC 3e",
+            "22RDC 3f"
+          ],
+          "q": "For $I_1=\\begin{pmatrix}1&0&1\\\\0&2&0\\\\2&0&3\\end{pmatrix}$ and $I_2=\\begin{pmatrix}5&4&5\\\\4&6&4\\\\6&4&7\\end{pmatrix}$, compute the normalised cross-correlation with a $3\\times3$ window, ignoring border pixels: (a) how many neighbourhoods contribute? (b) $\\bar I_1$; (c) $\\bar I_2$; (d) the denominator; (e) the numerator; (f) the NCC.",
+          "answer": "**(a) One.** Ignoring all boundary pixels, the only position with a full $3\\times3$ neighbourhood is the centre $(2,2)$.\n**(b)** $\\bar I_1=\\frac{1+0+1+0+2+0+2+0+3}{9}=\\frac{9}{9}=1$.\n**(c)** $\\bar I_2=\\frac{5+4+5+4+6+4+6+4+7}{9}=\\frac{45}{9}=5$.\n**(d)** $I_1-\\bar I_1=I_2-\\bar I_2=\\begin{pmatrix}0&-1&0\\\\-1&1&-1\\\\1&-1&2\\end{pmatrix}$, so each sum of squares is $0+1+0+1+1+1+1+1+4=10$, and the denominator is $\\sqrt{10\\cdot10}=10$.\n**(e)** Since the two mean-subtracted patches are identical, the numerator is the same sum of squares: $10$.\n**(f)** $\\text{NCC}=\\frac{10}{10}=1$.",
+          "extend": "$I_2=I_1+4$ exactly — a pure brightness offset. Subtracting the means removes it completely, which is why the NCC comes out at exactly $1$.",
+          "tags": [
+            "NCC",
+            "Patch matching",
+            "Feature matching"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "22RDC 3g"
+          ],
+          "q": "What is the range of values that NCC can take, and what is the significance of an obtained value of NCC $=1$?",
+          "answer": "**Range.** $\\text{NCC}\\in[-1,1]$ — it is the cosine of the angle between the two mean-subtracted, variance-normalised patches.\n**Meaning of $1$.** The patches **match exactly, ignoring changes in brightness** (and contrast): they are related by $I_2=aI_1+b$ with $a>0$. A value of $0$ means uncorrelated patches, and $-1$ means an exactly inverted patch.",
+          "extend": "Mean subtraction removes additive brightness; the normalisation removes multiplicative contrast. NCC only sees the *pattern*.",
+          "tags": [
+            "NCC",
+            "Patch matching"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX04 6"
+          ],
+          "q": "Two patches (or descriptors) are vectors $p,q\\in\\mathbb{R}^d$. Show that when $\\|p\\|=\\|q\\|=1$, minimising the sum of squared differences and maximising the inner product rank pairs identically: $\\arg\\min_q\\|p-q\\|^2=\\arg\\max_qp^\\top q$.",
+          "answer": "Expand:\n$$\\|p-q\\|^2=(p-q)^\\top(p-q)=\\|p\\|^2+\\|q\\|^2-2p^\\top q=2-2p^\\top q,$$\nusing $\\|p\\|=\\|q\\|=1$. So $\\|p-q\\|^2$ is an **affine, strictly decreasing** function of $p^\\top q$; minimising the left-hand side is therefore equivalent to maximising the right-hand side.\n**Consequence.** For $\\ell_2$-normalised descriptors (standardised patches, normalised SIFT), nearest-neighbour search under Euclidean distance and under cosine similarity return the **same ranking** — implementations simply pick whichever is cheaper to compute.",
+          "extend": "The equivalence needs **both** vectors normalised; without it, a long $q$ can win on inner product while being far away in Euclidean distance.",
+          "tags": [
+            "Patch matching",
+            "SSD",
+            "Feature matching"
+          ]
+        }
+      ]
+    }
+  ]
+}

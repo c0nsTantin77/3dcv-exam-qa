@@ -1,0 +1,42 @@
+name: Deploy to GitHub Pages
+
+# Builds the Astro site and publishes dist/ to GitHub Pages.
+# Requires Pages "Source" to be set to "GitHub Actions" (Settings → Pages).
+# Until then this workflow is inert. Runs on pushes to main (after the
+# astro-migration branch is merged) or manually.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build with Astro
+        uses: withastro/action@v3 # installs deps, runs `astro build`, uploads artifact
+        with:
+          node-version: 22 # Astro 6 requires Node >=22.12 (action defaults to 20)
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,70 @@
+---
+import TumLogo from "./TumLogo.astro";
+import { url } from "../lib/paths";
+
+export interface TocItem {
+  id: string;
+  num?: string;
+  label: string;
+  n: number;
+}
+
+interface Props {
+  backHref?: string;
+  backLabel?: string;
+  backFull?: string;
+  /** Server-rendered contents (chapter pages). */
+  toc?: TocItem[];
+  /** Render an empty contents pill that the client fills (tags/exams pages). */
+  contentsPlaceholder?: boolean;
+}
+
+const {
+  backHref = url("/"),
+  backLabel = "← All",
+  backFull = " chapters",
+  toc,
+  contentsPlaceholder = false,
+} = Astro.props;
+
+const showContents = Boolean(toc?.length) || contentsPlaceholder;
+---
+
+<header class="topbar">
+  <a class="brand" href={backHref}>
+    <TumLogo />
+    <span class="brand-back">{backLabel}<span class="brand-full">{backFull}</span></span>
+  </a>
+  {
+    showContents && (
+      <div class="nowat-wrap" hidden={!toc?.length}>
+        <button
+          id="nowAt"
+          class="nowat"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="tocPop"
+          title="Jump to a topic"
+        >
+          <span class="nowat-here">Contents</span>
+          <span class="nowat-caret" aria-hidden="true">▾</span>
+        </button>
+        <nav id="tocPop" class="toc-pop toc" hidden aria-label="Contents">
+          <ol>
+            {(toc ?? []).map((t) => (
+              <li>
+                <a href={`#${t.id}`}>
+                  {t.num && <span class="toc-num">{t.num}</span>}
+                  <span class="toc-label">{t.label}</span>
+                  <span class="toc-n">{t.n}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </div>
+    )
+  }
+  <slot name="filters" />
+</header>
