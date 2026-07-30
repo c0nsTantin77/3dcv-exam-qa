@@ -252,6 +252,22 @@
             "Linear independence",
             "Basis"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A linear map has matrix $A$ in the canonical basis and matrix $B=P^{-1}AP$ in a new basis. (a) Prove that $A$ and $B$ have the same characteristic polynomial and hence the same eigenvalues. (b) If $Bv=\\lambda v$, which vector is an eigenvector of $A$?",
+          "answer": "**(a)** Since $\\lambda I-P^{-1}AP=P^{-1}(\\lambda I-A)P$,\n$$\\det(\\lambda I-B)=\\det(P^{-1})\\det(\\lambda I-A)\\det(P)=\\det(\\lambda I-A).$$\nThus a change of basis changes only the coordinate matrix, not the characteristic polynomial or eigenvalues of the underlying linear map.\n**(b)** Multiply $Bv=\\lambda v$ by $P$:\n$$A(Pv)=P(P^{-1}AP)v=PBv=\\lambda Pv.$$\nTherefore $Pv$ is the corresponding eigenvector of $A$ (expressed in canonical coordinates).",
+          "extend": "Similarity preserves eigenvalues, but generally not the numerical entries of eigenvectors: their coordinates must be transformed by $P$.",
+          "tags": [
+            "Basis",
+            "Linear map",
+            "Eigenvalues",
+            "Proof"
+          ]
         }
       ]
     },
@@ -362,6 +378,22 @@
             "Frobenius norm",
             "Inner product",
             "Orthogonal group"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $A=\\begin{pmatrix}1&2\\\\2&1\\end{pmatrix}$. (a) State the induced matrix $2$-norm and the Frobenius norm. (b) Compute both norms for $A$. (c) Give a unit vector at which the maximum in the induced norm is attained.",
+          "answer": "**Definitions.** $\\|A\\|_2=\\max_{\\|x\\|_2=1}\\|Ax\\|_2=\\sigma_{\\max}(A)$, whereas $\\|A\\|_F=\\sqrt{\\operatorname{tr}(A^\\top A)}=\\sqrt{\\sum_i\\sigma_i^2}$.\nHere\n$$A^\\top A=\\begin{pmatrix}5&4\\\\4&5\\end{pmatrix}$$\nhas eigenvalues $9$ and $1$, so the singular values are $3$ and $1$. Hence\n$$\\|A\\|_2=3,\\qquad \\|A\\|_F=\\sqrt{3^2+1^2}=\\sqrt{10}.$$\nThe eigenvector of $A^\\top A$ for eigenvalue $9$ is $(1,1)^\\top$, so the maximum is attained at $x=\\tfrac1{\\sqrt2}(1,1)^\\top$ (and also at its negative).",
+          "extend": "The induced norm measures the largest stretch in one direction; the Frobenius norm accumulates the squared stretch over all singular directions.",
+          "tags": [
+            "Matrix norm",
+            "Frobenius norm",
+            "SVD",
+            "Eigenvalues"
           ]
         }
       ]

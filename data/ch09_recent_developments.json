@@ -2,7 +2,7 @@
   "id": "ch09",
   "roman": "IX",
   "title": "Recent Developments in 3D Computer Vision",
-  "blurb": "The last lecture: deep networks inside the SLAM pipeline (D3VO), NeRF versus Gaussian splatting, single-view density fields and scene completion, reconstruction from casual video, and event cameras. No past-exam questions exist for this chapter yet — everything here is derived from the SS26 slides.",
+  "blurb": "The last lecture: deep networks inside the SLAM pipeline (D3VO), NeRF versus Gaussian splatting, single-view density fields and scene completion, reconstruction from casual video, physically constrained 4D deformation, and event cameras. No past-exam questions exist for this chapter yet — everything here is derived from the SS26 slides.",
   "knowledge_points": [
     {
       "id": "deep-slam",
@@ -74,6 +74,31 @@
           "answer": "**What it is.** A bio-inspired sensor in which each pixel operates **independently and asynchronously**, firing whenever the **logarithmic brightness** at that pixel changes by more than a threshold.\n**Output.** Not images but a stream of **events** $(x,y,t,p)$ — pixel coordinates, a microsecond-resolution timestamp, and the polarity (brightness up or down).\n**Advantages.** Microsecond temporal resolution and effectively **no motion blur**, so tracking survives very fast motion; a very high **dynamic range** (~120 dB), because each pixel adapts on its own instead of sharing a global exposure; and low power / bandwidth, since static parts of the scene produce no data.\n**Challenges.** There is **no absolute intensity** — only changes — so brightness constancy, conventional feature detectors and photometric residuals do not transfer directly and the whole front end must be redesigned. Events appear only where there is both a **gradient and motion**, so a stationary camera observes nothing, and the asynchronous, noisy stream needs its own representation before it can be fed to geometry or a network.\n**State of the art.** Systems range from geometric event-based tracking and mapping (EVO) and hybrid event+frame+IMU pipelines (Ultimate SLAM) to **DEVO**, a deep monocular event-only visual odometry evaluated on seven datasets; the **TUM VIE** dataset provides events, frames, IMU and motion-capture ground truth for benchmarking.",
           "extend": "An event camera measures the *temporal derivative* of log intensity — literally the $I_t$ term of the optical flow constraint, sampled asynchronously.",
           "tags": ["Event camera", "Visual odometry", "SLAM"]
+        }
+      ]
+    },
+    {
+      "id": "dynamic-4d-reconstruction",
+      "title": "4D Reconstruction and Physically Constrained Deformation",
+      "recap": "**4D reconstruction.** The unknown is not one static surface but a surface evolving through time. Methods such as 4Deform interpolate between sparse keyframe point clouds by learning a continuous deformation or velocity field while constraining it with the observations.\n**Level-set transport.** Represent the moving surface as the zero level set $S(t)=\\{x\\mid\\phi(x,t)=0\\}$. A material point $x(t)$ on the surface with velocity $V=\\dot x$ must remain on it, so\n$$\\frac d{dt}\\phi(x(t),t)=\\partial_t\\phi+V^\\top\\nabla\\phi=0.$$\n**Why priors are necessary.** Sparse endpoints do not determine a unique motion between them. Spatial smoothness, volume preservation, limited stretching/distortion, normal-deformation consistency, the level-set equation and a data-matching loss rule out implausible interpolations. The result is reconstruction constrained by geometry and physics, rather than independent 3D generation at each time step.",
+      "questions": [
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": ["AI practice"],
+          "q": "A moving surface is represented by the zero level set $S(t)=\\{x\\mid\\phi(x,t)=0\\}$. A material point on the surface follows $\\dot x(t)=V(x(t),t)$. (a) Derive the level-set transport equation. (b) Which component of $V$ changes the surface geometry, and which component is invisible to this equation?",
+          "answer": "Because the material point stays on the surface,\n$$\\phi(x(t),t)=0\\quad\\text{for all }t.$$\nTaking the total derivative and applying the chain rule gives\n$$0=\\frac d{dt}\\phi(x(t),t)=\\partial_t\\phi(x(t),t)+\\nabla\\phi(x(t),t)^\\top\\dot x(t),$$\ntherefore\n$$\\boxed{\\partial_t\\phi+V^\\top\\nabla\\phi=0}.$$\nThe gradient $\\nabla\\phi$ is normal to the level set, so only the **normal component** $V_n=(V^\\top n)n$ changes the represented surface. A tangential component satisfies $V_t^\\top\\nabla\\phi=0$ and merely reparameterises/slides material along the surface; it is invisible to the level-set geometry.",
+          "extend": "This is a 3D analogue of the aperture problem: one scalar transport equation observes only motion along one distinguished direction — here the surface normal.",
+          "tags": ["4D reconstruction", "Level set", "Deformation", "Proof"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": ["AI practice"],
+          "q": "Only two sparse keyframe point clouds of a deforming object are observed. Explain why matching both endpoints is insufficient for 4D reconstruction. Give two physical and two geometric constraints that can regularise the intermediate deformation, and state what volume preservation means locally.",
+          "answer": "Infinitely many time-dependent deformation fields can map the first sparse shape to the second while behaving arbitrarily between the endpoints. Endpoint matching therefore gives no unique or necessarily plausible 4D reconstruction.\n**Physical constraints** include spatial/temporal smoothness of the velocity, limited stretching or distortion, and **volume preservation**. Locally, volume preservation means the deformation Jacobian has determinant one, $\\det D\\psi_t=1$; for an infinitesimal velocity field this corresponds to $\\nabla\\!\\cdot V=0$.\n**Geometric constraints** include consistency of the transported surface normals, satisfaction of the level-set transport equation $\\partial_t\\phi+V^\\top\\nabla\\phi=0$, and a matching loss that keeps the deformed surface close to every observed keyframe point cloud.\nTogether these priors select a smooth, physically plausible path instead of a sequence that merely hits the two endpoints.",
+          "extend": "Data terms say where the shape must be at observed times; physical and geometric terms determine how it is allowed to travel between them.",
+          "tags": ["4D reconstruction", "Physical constraints", "Volume preservation", "Deformation"]
         }
       ]
     }

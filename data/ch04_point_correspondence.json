@@ -105,6 +105,22 @@
             "Brightness constancy",
             "Optical flow"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Lucas–Kanade and Horn–Schunck start from the same optical-flow constraint. (a) Write the Horn–Schunck energy for a flow field $v=(u,w)^\\top$. (b) What additional assumption does its regulariser impose? (c) Contrast the type of flow produced by Horn–Schunck with Lucas–Kanade.",
+          "answer": "**Horn–Schunck energy.** Over the image domain $\\Omega$,\n$$E(u,w)=\\int_\\Omega\\big(I_xu+I_yw+I_t\\big)^2+\\alpha^2\\big(\\|\\nabla u\\|^2+\\|\\nabla w\\|^2\\big)\\,dx.$$\nThe first term is brightness constancy. The second imposes **global spatial smoothness**: neighbouring flow vectors should vary slowly; $\\alpha$ trades data fidelity against smoothness.\n**Contrast.** Horn–Schunck couples all pixels and produces a **dense, globally smooth** flow field, but it can over-smooth motion boundaries. Lucas–Kanade assumes one constant flow vector only within each local window, solves a small least-squares system using the structure tensor, and is naturally **local/sparse** when run only at selected features.",
+          "extend": "The aperture problem is resolved differently: Lucas–Kanade collects several gradients in one window; Horn–Schunck propagates information through a global smoothness prior.",
+          "tags": [
+            "Horn-Schunck",
+            "Optical flow",
+            "Brightness constancy",
+            "Variational methods"
+          ]
         }
       ]
     },
@@ -431,6 +447,22 @@
             "Patch matching",
             "SSD",
             "Feature matching"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let a non-constant image patch be the vector $p\\in\\mathbb{R}^d$ and let the second patch be $q=ap+b\\mathbf{1}$. Prove that $\\operatorname{NCC}(p,q)=1$ for $a>0$ and $-1$ for $a<0$. Why is raw SSD not invariant to the same photometric change?",
+          "answer": "The means satisfy $\\bar q=a\\bar p+b$, hence\n$$q-\\bar q\\mathbf1=a\\big(p-\\bar p\\mathbf1\\big).$$\nWriting $p_c=p-\\bar p\\mathbf1$, the NCC is\n$$\\frac{p_c^\\top(ap_c)}{\\|p_c\\|\\,\\|ap_c\\|}=\\frac{a}{|a|}.$$\nTherefore it is $1$ for positive contrast scaling and $-1$ for contrast inversion. The additive offset $b$ vanishes when the means are subtracted.\nRaw SSD instead gives\n$$\\|p-q\\|^2=\\|(1-a)p-b\\mathbf1\\|^2,$$\nwhich is generally non-zero and changes with both $a$ and $b$. SSD therefore confuses illumination changes with geometric mismatch unless the patches are normalised first.",
+          "extend": "The proof also explains the degenerate case: NCC is undefined for a constant patch because the centred vector has zero norm.",
+          "tags": [
+            "NCC",
+            "SSD",
+            "Patch matching",
+            "Invariance"
           ]
         }
       ]

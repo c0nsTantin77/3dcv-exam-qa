@@ -844,6 +844,38 @@
             "Kronecker product",
             "SVD"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Seven point correspondences are used to estimate a fundamental matrix. (a) Why is the nullspace of the $7\\times9$ design matrix generically two-dimensional? (b) How is the rank-two constraint imposed, and how many candidate matrices can result? (c) Why is this determinant constraint alone insufficient to characterise a calibrated essential matrix?",
+          "answer": "**(a)** Seven independent epipolar equations give a design matrix $\\chi$ of rank $7$, so by rank–nullity $\\dim\\ker(\\chi)=9-7=2$. Let $F_1,F_2$ be the two matrices obtained from a nullspace basis.\n**(b)** Every linear solution is $F(\\alpha)=F_1+\\alpha F_2$ up to scale. A fundamental matrix must have rank $2$, so impose\n$$\\det(F_1+\\alpha F_2)=0.$$\nThe determinant is a cubic polynomial in $\\alpha$, hence it yields one or three real candidates (at most three). Each must be scored against the correspondences, usually inside RANSAC.\n**(c)** Rank two is the only intrinsic algebraic constraint on a fundamental matrix. An essential matrix must additionally have **two equal non-zero singular values**. Therefore $\\det(E)=0$ alone does not guarantee $E\\in\\mathcal E$; a calibrated minimal solver must enforce the full essential-space constraints.",
+          "extend": "Nullspace dimension gives the family; the determinant turns that family into finitely many candidates. Do not claim that every rank-two matrix is essential.",
+          "tags": [
+            "Seven-point algorithm",
+            "Fundamental matrix",
+            "Rank",
+            "Minimal solver"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "All matched 3D points lie on a plane $N^\\top X=d$ and the calibrated cameras satisfy $\\lambda_2x_2=R(\\lambda_1x_1)+T$. (a) Derive the planar homography $x_2\\sim Hx_1$ and state $H$. (b) Why are four point pairs sufficient to estimate $H$? (c) Which translation quantity is recoverable from $H$?",
+          "answer": "Since $X=\\lambda_1x_1$ lies on the plane,\n$$\\lambda_1N^\\top x_1=d\\quad\\Longrightarrow\\quad \\frac1{\\lambda_1}=\\frac{N^\\top x_1}{d}.$$\nDividing the second-view equation by $\\lambda_1$ gives\n$$x_2\\sim Rx_1+\\frac{T}{\\lambda_1}=\\left(R+\\frac1dTN^\\top\\right)x_1,$$\nso\n$$H=R+\\frac1dTN^\\top.$$\nThe cross-product constraint $\\widehat{x_2}Hx_1=0$ supplies two independent linear equations per correspondence. A $3\\times3$ homography has $9$ entries but is defined up to scale, hence $8$ degrees of freedom; four pairs give the required $8$ independent equations.\nDecomposing $H$ recovers the plane normal and **$T/d$**, not the metric translation $T$ separately: translation and plane distance share an unavoidable scale ambiguity.",
+          "extend": "The planar case needs fewer points because one homography maps every point on the plane; it is not an essential-matrix shortcut.",
+          "tags": [
+            "Homography",
+            "Four-point algorithm",
+            "Planar scene",
+            "Scale ambiguity"
+          ]
         }
       ]
     },
