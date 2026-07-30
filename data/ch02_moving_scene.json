@@ -401,6 +401,22 @@
             "Lie algebra",
             "Special Euclidean group"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $\\hat\\xi=\\begin{pmatrix}\\hat\\omega&v\\\\0&0\\end{pmatrix}\\in\\mathfrak{se}(3)$ and $\\theta=\\|\\omega\\|$. Write $\\exp(\\hat\\xi)$ in block form for (a) $\\theta=0$ and (b) $\\theta\\neq0$. Why is the translational block generally not equal to $v$?",
+          "answer": "**(a) Pure translation.** If $\\omega=0$, then\n$$\\exp(\\hat\\xi)=\\begin{pmatrix}I&v\\\\0&1\\end{pmatrix}.$$\n**(b) Rotation and translation.** For $\\theta\\neq0$,\n$$\\exp(\\hat\\xi)=\\begin{pmatrix}R&V(\\omega)v\\\\0&1\\end{pmatrix},\\qquad R=\\exp(\\hat\\omega),$$\nwith\n$$V(\\omega)=I+\\frac{1-\\cos\\theta}{\\theta^2}\\hat\\omega+\\frac{\\theta-\\sin\\theta}{\\theta^3}\\hat\\omega^2.$$\nEquivalently, the translation is\n$$T=\\frac{(I-R)\\hat\\omega v+\\omega\\omega^\\top v}{\\|\\omega\\|^2}.$$\nIt is generally not $v$ because the body translates while its frame is continuously rotating; the instantaneous linear velocity must be integrated along that rotating frame. Only when $\\omega=0$ does $V=I$ and $T=v$.",
+          "extend": "Do not exponentiate the rotation and copy $v$ unchanged. The coupling matrix $V(\\omega)$ is the characteristic extra term of the $SE(3)$ exponential.",
+          "tags": [
+            "Special Euclidean group",
+            "Exponential map",
+            "Twist",
+            "Rodrigues formula"
+          ]
         }
       ]
     },
@@ -565,6 +581,22 @@
             "Quaternion",
             "Rotation matrix",
             "Double cover"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Two orientations are represented by unit quaternions $q_0,q_1$. (a) Write the spherical linear interpolation (SLERP) $q(t)$ for $t\\in[0,1]$. (b) Why must $q_1$ be replaced by $-q_1$ when $q_0^\\top q_1<0$? (c) State two advantages over component-wise linear interpolation.",
+          "answer": "Let $\\Omega=\\arccos(q_0^\\top q_1)$ after choosing the signs so that $q_0^\\top q_1\\ge0$. Then\n$$q(t)=\\frac{\\sin((1-t)\\Omega)}{\\sin\\Omega}q_0+\\frac{\\sin(t\\Omega)}{\\sin\\Omega}q_1.$$\nIf $q_0^\\top q_1<0$, replacing $q_1$ by $-q_1$ does not change the represented rotation, because $q_1$ and $-q_1$ are the same element of $SO(3)$. It does select the **shorter arc** on the unit sphere $S^3$, avoiding an unnecessary long rotation.\n**Advantages.** SLERP stays on $S^3$, so every intermediate quaternion has unit norm, and it moves with constant angular velocity along the shortest geodesic. Ordinary component-wise interpolation leaves the unit sphere unless it is renormalised and does not give constant angular velocity.",
+          "extend": "For very small $\\Omega$, use normalised linear interpolation to avoid dividing by a tiny $\\sin\\Omega$.",
+          "tags": [
+            "Quaternion",
+            "Interpolation",
+            "Double cover",
+            "Rotation"
           ]
         }
       ]

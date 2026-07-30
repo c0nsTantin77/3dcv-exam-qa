@@ -68,6 +68,24 @@
           "answer": "**(a)** Each pixel contributes one scalar residual and a $1\\times6$ Jacobian row, so $J\\in\\mathbb{R}^{N\\times6}$ and $r\\in\\mathbb{R}^N$. Therefore\n$$J^\\top J\\in\\mathbb{R}^{6\\times6},\\qquad J^\\top r\\in\\mathbb{R}^{6}$$\n— **independent of the number of pixels $N$**.\n**(b)** Writing $J$ row-wise as $J=(J_1^\\top,\\dots,J_N^\\top)^\\top$ with $J_i\\in\\mathbb{R}^{1\\times6}$,\n$$J^\\top J=\\sum_{i=1}^{N}J_i^\\top J_i,\\qquad J^\\top r=\\sum_{i=1}^{N}J_i^\\top r_i.$$\n**Memory consequence.** The full $N\\times6$ Jacobian never has to be stored: one iterates over pixels, accumulating a $6\\times6$ matrix and a $6$-vector. Memory is $O(1)$ in the number of pixels (and the accumulation parallelises trivially over pixels), which is exactly why a direct method can use hundreds of thousands of pixels in real time.",
           "extend": "The same rank-1 accumulation pattern appears in the structure tensor of Lucas–Kanade — it is the standard way to build normal equations without materialising $J$.",
           "tags": ["Direct methods", "Gauss-Newton", "Hessian"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": ["AI practice"],
+          "q": "An RGB-D tracker aligns a live frame to a reference frame. Let $p_i$ be a reference 3D point, $q_i$ the corresponding live-frame 3D point, $n_i$ the live surface normal, and $T(\\xi)$ the candidate pose. (a) Write a point-to-plane geometric residual and a photometric residual. (b) Give a combined energy. (c) Why are the two residuals complementary?",
+          "answer": "**Residuals.** A point-to-plane ICP residual is\n$$r_i^g(\\xi)=n_i^\\top\\big(T(\\xi)p_i-q_i\\big),$$\nwhile the direct photometric residual is\n$$r_i^I(\\xi)=I_2\\big(\\pi(T(\\xi)p_i)\\big)-I_1\\big(\\pi(p_i)\\big).$$\nA combined robust least-squares objective is, for example,\n$$E(\\xi)=\\sum_i w_i^g\\,\\rho\\big((r_i^g)^2\\big)+\\lambda\\sum_i w_i^I\\,\\rho\\big((r_i^I)^2\\big).$$\n**Complementarity.** The geometric term uses measured depth and surface normals, so it remains informative on textureless surfaces where the image gradient is zero. The photometric term supplies sub-pixel constraints from texture and can constrain directions to which a locally planar point-to-plane residual is weak. Combining them improves conditioning and robustness, provided invalid depths, occlusions and illumination changes are down-weighted.",
+          "extend": "Point-to-plane ICP measures only the displacement along the normal; tangential motion on a flat surface needs texture or additional geometry to become observable.",
+          "tags": ["RGB-D", "Direct methods", "Photometric error", "ICP"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": ["AI practice"],
+          "q": "In direct image alignment the approximate Hessian is $H=\\sum_iJ_i^\\top J_i$. Why can using every pixel from one strongly textured edge still produce a poorly conditioned $H$? How does the pixel-selection strategy of a direct sparse method address this?",
+          "answer": "Neighbouring pixels on the same edge have nearly parallel image gradients and very similar pose Jacobians. Their outer products $J_i^\\top J_i$ therefore add almost the **same rank-one information** many times. The number of residuals grows, but the missing motion directions remain weak; $H$ has a large eigenvalue in one direction and tiny eigenvalues in others, so it is ill-conditioned.\nA direct sparse method keeps pixels with sufficient gradient but distributes them over the image and across different gradient orientations and depths. This removes highly correlated measurements, preserves the independent directions that determine the pose, improves the eigenvalue spread of $H$, and makes the windowed optimisation much cheaper without losing proportional information.",
+          "extend": "More pixels do not automatically mean more information. What matters is the rank and conditioning of the summed Jacobian outer products.",
+          "tags": ["Direct sparse odometry", "Hessian", "Spatial correlation", "Conditioning"]
         }
       ]
     },

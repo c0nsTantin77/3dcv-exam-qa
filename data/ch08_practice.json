@@ -137,6 +137,24 @@
           "answer": "**(1) Alignment.** Denote by $R,t,s$ the rotation, translation and scale of the **similarity** transformation. The objective is\n$$\\tilde R,\\tilde t,\\tilde s=\\arg\\min_{R,t,s}\\sum_{k=1}^{N}\\big\\|\\hat c_k-s\\,Rc_k-t\\big\\|^2.$$\nIt is minimised in closed form by **Horn's method** or **Umeyama's method**.\n**(2) Accuracy.** With the optimal $\\tilde R,\\tilde t,\\tilde s$, the **absolute trajectory error** is reported as the root mean square error\n$$\\text{RMSE}=\\sqrt{\\frac{\\sum_{k=1}^{N}\\big\\|\\hat c_k-\\tilde s\\tilde Rc_k-\\tilde t\\big\\|^2}{N}}.$$",
           "extend": "The scale $s$ is included because a **monocular** trajectory is only defined up to scale — for stereo or RGB-D one aligns with a rigid ($SE(3)$) transform instead.",
           "tags": ["SLAM", "Benchmark", "Absolute trajectory error"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": ["AI practice"],
+          "q": "COLMAP is applied to uncalibrated images with substantial radial distortion. (a) Why can estimating a fundamental matrix absorb an unknown focal length but not arbitrary radial distortion? (b) What does PRaDA estimate, what does it deliberately leave for COLMAP, and where can it enter the pipeline?",
+          "answer": "**(a)** Unknown focal length is part of the projective camera calibration and can be represented through the relationship between $F$, the intrinsics and the epipolar geometry. Radial distortion is a **nonlinear, radius-dependent warp of the measured pixels**; distorted correspondences no longer satisfy one linear epipolar constraint in the original image coordinates, so a pinhole $F$ cannot simply absorb it.\n**(b)** PRaDA separates calibration into **radial distortion** and **focal length**. It estimates the distortion parameters only and produces automatically undistorted images independently of the focal length; the focal length remains for COLMAP's ordinary calibration/reconstruction machinery. PRaDA can be used as an image-preprocessing/distortion-estimation step and inside distortion-aware geometric verification before the standard incremental SfM pipeline.",
+          "extend": "The design principle is modular: remove the nonlinear distortion first, then let the established pinhole SfM system handle focal length, matching and reconstruction.",
+          "tags": ["PRaDA", "COLMAP", "Radial distortion", "Structure from motion"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": ["AI practice"],
+          "q": "Why are cameras and IMUs complementary for visual-inertial odometry? State the measurements and typical failure mode of each, then name the main state-variable and factor types in a VIO factor graph such as BASALT.",
+          "answer": "**IMU.** A gyroscope measures three-axis angular velocity and an accelerometer measures three-axis specific force at roughly $200$–$1000$ Hz. It works without external light and gives low-latency motion, but it is noisy and biased; integrating acceleration and angular velocity makes pose error drift rapidly.\n**Camera.** Images arrive more slowly (roughly $15$–$60$ Hz) and fail under darkness, blur or weak texture, but visual reprojection constraints anchor the trajectory to the observed scene and correct long-term IMU drift. Stereo can additionally provide metric depth.\n**Factor graph.** Typical state nodes are keyframe poses, velocities, gyroscope/accelerometer biases and 3D landmarks (plus calibration parameters when estimated). **Visual reprojection factors** connect a pose to a landmark, **IMU preintegration factors** connect consecutive pose/velocity/bias states, and a **marginalisation prior** carries information from states removed from the active window. Joint optimisation fuses the high-rate relative motion with the slower geometric anchor.",
+          "extend": "The sensors fail in different ways: the IMU is locally responsive but globally drifting; the camera is globally corrective but intermittently unreliable.",
+          "tags": ["Visual-inertial odometry", "IMU", "Factor graph", "SLAM"]
         }
       ]
     },

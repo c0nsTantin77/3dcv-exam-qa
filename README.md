@@ -34,6 +34,8 @@ Cards from a **Cremers** paper carry a ★ badge, an amber source chip and a lef
   (definitions, formulas, exam traps) before the questions.
 - Interactive **multiple-choice** and **open** questions; answers follow the official sample solutions,
   with the marking-scheme pitfalls called out under *Extended memory*.
+- **18 Cremers-style AI practice questions** (two per chapter) target concepts that previously had no
+  standalone question, with complete derivations and exam-style traps.
 - Site-wide **search** (keyword, concept tag, or an exact code like `25EDC 1.1`), **tag** browsing and
   **browse-by-exam**.
 - **Study system**: Reviewed / wrong book / notes (Markdown + math) / Ebbinghaus spaced repetition,
@@ -79,6 +81,7 @@ GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`, `withastro/acti
 
 ## Recent updates
 
+- **2026-07-30** — Added 18 Cremers-style AI questions, two per chapter, covering previously untested concepts.
 - **2026-07-25** — First release: all 9 chapters, from 12 past papers and 8 exercise sheets.
 - **2026-07-25** — Every question is tagged with its examiner; Cremers papers are marked ★ and rank first.
 

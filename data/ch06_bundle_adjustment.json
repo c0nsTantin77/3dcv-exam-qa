@@ -268,6 +268,22 @@
             "Gauss-Newton",
             "Nonlinear optimisation"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Iteratively reweighted least squares (IRLS) is used for $E(x)=\\sum_i w_i(x)\\,|a_i-f_i(x)|^2$. (a) Write the IRLS update. (b) If $f_i(x)=b_i^\\top x$, derive the weighted normal equations for one iteration. (c) Why does solving every subproblem exactly not guarantee a global minimum of $E$?",
+          "answer": "**(a)** Freeze the weights at the current estimate and solve\n$$x_{t+1}=\\arg\\min_x\\sum_i w_i(x_t)\\,|a_i-f_i(x)|^2.$$\n**(b)** With $A$ containing rows $b_i^\\top$, observation vector $a$, and $W_t=\\operatorname{diag}(w_i(x_t))$, the subproblem is $\\min_x\\|W_t^{1/2}(a-Ax)\\|^2$. Its normal equations are\n$$A^\\top W_tA\\,x_{t+1}=A^\\top W_ta,$$\nso $x_{t+1}=(A^\\top W_tA)^{-1}A^\\top W_ta$ when the matrix is invertible.\n**(c)** Although each frozen-weight problem is quadratic, the weights depend on $x$, so the original objective is generally **non-convex**. IRLS is iterative and initialization-dependent; it can converge to a local minimum or stationary point rather than the global minimum.",
+          "extend": "The weights are evaluated at $x_t$, not at the unknown $x_{t+1}$; otherwise the subproblem would not be an ordinary weighted least-squares solve.",
+          "tags": [
+            "IRLS",
+            "Weighted least squares",
+            "Nonlinear optimisation",
+            "Normal equations"
+          ]
         }
       ]
     },
@@ -501,6 +517,22 @@
             "Bundle adjustment",
             "Jacobian",
             "Sparsity"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A separable least-squares problem has nonlinear pose variables $p$ and linear structure variables $\\ell$: $E(p,\\ell)=\\|A(p)\\ell-b\\|_2^2$. (a) Eliminate $\\ell$ by variable projection and write the reduced problem in $p$. (b) How does this idea help projective bundle adjustment, and how is it conceptually different from merely taking one Schur-complement step?",
+          "answer": "For fixed $p$, the optimal linear variables are\n$$\\ell^*(p)=A(p)^\\dagger b.$$\nSubstitution gives the reduced objective\n$$E_{\\mathrm{red}}(p)=\\|A(p)A(p)^\\dagger b-b\\|^2=\\|\\big(I-A(p)A(p)^\\dagger\\big)b\\|^2,$$\nso the outer optimisation is only\n$$p^*=\\arg\\min_p E_{\\mathrm{red}}(p),\\qquad \\ell^*=\\ell^*(p^*).$$\nIn projective bundle adjustment, homogeneous landmarks can be the linear block, so every candidate set of cameras gets its best possible structure in closed form. This reduces the search space and permits optimisation from much poorer or even arbitrary initial structure, which motivates initialization-free variable-projection methods such as PoVar.\nA Schur complement eliminates the landmark **increment inside one linearised Gauss–Newton system**. Variable projection eliminates the landmark variables in the **objective itself** before the outer nonlinear optimisation; the optimum structure is recomputed as a function of the current poses.",
+          "extend": "Both methods eliminate landmarks, but at different levels: variable projection acts on the separable objective; Schur acts on one local normal equation.",
+          "tags": [
+            "Variable projection",
+            "Bundle adjustment",
+            "Pseudo-inverse",
+            "Initialisation"
           ]
         }
       ]

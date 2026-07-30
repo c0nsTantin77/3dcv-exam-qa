@@ -247,6 +247,22 @@
             "Intrinsics",
             "Principal point"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A general intrinsic matrix is $K=\\begin{pmatrix}fs_x&fs_\\theta&o_x\\\\0&fs_y&o_y\\\\0&0&1\\end{pmatrix}$. (a) Interpret its five independent matrix entries. (b) For $K=\\begin{pmatrix}200&20&320\\\\0&240&240\\\\0&0&1\\end{pmatrix}$ and camera coordinates with $X/Z=0.5$, $Y/Z=-0.25$, compute the pixel coordinates. Which term couples the two image axes?",
+          "answer": "**Interpretation.** The five independent entries are $f_x=fs_x$ and $f_y=fs_y$ (focal length measured in horizontal and vertical pixels), the skew $s=fs_\\theta$, and the principal point $(o_x,o_y)$. In this matrix alone, $f$ cannot be separated from the pixel scale factors $s_x,s_y$. A non-zero skew means the pixel axes are not perpendicular.\nApplying $K$ to $(0.5,-0.25,1)^\\top$ gives\n$$u=200(0.5)+20(-0.25)+320=415,$$\n$$v=240(-0.25)+240=180.$$\nThus the pixel is $(415,180)^\\top$. The off-diagonal entry $fs_\\theta=20$ couples the vertical normalised coordinate into $u$. There is no corresponding lower-left term because the standard calibration convention chooses an upper-triangular $K$.",
+          "extend": "Do not silently set the skew to zero when the full intrinsic matrix is given; it contributes to the horizontal pixel coordinate.",
+          "tags": [
+            "Intrinsics",
+            "Skew",
+            "Calibration",
+            "Perspective projection"
+          ]
         }
       ]
     },
@@ -571,6 +587,22 @@
           "tags": [
             "Perspective projection",
             "Visibility"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let a full-rank camera matrix be $P=K[R\\mid T]\\in\\mathbb{R}^{3\\times4}$, where $R\\in SO(3)$ maps world coordinates to camera coordinates. (a) Show that the homogeneous camera centre $C_h=(-R^\\top T,1)^\\top$ spans $\\ker(P)$. (b) Explain the geometric meaning of this nullspace.",
+          "answer": "**(a)** Since $R^{-1}=R^\\top$,\n$$PC_h=K[R\\mid T]\\begin{pmatrix}-R^\\top T\\\\1\\end{pmatrix}=K\\big(-RR^\\top T+T\\big)=K(-T+T)=0.$$\nBecause $P$ has rank $3$, its nullspace in $\\mathbb{R}^4$ is one-dimensional, so $C_h$ spans it.\n**(b)** The camera centre is the unique projective 3D point at which every viewing ray originates. It has no finite image coordinate: the projection gives the zero homogeneous vector. For any image point $x$, all 3D points on the corresponding backprojection line pass through this nullspace point.",
+          "extend": "The familiar formula $C=-R^\\top T$ is therefore not only an inverse-pose identity; it is also the right null vector of the projection matrix.",
+          "tags": [
+            "Camera centre",
+            "Kernel",
+            "Extrinsics",
+            "Projective geometry"
           ]
         }
       ]
