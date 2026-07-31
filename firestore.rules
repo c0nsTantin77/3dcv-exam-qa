@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'progress',
+          'updated',
+          'lastActiveAt',
+          'retentionPolicyVersion'
+        ])
+        && request.resource.data.progress is map
+        && request.resource.data.updated is int
+        && request.resource.data.lastActiveAt == request.time
+        && request.resource.data.retentionPolicyVersion == 1;
+    }
+  }
+}

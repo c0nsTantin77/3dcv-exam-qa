@@ -10,6 +10,12 @@ dist/
 *.log
 npm-debug.log*
 
+# Firebase local state and credentials (web config is public; admin keys are not)
+.firebase/
+firebase-debug.log*
+*-firebase-adminsdk-*.json
+service-account*.json
+
 # Local editor / tooling config (machine-specific, not committed)
 .claude/
 .vscode/

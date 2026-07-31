@@ -35,7 +35,7 @@ const { title } = Astro.props;
     </script>
   </head>
   <body>
-    <div id="presence-bar" aria-live="polite"></div>
+    <div id="presence-bar" role="status" aria-live="polite" aria-atomic="true"></div>
     <slot />
     <script>
       import "../lib/client/main.ts";

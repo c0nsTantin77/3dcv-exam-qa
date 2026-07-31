@@ -30,6 +30,15 @@ let uid: string | null = null;
 let ready = false;
 let dirty = false;
 
+const cloudDocument = (): Record<string, unknown> => ({
+  progress: Store.data(),
+  // Keep the numeric field for compatibility. Retention should use only the
+  // server-generated Timestamp below, never this client-controlled value.
+  updated: Date.now(),
+  lastActiveAt: firebase.firestore.FieldValue.serverTimestamp(),
+  retentionPolicyVersion: 1,
+});
+
 function mergeProgress(local: Progress, cloud: Partial<Progress>): Progress {
   const out: any = {};
   (["reviewed", "wrong", "srs", "activity", "notes"] as (keyof Progress)[]).forEach((k) => {
@@ -43,19 +52,26 @@ function pushNow(): void {
   dirty = false;
   db.collection("users")
     .doc(uid)
-    .set({ progress: Store.data(), updated: Date.now() }, { merge: true })
-    .catch((e: unknown) => console.warn("cloud push failed", e));
+    .set(cloudDocument(), { merge: true })
+    .catch((e: unknown) => {
+      dirty = true;
+      console.warn("cloud push failed", e);
+    });
 }
 
 async function pullMergePush(): Promise<void> {
   try {
-    const doc = await db.collection("users").doc(uid).get();
+    const activeUid = uid;
+    if (!activeUid) return;
+    const document = db.collection("users").doc(activeUid);
+    const doc = await document.get();
     const cloud = doc.exists ? doc.data().progress || {} : {};
     const merged = mergeProgress(Store.data(), cloud);
     Store.importBlob(JSON.stringify(merged));
     // a cloud doc from another device may still carry pre-dedup ids
     runMigrations();
-    await db.collection("users").doc(uid).set({ progress: Store.data(), updated: Date.now() }, { merge: true });
+    // A successful sign-in counts as activity even if no study data changed.
+    await document.set(cloudDocument(), { merge: true });
     applyAllStudy();
     renderProgressUI();
   } catch (e) {
