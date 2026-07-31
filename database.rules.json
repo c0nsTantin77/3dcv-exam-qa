@@ -1,0 +1,20 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "presence": {
+      ".read": true,
+      ".indexOn": ["t"],
+      "$connection": {
+        ".write": "!newData.exists() || (!data.exists() || newData.child('t').val() >= data.child('t').val())",
+        ".validate": "newData.hasChildren(['t'])",
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now && newData.val() >= now - 120000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
