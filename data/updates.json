@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-07-31",
+    "text": "Expanded the Cremers-style AI practice set to 101 questions, guaranteeing at least two for every knowledge point."
+  },
+  {
+    "date": "2026-07-31",
     "text": "Added versioned progress backups and a guarded 180-day cloud-progress retention workflow."
   },
   {

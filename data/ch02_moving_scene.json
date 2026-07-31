@@ -86,6 +86,20 @@
             "Rotation matrix",
             "Hat operator"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A point is first translated by $T_1$, then rotated by $R$, then translated by $T_2$.\n\n1. Write the single homogeneous transformation $g\\in SE(3)$. (3)\n2. Give $g^{-1}$. (2)\n3. State the result if the first translation and rotation are interchanged. (2)",
+          "answer": "Applying the operations from right to left gives\n$$x' = R(x+T_1)+T_2=Rx+RT_1+T_2,$$\nso\n$$g=\\begin{bmatrix}R&RT_1+T_2\\\\0&1\\end{bmatrix},\\qquad g^{-1}=\\begin{bmatrix}R^\\top&-R^\\top(RT_1+T_2)\\\\0&1\\end{bmatrix}.$$\nIf the rotation is applied first and the translation $T_1$ second, the translation block becomes $T_1+T_2$. It generally differs from $RT_1+T_2$: rigid transformations do not commute.",
+          "extend": "Generated set Q11-A: Order matters (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Rigid-body motion and homogeneous matrices",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -199,6 +213,34 @@
             "Rotation matrix",
             "Composition",
             "Euler angles"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For $g(x)=Rx+T$ with $R\\in SO(3)$, prove that $g$ preserves distances and oriented cross products between displacement vectors. Give a counterexample showing why an element of $O(3)\\setminus SO(3)$ preserves distances but reverses orientation. (6)",
+          "answer": "Translations cancel in displacement vectors, and\n$$\\|g(x)-g(y)\\|=\\|R(x-y)\\|=\\|x-y\\|.$$\nFor $R\\in SO(3)$, orientation is preserved and\n$$(Ra)\\times(Rb)=R(a\\times b).$$\nThe reflection $Q=\\operatorname{diag}(-1,1,1)$ is in $O(3)\\setminus SO(3)$. It preserves lengths, but\n$$(Qa)\\times(Qb)=-Q(a\\times b),$$\nso the handedness is reversed. The determinant test is therefore essential.",
+          "extend": "Generated set Q11-B: What exactly is preserved? (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Rigid-body motion and homogeneous matrices",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For $R\\in SO(3)$, prove\n\n$$R\\widehat aR^\\top=\\widehat{Ra}.$$\n\nDoes the identity remain true for $R\\in O(3)$ with $\\det R=-1$? If not, give the corrected formula. (6)",
+          "answer": "For arbitrary $x$ and $R\\in SO(3)$,\n$$R\\widehat aR^\\top x=R(a\\times R^\\top x)=(Ra)\\times x=\\widehat{Ra}x.$$\nSince the two matrices act identically on every $x$, $R\\widehat aR^\\top=\\widehat{Ra}$. For a general orthogonal matrix the cross product is a pseudovector, so the corrected identity is\n$$R\\widehat aR^\\top=\\det(R)\\widehat{Ra}.$$\nA reflection therefore introduces a minus sign.",
+          "extend": "Generated set Q12-B: Rotation covariance of the cross product (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Cross products and the hat operator",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -347,6 +389,20 @@
             "Lie algebra",
             "Skew-symmetric matrix",
             "Exponential map"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Given $R\\in SO(3)$:\n\n1. Derive $\\theta=\\arccos((\\operatorname{tr}R-1)/2)$. (2)\n2. For $0<\\theta<\\pi$, derive $\\widehat\\omega=\\frac{\\theta}{2\\sin\\theta}(R-R^\\top)$. (3)\n3. Explain why $\\theta=0$ and $\\theta=\\pi$ require special handling. (3)",
+          "answer": "Taking the trace of Rodrigues' formula gives\n$$\\operatorname{tr}R=1+2\\cos\\theta,\\qquad \\theta=\\arccos\\!\\left(\\frac{\\operatorname{tr}R-1}{2}\\right).$$\nFor $0<\\theta<\\pi$, subtracting the transpose of Rodrigues' formula yields\n$$\\widehat\\omega=\\frac{\\theta}{2\\sin\\theta}(R-R^\\top).$$\nAt $\\theta=0$ the rotation axis is arbitrary. At $\\theta=\\pi$, $\\sin\\theta=0$, so the formula is singular; recover the axis from an eigenvector of $R$ with eigenvalue $1$ or from a non-zero column of $R+I$. Its sign remains ambiguous.",
+          "extend": "Generated set Q13-B: Recovering axis-angle with edge cases (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Exponential/logarithmic maps and Rodrigues' formula",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -597,6 +653,20 @@
             "Interpolation",
             "Double cover",
             "Rotation"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$:\n\n1. Write the full matrix. (4)\n2. Set $\\theta=\\pi/2$ and show that $R$ depends only on one combination of $\\psi$ and $\\phi$. (3)\n3. State the lost degree of freedom. (1)",
+          "answer": "With $c_\\alpha=\\cos\\alpha$ and $s_\\alpha=\\sin\\alpha$,\n$$R=\\begin{bmatrix}c_\\psi c_\\theta&c_\\psi s_\\theta s_\\phi-s_\\psi c_\\phi&c_\\psi s_\\theta c_\\phi+s_\\psi s_\\phi\\\\s_\\psi c_\\theta&s_\\psi s_\\theta s_\\phi+c_\\psi c_\\phi&s_\\psi s_\\theta c_\\phi-c_\\psi s_\\phi\\\\-s_\\theta&c_\\theta s_\\phi&c_\\theta c_\\phi\\end{bmatrix}.$$\nAt $\\theta=\\pi/2$, $c_\\theta=0$ and all remaining yaw/roll terms depend only on $\\psi-\\phi$ (the sum under the opposite active/passive convention). Yaw and roll can no longer be identified separately: one rotational degree of freedom is lost.",
+          "extend": "Generated set Q20-A: ZYX gimbal lock (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Euler angles, gimbal lock, and representation choice",
+            "Cremers-style practice"
           ]
         }
       ]

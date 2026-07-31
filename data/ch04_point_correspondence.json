@@ -121,6 +121,20 @@
             "Brightness constancy",
             "Variational methods"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Give three physically distinct violations of brightness constancy. For each, state whether a global affine brightness model $I_2\\approx aI_1+b$ could plausibly compensate for it. (6)",
+          "answer": "Examples include: **global exposure or gain**, which a global affine model $aI+b$ can often absorb; **spatially varying illumination or local shadows**, which one global pair $(a,b)$ generally cannot absorb; **specular highlights or other non-Lambertian effects**, which are view-dependent and not globally affine; and **occlusion/disocclusion**, where no corresponding scene point exists at all. Motion blur and automatic white balance may be only partly compensated. The key distinction is global photometric change versus local or correspondence-breaking change.",
+          "extend": "Generated set Q27-B: When brightness constancy fails (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Brightness constancy and the optical-flow constraint",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -238,6 +252,34 @@
             "Structure tensor",
             "Optical flow"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For\n\n$$E(v)=\\int G(x-x')\\big(\\nabla I(x')^\\top v+I_t(x')\\big)^2\\,dx',$$\n\nderive $M$, $q$, the optimality condition, and the solution for $v$ when it is unique. State the dimensions of all quantities. (9)",
+          "answer": "Expanding the square gives\n$$E(v)=v^\\top Mv+2q^\\top v+c,$$\nwhere\n$$M=\\int G\\,\\nabla I\\nabla I^\\top dx'\\in\\mathbb R^{2\\times2},\\quad q=\\int G\\,I_t\\nabla I\\,dx'\\in\\mathbb R^2,$$\nand $c=\\int G I_t^2dx'$ is scalar. Differentiation yields $\\nabla_vE=2Mv+2q$, so the normal equations are $Mv=-q$. If $M$ is invertible, the unique estimate is $v=-M^{-1}q$.",
+          "extend": "Generated set Q28-A: Deriving the local normal equations (9 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Lucas-Kanade and the aperture problem",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Assume $\\nabla I(x')=\\alpha(x')u$ for every $x'$ in the window, with fixed unit vector $u$.\n\n1. Show that $M$ has rank at most one. (3)\n2. Which component of motion can be estimated? (2)\n3. Give one regularized solution when $M$ is singular. (2)",
+          "answer": "Substitution gives\n$$M=\\left(\\int G(x-x')\\alpha(x')^2dx'\\right)uu^\\top,$$\nso $\\operatorname{rank}M\\le1$. Only the motion component along the gradient direction $u$ is constrained; the orthogonal, tangential component is invisible. A regularized estimate is\n$$v_\\lambda=-(M+\\lambda I)^{-1}q,$$\nor one may use the Moore--Penrose solution. Regularization makes the system solvable but introduces bias; it does not create missing image information.",
+          "extend": "Generated set Q28-B: Rank-one structure tensors (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Lucas-Kanade and the aperture problem",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -333,6 +375,34 @@
             "Eigenvalues",
             "Corner detection"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Classify each structure tensor as flat, edge-like, or corner-like, and state whether 2D flow is locally observable:\n\n1. eigenvalues $(0.01,0.00)$;\n2. eigenvalues $(12.0,0.08)$;\n3. eigenvalues $(8.0,5.0)$.\n\nFor the edge case, give the dominant gradient direction in terms of the eigenvectors. (8)",
+          "answer": "$(0.01,0.00)$ is effectively **flat**, so 2D flow is unobservable. $(12.0,0.08)$ is **edge-like**: only the normal component is reliable, and the dominant gradient direction is the eigenvector of the larger eigenvalue. $(8.0,5.0)$ is **corner-like**, with significant variation in two directions, so both flow components are locally observable. Large trace alone is insufficient; the smaller eigenvalue controls the weak direction.",
+          "extend": "Generated set Q30-A: Reading an image patch from eigenvalues (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Structure tensor and Harris corner score",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Two points have structure-tensor eigenvalues $(1000,0.002)$ and $(3,2)$.\n\n1. Compare their determinant and condition number. (3)\n2. Explain why selecting only by $\\det M>\\theta$ can be misleading. (2)\n3. Propose a more stable criterion using both eigenvalues or a Harris/Förstner-style response. (2)",
+          "answer": "For $(1000,0.002)$, $\\det M=2$ but the condition number is $1000/0.002=500000$. For $(3,2)$, $\\det M=6$ and the condition number is $1.5$. A determinant threshold can therefore hide an almost unconstrained direction when one eigenvalue is huge. More stable choices require $\\lambda_{\\min}>\\tau$, bound the condition number, or use a Harris/Förstner response that penalizes strongly unbalanced eigenvalues.",
+          "extend": "Generated set Q31-B: Determinant threshold versus conditioning (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Invariance and robust feature selection",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -370,6 +440,34 @@
             "Invariance",
             "Structure tensor"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $C=\\det M-\\kappa\\operatorname{tr}(M)^2$.\n\n1. Express $C$ using eigenvalues $\\lambda_1,\\lambda_2$. (2)\n2. Determine its qualitative sign for flat, edge, and corner patches. (3)\n3. For $\\lambda_1=\\lambda_2=\\lambda>0$, find the condition on $\\kappa$ for $C>0$. (2)",
+          "answer": "Since trace and determinant are spectral invariants,\n$$C=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2.$$\nA flat patch gives a score near zero. An edge has one large and one small eigenvalue, making the negative trace penalty dominate. A corner has two substantial eigenvalues and gives a positive score for a suitable $\\kappa$. If $\\lambda_1=\\lambda_2=\\lambda>0$, then $C=\\lambda^2(1-4\\kappa)$, so positivity requires $\\kappa<1/4$.",
+          "extend": "Generated set Q30-B: Harris response without eigendecomposition (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Structure tensor and Harris corner score",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "An image is rotated in the plane by $R\\in SO(2)$.\n\n1. Derive how $\\nabla I$ and $M$ transform. (4)\n2. Prove that $\\det M$, $\\operatorname{tr}M$, and the Harris score are unchanged. (3)\n3. Is the score unchanged under arbitrary spatial scaling? (1)",
+          "answer": "Under an in-plane rotation, gradients transform as $\\nabla I'=R\\nabla I$ (or $R^\\top\\nabla I$ under the passive convention), hence\n$$M'=RMR^\\top.$$\nThis is an orthogonal similarity transform, so $\\det M'=\\det M$ and $\\operatorname{tr}M'=\\operatorname{tr}M$. The Harris score is therefore rotation invariant. It is not automatically scale invariant: spatial scaling changes derivative magnitudes, integration measure, and the appropriate Gaussian window scale.",
+          "extend": "Generated set Q31-A: Rotation invariance of Harris (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Invariance and robust feature selection",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -391,6 +489,34 @@
             "Optical flow",
             "Image pyramid",
             "Lucas-Kanade"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "An image pyramid downsamples by 2 between consecutive levels. A full-resolution displacement is $(96,-40)$ pixels.\n\n1. What is the displacement at level $L=3$? (2)\n2. If Lucas-Kanade handles at most 5 pixels per level, is this motion within the local linearization range at level 3? (2)\n3. Give a conservative full-resolution displacement bound for an $L$-level pyramid. (2)",
+          "answer": "After three factors of two, the displacement is\n$$(96,-40)/2^3=(12,-5)$$\npixels. Since one component has magnitude $12>5$, it is outside the stated local range at level 3. If only capture at the coarsest level is required, a conservative full-resolution component bound is $2^Ld_{\\max}$. If every level contributes a maximal incremental correction, the theoretical accumulated bound is $d_{\\max}(2^{L+1}-1)$, subject to the level-index convention.",
+          "extend": "Generated set Q29-A: Pyramid displacement budget (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Coarse-to-fine optical flow",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Describe a complete pyramidal Lucas-Kanade procedure, including image construction, initialization at the coarsest level, warping, incremental flow, upsampling, and stopping. Explain why simply running LK independently at every level is incorrect. (8)",
+          "answer": "Build Gaussian pyramids and initialize the flow to zero at the coarsest level. Warp the second image using the current estimate, solve Lucas--Kanade for an increment, update, and iterate to convergence. Upsample the flow to the next finer level and multiply its pixel displacement by two; then repeat warping and incremental refinement down to level zero. Independent estimates at each level discard the coarse initialization, so the fine-level solver again sees the original large displacement and violates its Taylor approximation.",
+          "extend": "Generated set Q29-B: Complete coarse-to-fine algorithm (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Coarse-to-fine optical flow",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -463,6 +589,20 @@
             "SSD",
             "Patch matching",
             "Invariance"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Compare Lucas-Kanade tracking with descriptor-based wide-baseline matching. Discuss the motion model, initialization, invariance, computational strategy, and likely failure modes. Given a $60^\\circ$ viewpoint change with repeated texture, select a method and state two additional checks needed to reject false matches. (8)",
+          "answer": "Lucas--Kanade is a local, continuous optimizer for small motion; it needs a good initialization, uses image gradients, and offers little built-in scale or viewpoint invariance. Wide-baseline descriptors generate discrete candidate matches with engineered or learned invariance, tolerate large displacement, but are more expensive and can be ambiguous. For a $60^\\circ$ viewpoint change, use descriptor or learned-feature matching, then reject false matches with checks such as the ratio test, mutual nearest neighbors, epipolar/homography RANSAC, cheirality, or cycle consistency.",
+          "extend": "Generated set Q32-B: Small deformation or wide baseline? (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Patch matching and wide-baseline correspondence",
+            "Cremers-style practice"
           ]
         }
       ]

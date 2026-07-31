@@ -35,6 +35,36 @@
           "answer": "**Step 1 — transform to the camera frame.**\n$$P_C=R_{W\\to C}P_W+t_{W\\to C}=\\begin{pmatrix}0.555\\\\-0.420\\\\5.510\\end{pmatrix}.$$\n**Step 2 — build the intrinsic matrix.** The principal point is the image centre, so $c=(320,240)$:\n$$K=\\begin{pmatrix}800&0&320\\\\0&800&240\\\\0&0&1\\end{pmatrix}.$$\n**Step 3 — project and divide by the third component.**\n$$KP_C=\\begin{pmatrix}800(0.555)+320(5.510)\\\\800(-0.420)+240(5.510)\\\\5.510\\end{pmatrix}\\ \\Longrightarrow\\ p'=\\begin{pmatrix}400.581\\\\179.020\\end{pmatrix}.$$\n**Step 4 — reprojection error.**\n$$d=\\|p-p'\\|=\\big\\|(393-400.581,\\ 167-179.020)\\big\\|=\\sqrt{7.581^2+12.020^2}\\approx14.211\\ \\text{px}.$$",
           "extend": "Four steps, four blocks of marks: transform, build $K$, project **with the division**, take the norm. Skipping the perspective division is the classic error.",
           "tags": ["Reprojection error", "PnP", "Intrinsics", "Pose estimation"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A world point is $P_W=(2,1,8)^\\top$. The world-to-camera pose is $R=I$, $t=(-1,0,0)^\\top$, and $K=\\begin{pmatrix}600&0&320\\\\0&600&240\\\\0&0&1\\end{pmatrix}$. It is detected at $(400,310)^\\top$. Compute its predicted pixel and Euclidean reprojection error, showing the perspective division.",
+          "answer": "Transform first:\n$$P_C=RP_W+t=(1,1,8)^\\top.$$\nThe normalized coordinate is $(1/8,1/8,1)^\\top$, so\n$$\\hat p=\\left(600/8+320,\\ 600/8+240\\right)^\\top=(395,315)^\\top.$$\nThe reprojection error is\n$$\\|p-\\hat p\\|_2=\\sqrt{(400-395)^2+(310-315)^2}=5\\sqrt2\\approx7.07\\text{ px}.$$\nMultiplying by $K$ without dividing by the third component would not produce a pixel coordinate.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "PnP",
+            "Reprojection error",
+            "Camera pose"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Compare P3P and EPnP. Why can three perfect 3D--2D correspondences yield several P3P poses, how is the ambiguity resolved in practice, and how would you embed the solver in RANSAC?",
+          "answer": "P3P is a minimal calibrated solver: three bearing rays and three inter-point distances lead to polynomial constraints with up to four real camera poses. A fourth correspondence, positive-depth tests, and reprojection error select the physical solution. EPnP is a non-minimal $O(n)$ method that expresses points using four virtual control points and is useful with many correspondences. In RANSAC, repeatedly sample minimal triples, enumerate each P3P pose, score all correspondences by reprojection error, keep the largest consensus, and refine the winning pose on all inliers.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "P3P",
+            "EPnP",
+            "RANSAC"
+          ]
         }
       ]
     },
@@ -60,6 +90,36 @@
           "answer": "**Step 1 — centroids.**\n$$\\mu_P=\\frac1N\\sum_{i=1}^{N}P_i,\\qquad \\mu_Q=\\frac1N\\sum_{i=1}^{N}Q_i.$$\n**Step 2 — centre both point sets.**\n$$\\hat P_i=P_i-\\mu_P,\\qquad \\hat Q_i=Q_i-\\mu_Q.$$\n**Step 3 — cross-covariance matrix.**\n$$W=\\sum_{i=1}^{N}\\hat P_i\\hat Q_i^\\top\\in\\mathbb{R}^{3\\times3}.$$\n**Step 4 — singular value decomposition.** $W=U\\Sigma V^\\top$.\n**Step 5 — rotation.** $R_{2\\to1}=UV^\\top$; if $\\det(UV^\\top)=-1$ use $R=U\\operatorname{diag}\\big(1,1,\\det(UV^\\top)\\big)V^\\top$ to stay in $SO(3)$.\n**Step 6 — translation.** $t_{2\\to1}=\\mu_P-R_{2\\to1}\\mu_Q$.\n**Why centring first.** It decouples the two unknowns: at the optimum the transformed centroid must equal the target centroid, so $t$ is determined by $R$ and the cost reduces to the pure-rotation Procrustes problem $\\max_R\\operatorname{trace}(R^\\top W)$.",
           "extend": "This is the orthogonal-Procrustes projection of Chapter 1 in disguise — same $UV^\\top$, same determinant fix.",
           "tags": ["ICP", "SVD", "3D-3D alignment", "Procrustes"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Derive the closed-form rigid alignment for corresponding point sets by eliminating translation and reducing the objective to a trace maximization. Include the SVD reflection correction and the final translation.",
+          "answer": "At the optimum the centroids coincide, so with $\\hat P_i=P_i-\\mu_P$ and $\\hat Q_i=Q_i-\\mu_Q$,\n$$t=\\mu_P-R\\mu_Q.$$\nThe remaining cost is constant minus $2\\operatorname{tr}(R^\\top W)$, where $W=\\sum_i\\hat P_i\\hat Q_i^\\top$. If $W=U\\Sigma V^\\top$, maximize the trace with\n$$R=U\\operatorname{diag}(1,1,\\det(UV^\\top))V^\\top.$$\nThe determinant correction prevents a reflection. Finally use $t=\\mu_P-R\\mu_Q$.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "ICP",
+            "Kabsch",
+            "SVD"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "ICP alternates nearest-neighbor assignment and rigid alignment. Explain why each iteration cannot increase the point-to-point objective, yet convergence to the correct alignment is not guaranteed. Give one geometric degeneracy and two practical remedies.",
+          "answer": "With the transform fixed, choosing nearest neighbors minimizes the distance for each source point. With those correspondences fixed, the SVD step globally minimizes the rigid point-to-point cost. Therefore the alternating objective is non-increasing. The joint problem is non-convex and correspondences can change, so ICP may converge to a wrong local minimum. A planar or symmetric cloud leaves some motions weakly constrained. Remedies include a good global/feature-based initialization, multi-scale alignment, point-to-plane residuals with normals, trimming or robust weights, and rejecting implausible correspondences.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "ICP",
+            "Alternating minimization",
+            "Degeneracy"
+          ]
         }
       ]
     },
@@ -103,6 +163,36 @@
           "answer": "**(1) Advantage.** Normalisation greatly improves the **numerical stability** of the linear system: raw pixel coordinates are of order $10^2$–$10^3$, so the columns of the coefficient matrix differ by many orders of magnitude and the smallest singular vector becomes dominated by round-off. After normalisation the solution is far **less sensitive to noise**.\n**(2) Steps.**\n**Step 1 — normalise each image's points** so that they have zero mean and average distance $\\sqrt2$ from the origin:\n$$\\hat p_i=\\frac{\\sqrt2}{\\sigma}(p_i-\\mu),\\qquad \\hat p_i=\\underbrace{\\begin{pmatrix}\\tfrac{\\sqrt2}{\\sigma}&0&-\\tfrac{\\sqrt2}{\\sigma}\\mu_x\\\\0&\\tfrac{\\sqrt2}{\\sigma}&-\\tfrac{\\sqrt2}{\\sigma}\\mu_y\\\\0&0&1\\end{pmatrix}}_{B_1}p_i,$$\nwhere $\\mu=[\\mu_x,\\mu_y]^\\top$ is the centroid and $\\sigma$ the standard deviation of the point set. Similarly $\\hat q_i=B_2q_i$ for the second image.\n**Step 2 — estimate the normalised fundamental matrix $\\hat F$** with the classical DLT / eight-point algorithm on the normalised correspondences $(\\hat p_i,\\hat q_i)$.\n**Step 3 — undo the normalisation:**\n$$F=B_2^\\top\\hat FB_1.$$",
           "extend": "Note the transposes: $B_2^\\top$ on the **left** (it acted on the second image's points, which sit on the left of $q^\\top Fp$) and $B_1$ on the right.",
           "tags": ["Eight-point algorithm", "Fundamental matrix", "Normalisation"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A five-point essential-matrix RANSAC has inlier probability $w=0.6$ per correspondence. How many iterations are required for at least $99\\%$ probability of drawing one all-inlier minimal sample? Derive the formula and round up.",
+          "answer": "One five-point sample is all-inlier with probability $w^5$. The probability that all $N$ samples fail is $(1-w^5)^N$. Requiring success probability at least $p$ gives\n$$1-(1-w^5)^N\\ge p\\quad\\Longrightarrow\\quad N\\ge\\frac{\\log(1-p)}{\\log(1-w^5)}.$$\nWith $w=0.6$ and $p=0.99$,\n$$N\\ge\\frac{\\log0.01}{\\log(1-0.6^5)}\\approx56.9,$$\nso at least $57$ iterations are required under the independent-sampling model.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "RANSAC",
+            "Five-point algorithm",
+            "Probability"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Compare hard RANSAC consensus with an EM/IRLS-style weighted fundamental-matrix estimate. State the model-update step in each, explain why the algebraic residual $|x'^\\top Fx|$ is not a pixel distance, and name a geometrically normalized alternative.",
+          "answer": "RANSAC fits candidates to minimal samples, makes hard inlier decisions under a geometric threshold, keeps the largest consensus, and refits on all winning inliers. EM/IRLS keeps all matches but alternates residual-dependent soft weights with a weighted DLT/model update. The scalar $x'^\\top Fx$ changes if $F$ is rescaled and ignores the norm of the epipolar-line normal, so it is not measured in pixels. Use normalized point-to-line distance, symmetric epipolar distance, or the Sampson approximation. Soft weighting needs a reasonable initialization; RANSAC tolerates a larger outlier fraction.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "RANSAC",
+            "EM",
+            "Robust estimation"
+          ]
         }
       ]
     },
@@ -180,6 +270,36 @@
           "answer": "**Step 1 — vanishing directions in the second frame.**\n$$d'_i=K^{-1}v'_i,\\qquad i=1,2,3.$$\n**Step 2 — rotate the first frame's directions into the second frame.** Only the rotation is applied (a translation does not move points at infinity):\n$$d''_i=R_{1\\to2}\\,d_i.$$\n**Step 3 — compare.** If $\\{d''_i\\}_{i=1}^3$ are aligned with $\\{d'_i\\}_{i=1}^3$ respectively — i.e. corresponding vectors are **equal up to scale** — then $R_{1\\to2}$ is a correct rotation. Otherwise it is not.",
           "extend": "Because points at infinity are translation-invariant, vanishing points constrain the **rotation only** — which is precisely what makes them useful for drift-free orientation in man-made scenes.",
           "tags": ["Vanishing point", "Manhattan world", "Rotation"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For $K=\\operatorname{diag}(f,f,1)$ with principal point at the origin, two vanishing points are $v_1=(f,0,1)^\\top$ and $v_2=(0,f,1)^\\top$. Recover their 3D directions, test whether they satisfy the Manhattan orthogonality assumption, and state how a third orthogonal direction should be computed in the general case.",
+          "answer": "Back-project and normalize:\n$$\\tilde d_1=K^{-1}v_1=(1,0,1)^\\top,\\qquad \\tilde d_2=K^{-1}v_2=(0,1,1)^\\top.$$\nTheir dot product is $1$, so they are not orthogonal even after normalization and cannot be two Manhattan axes for this $K$. In the valid general case, normalize $d_i\\propto K^{-1}v_i$, verify $d_1^\\top d_2\\approx0$, then compute\n$$d_3=\\frac{d_1\\times d_2}{\\|d_1\\times d_2\\|},\\qquad v_3\\sim Kd_3.$$\nTaking a cross product of the image pixels directly is the trap.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Vanishing points",
+            "Manhattan world",
+            "Calibration"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Two calibrated images provide three associated, mutually orthogonal vanishing directions assembled as $D=[d_1\\ d_2\\ d_3]$ and $D'=[d'_1\\ d'_2\\ d'_3]$. Derive the relative rotation, explain how to correct noisy data to $SO(3)$, and prove why translation cannot be recovered from these measurements.",
+          "answer": "In the noise-free case $D'=RD$, so\n$$R=D'D^\\top$$\nwhen both direction matrices are orthonormal. With noise, form $M=D'D^\\top=U\\Sigma V^\\top$ and project to\n$$R=U\\operatorname{diag}(1,1,\\det(UV^\\top))V^\\top.$$\nA vanishing point represents a point at infinity, whose homogeneous last coordinate is zero. Under $[R\\mid t]$, the translation term is multiplied by that zero coordinate, so directions transform only by $R$. No finite-depth or parallax information remains to determine $t$.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Vanishing points",
+            "Rotation estimation",
+            "SO(3) projection"
+          ]
         }
       ]
     },
@@ -196,6 +316,36 @@
           "answer": "**Explicit representations** parameterise the surface itself — meshes, triangulations, splines, point clouds. They are compact and directly renderable, but the **topology is fixed** by the parameterisation, so splitting, merging or creating holes during the optimisation is difficult, and self-intersections must be prevented by hand.\n**Implicit representations** define the surface as a level set of a scalar field, e.g. $S=\\{x\\mid\\phi(x)=0\\}$ with $\\phi$ a signed distance or an indicator/occupancy function. **Topology changes come for free**, and set operations are trivial; the cost is memory proportional to the enclosing volume and an extra surface-extraction step (marching cubes).\n**Convex relaxation.** Writing multi-view reconstruction as a weighted minimal surface, $\\min_S\\int_Sg(x)\\,dA$ with $g$ a photoconsistency weight, and encoding $S$ by a **binary** indicator gives a combinatorial problem. Relaxing the indicator from $\\{0,1\\}$ to the interval $[0,1]$ makes the energy **convex**, so a global minimiser can be computed; **thresholding** the relaxed solution then returns a binary shape — with the guarantee that the thresholded result is optimal for the original problem in the standard formulation. Silhouette consistency can be added as a further convex constraint.",
           "extend": "This is the classical answer to the local-minimum problem: change the representation until the energy becomes convex, then threshold.",
           "tags": ["Dense reconstruction", "Variational methods", "Shape representation"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Compare an explicit triangular mesh with an implicit level-set representation for dense reconstruction. A scene contains two objects that merge during optimization. Which representation handles the topology change naturally, and what are the principal memory and rendering trade-offs?",
+          "answer": "A mesh stores vertices and connectivity near the surface, so it is compact, easy to texture and render, and offers direct resolution control. Its connectivity fixes topology; merging, splitting, and preventing self-intersections require explicit operations. A level set stores a scalar field $\\phi$ over a volume and represents the surface by $\\phi=0$, so merging and splitting occur automatically. The cost is volumetric memory and the need to extract a mesh, for example by marching cubes, before conventional rendering. The implicit representation is therefore natural for the topology-changing case.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Dense reconstruction",
+            "Level set",
+            "Shape representation"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A multi-view method minimizes a photoconsistency-weighted surface area. Explain how an indicator-function relaxation can turn the problem into a convex optimization, why thresholding can recover a binary shape, and give one convex constraint that could incorporate silhouette information.",
+          "answer": "Represent inside/outside by an indicator $u\\in\\{0,1\\}$ and write the weighted boundary area as a total-variation-type energy. Relaxing to $u\\in[0,1]$ makes the feasible set convex and the weighted total variation convex. Coarea/thresholding results imply that, for almost every threshold, a level set of the relaxed minimizer yields a binary solution with the corresponding optimal energy. Silhouette consistency can be imposed by forcing known foreground rays/voxels to satisfy lower bounds and known background regions to be zero, using linear inequalities. The relaxation is global for the relaxed model, not a guarantee that the data term itself is physically perfect.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Variational reconstruction",
+            "Convex relaxation",
+            "Silhouette"
+          ]
         }
       ]
     }

@@ -25,6 +25,36 @@
           "q": "What are the shortcomings of classical (feature-based) approaches to multiple-view reconstruction that motivate direct methods?",
           "answer": "**Information is thrown away.** The pipeline reduces a full image to a few hundred keypoints and descriptors; everything else — edges, faint texture, the intensity profile itself — is discarded before any geometry is estimated.\n**Sparse output.** The reconstruction consists only of the matched landmarks, so a dense surface has to be recovered afterwards by a separate multi-view stereo stage.\n**Fails in low-texture scenes.** Corner detectors need two dominant gradient directions; on white walls, sky or repetitive structures there simply are not enough reliable keypoints.\n**Matching outliers.** Descriptor matching produces wrong correspondences that must be removed by RANSAC, and its assumptions can fail with repetitive structure.\n**Cascaded errors.** Each stage (detection, description, matching, geometry) commits to a hard decision, and an early mistake cannot be repaired later.\n**Direct methods** address all of these by optimising pose and depth directly against the image intensities, keeping the full photometric information in the loop.",
           "tags": ["Direct methods", "Feature-based methods", "SLAM"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A direct tracker augments brightness constancy with $I_2(\\tau(\\xi,x_i))\\approx aI_1(x_i)+b$. Write the residual and its Jacobian blocks with respect to the pose increment $\\xi$, gain $a$, and bias $b$. Which illumination changes can this model absorb, and which cannot it repair?",
+          "answer": "Use\n$$r_i(\\xi,a,b)=I_2(\\tau(\\xi,x_i))-aI_1(x_i)-b.$$\nAt the current estimate,\n$$\\frac{\\partial r_i}{\\partial\\xi}=\\nabla I_2\\frac{\\partial\\pi}{\\partial X}\\frac{\\partial(Tp_i)}{\\partial\\xi},\\qquad \\frac{\\partial r_i}{\\partial a}=-I_1(x_i),\\qquad \\frac{\\partial r_i}{\\partial b}=-1.$$\nA global exposure/gain and offset can be modeled. Spatially varying shadows, specularities, saturation, motion blur, and occlusion are not one global affine change; robust weights or a richer photometric model are still needed.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Direct methods",
+            "Photometric residual",
+            "Brightness model"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Choose between a feature-based, a direct, or a hybrid visual-odometry front end for each case: (i) a weakly textured wall with faint gradients, (ii) a large viewpoint jump, and (iii) auto-exposed video with repeated texture. Justify each choice in terms of information used, convergence basin, and outlier handling.",
+          "answer": "**(i)** A direct or semi-direct method can use the faint gradients even when no repeatable corners exist. **(ii)** Descriptor-based features have a larger discrete matching basin than local photometric optimization and are the safer initializer. **(iii)** A hybrid is appropriate: invariant or learned matches plus geometric RANSAC handle repeated texture and large association errors, while a calibrated photometric model and direct refinement recover sub-pixel accuracy. Direct methods avoid feature-matching outliers but have a narrow, non-convex basin; feature methods discard dense intensity information but tolerate larger displacement.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Direct methods",
+            "Feature methods",
+            "Visual odometry"
+          ]
         }
       ]
     },
@@ -110,6 +140,36 @@
           "q": "Explain the role of loop closure and pose-graph optimisation in a large-scale direct SLAM system such as LSD-SLAM, and why $\\operatorname{Sim}(3)$ rather than $SE(3)$ is used in the monocular case.",
           "answer": "**Drift.** Tracking estimates each new frame relative to the previous one, so errors accumulate: after a long trajectory the map is locally accurate but globally inconsistent.\n**Loop closure** detects that the camera has revisited a place and adds a constraint between two distant keyframes. Optimising the pose graph then spreads the accumulated error around the loop, restoring **global consistency** without re-optimising every pixel.\n**Why $\\operatorname{Sim}(3)$.** In **monocular** SLAM the absolute scale is unobservable, and it does not merely stay unknown — it **drifts** over the trajectory. So two keyframes can differ not only by a rigid motion but also by a scale factor. Optimising over $\\operatorname{Sim}(3)$ (rotation, translation **and** scale, 7 DOF) lets the loop closure correct scale drift as well; LSD-SLAM's tracking is a direct $\\mathfrak{sim}(3)$ image alignment for exactly this reason.\n**Contrast with DSO,** which instead performs a **windowed joint optimisation** of poses, inverse depths and photometric parameters, marginalising older keyframes out of the sliding window rather than maintaining a global pose graph.",
           "tags": ["Loop closure", "Pose graph", "SLAM", "Scale"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A pose graph has residual $r_{ij}=\\log(\\hat T_{ij}^{-1}T_i^{-1}T_j)^\\vee$. (a) Show when it is zero. (b) Explain the gauge freedom and one valid way to remove it. (c) Describe the Hessian block pattern for a chain of $N$ poses after adding one loop edge between poses $1$ and $N$.",
+          "answer": "The logarithm is zero exactly when its argument is the identity, hence\n$$T_i^{-1}T_j=\\hat T_{ij}.$$\nLeft-multiplying every pose by the same global transform leaves all relative poses unchanged, so the graph has a global-pose gauge; fix one pose or add an equivalent prior. A chain produces a block-tridiagonal Hessian with $6\\times6$ pose blocks. The loop edge adds one symmetric off-diagonal block pair coupling poses $1$ and $N$ and corresponding diagonal contributions, turning the chain into a sparse cycle rather than a dense system.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Pose graph",
+            "Loop closure",
+            "Gauge freedom"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Why does monocular loop closure often optimize a $\\operatorname{Sim}(3)$ pose graph instead of $SE(3)$? State the residual dimension, the additional state variable, and two defenses against a false loop-closure edge.",
+          "answer": "Monocular visual odometry can accumulate scale drift as well as rotational and translational drift. $SE(3)$ has no scale variable, whereas $\\operatorname{Sim}(3)$ adds one log-scale parameter, giving a 7D tangent-space residual instead of a 6D one. A loop can then correct scale inconsistency around the cycle. False loops are dangerous global constraints; defenses include appearance retrieval followed by geometric verification, consistency with neighboring poses, robust losses or switchable constraints, and rejecting edges whose inlier count or reprojection residual is poor.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Sim(3)",
+            "Loop closure",
+            "Monocular SLAM"
+          ]
         }
       ]
     }
