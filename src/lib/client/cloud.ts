@@ -25,6 +25,15 @@ const load = (src: string): Promise<void> =>
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
+function initAnalytics(cfg: FirebaseConfig): void {
+  if (!cfg.measurementId) return;
+  // Analytics is optional: blockers or unsupported browsers must not disable
+  // authentication, cloud sync, or realtime presence.
+  void load(FB + "firebase-analytics-compat.js")
+    .then(() => firebase.analytics())
+    .catch((e: unknown) => console.warn("Firebase Analytics init failed", e));
+}
+
 let db: any = null;
 let uid: string | null = null;
 let ready = false;
@@ -122,6 +131,7 @@ async function init(cfg: FirebaseConfig): Promise<void> {
     if (cfg.databaseURL) extra.push(load(FB + "firebase-database-compat.js"));
     await Promise.all(extra);
     firebase.initializeApp(cfg);
+    initAnalytics(cfg);
     db = firebase.firestore();
     if (cfg.databaseURL) startPresence();
     firebase.auth().onAuthStateChanged(async (user: any) => {
