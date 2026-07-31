@@ -34,8 +34,8 @@ Cards from a **Cremers** paper carry a ★ badge, an amber source chip and a lef
   (definitions, formulas, exam traps) before the questions.
 - Interactive **multiple-choice** and **open** questions; answers follow the official sample solutions,
   with the marking-scheme pitfalls called out under *Extended memory*.
-- **18 Cremers-style AI practice questions** (two per chapter) target concepts that previously had no
-  standalone question, with complete derivations and exam-style traps.
+- **101 Cremers-style AI practice questions** cover all 50 knowledge points, with at least two per
+  knowledge point, complete derivations and exam-style traps.
 - Site-wide **search** (keyword, concept tag, or an exact code like `25EDC 1.1`), **tag** browsing and
   **browse-by-exam**.
 - **Study system**: Reviewed / wrong book / notes (Markdown + math) / Ebbinghaus spaced repetition,
@@ -57,6 +57,7 @@ npm install
 npm run dev        # http://localhost:4321/3dcv-exam-qa/
 npm run build      # -> dist/
 npm run check      # astro check (types)
+npm run check:ai   # every knowledge point has at least two AI questions
 npm run preview
 ```
 
@@ -85,6 +86,7 @@ GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`, `withastro/acti
 
 ## Recent updates
 
+- **2026-07-31** — Expanded the AI practice set to 101 questions, guaranteeing at least two for every knowledge point.
 - **2026-07-30** — Added 18 Cremers-style AI questions, two per chapter, covering previously untested concepts.
 - **2026-07-25** — First release: all 9 chapters, from 12 past papers and 8 exercise sheets.
 - **2026-07-25** — Every question is tagged with its examiner; Cremers papers are marked ★ and rank first.

@@ -268,6 +268,20 @@
             "Eigenvalues",
             "Proof"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For a fixed nonzero $a\\in\\mathbb R^n$ and $c\\in\\mathbb R$, define\n\n$$W_c=\\{x\\in\\mathbb R^n\\mid a^\\top x=c\\}.$$\n\n1. For which values of $c$ is $W_c$ a vector subspace? Prove your statement. (3)\n2. If $c\\neq0$, identify the geometric type and dimension of $W_c$. (2)\n3. Give a linear subspace parallel to $W_c$. (1)",
+          "answer": "Only $c=0$ gives a vector subspace. Then $W_0=\\ker(a^\\top)$ contains $0$ and is closed under addition and scalar multiplication. If $c\\neq0$, then $0\\notin W_c$, so the subspace test already fails. Since $a\\neq0$, the equation $a^\\top x=c$ removes one degree of freedom: $W_c$ is an affine hyperplane of dimension $n-1$, parallel to the linear subspace $W_0=\\ker(a^\\top)$.",
+          "extend": "Generated set Q02-A: Linear or affine? (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Vector spaces and subspaces",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -831,6 +845,34 @@
             "Determinant",
             "Special Euclidean group"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let\n\n$$\nG=\\left\\{\\begin{bmatrix}A&t\\\\0&1\\end{bmatrix}\\in\\mathbb R^{(n+1)\\times(n+1)}\\;\\middle|\\;A\\in GL(n),\\ \\det A>0,\\ t\\in\\mathbb R^n\\right\\}.\n$$\n\n1. Show that $G$ is a group under matrix multiplication. (4)\n2. Is $G$ a subgroup of $A(n)$, $E(n)$, or $SE(n)$? State every inclusion that always holds. (2)",
+          "answer": "**Closure:**\n$$\\begin{bmatrix}A_1&t_1\\\\0&1\\end{bmatrix}\\begin{bmatrix}A_2&t_2\\\\0&1\\end{bmatrix}=\\begin{bmatrix}A_1A_2&A_1t_2+t_1\\\\0&1\\end{bmatrix},$$\nand $\\det(A_1A_2)>0$. The identity is $I_{n+1}$, associativity is inherited from matrix multiplication, and\n$$\\begin{bmatrix}A&t\\\\0&1\\end{bmatrix}^{-1}=\\begin{bmatrix}A^{-1}&-A^{-1}t\\\\0&1\\end{bmatrix}$$\nhas $\\det A^{-1}>0$. Thus $G$ is a group. Every element is affine, so $G\\subset A(n)$. In general $G\\not\\subset E(n)$ and $G\\not\\subset SE(n)$ because $A$ need not be orthogonal.",
+          "extend": "Generated set Q01-A: A subgroup with an orientation constraint (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Groups and matrix groups",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $Q\\in O(3)$ with $\\det Q=-1$ and $t\\in\\mathbb R^3$.\n\n1. Does $x\\mapsto Qx+t$ preserve distances? (1)\n2. Is its homogeneous matrix in $E(3)$? Is it in $SE(3)$? Justify both answers. (2)\n3. Give its inverse as a homogeneous matrix. (2)",
+          "answer": "For any points $x,y$,\n$$\\|Qx+t-(Qy+t)\\|^2=(x-y)^\\top Q^\\top Q(x-y)=\\|x-y\\|^2,$$\nso distances are preserved. The homogeneous matrix belongs to $E(3)$ because $Q\\in O(3)$, but not to $SE(3)$ because $\\det Q=-1$ reverses orientation. Its inverse is\n$$\\begin{bmatrix}Q&t\\\\0&1\\end{bmatrix}^{-1}=\\begin{bmatrix}Q^\\top&-Q^\\top t\\\\0&1\\end{bmatrix}.$$",
+          "extend": "Generated set Q01-B: Reflection versus rigid-body motion (5 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Groups and matrix groups",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -1118,6 +1160,20 @@
             "Rank",
             "Sylvester's inequality"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let\n\n$$A=\\begin{bmatrix}1&2&0\\\\0&1&1\\\\1&3&1\\\\2&5&1\\end{bmatrix}.$$\n\nDetermine bases for $\\ker A$, $\\operatorname{range}A$, $\\ker A^\\top$, and $\\operatorname{range}A^\\top$. Verify rank-nullity for both $A$ and $A^\\top$. (7)",
+          "answer": "Row reduction gives $\\operatorname{rank}A=2$. Suitable bases are\n$$\\ker A=\\operatorname{span}\\{(2,-1,1)^\\top\\},$$\n$$\\operatorname{range}A=\\operatorname{span}\\{(1,0,1,2)^\\top,(2,1,3,5)^\\top\\},$$\n$$\\ker A^\\top=\\operatorname{span}\\{(-1,-1,1,0)^\\top,(-2,-1,0,1)^\\top\\},$$\nand\n$$\\operatorname{range}A^\\top=\\operatorname{span}\\{(1,2,0)^\\top,(0,1,1)^\\top\\}.$$\nHence $\\operatorname{rank}A+\\dim\\ker A=2+1=3$ and $\\operatorname{rank}A^\\top+\\dim\\ker A^\\top=2+2=4$, as required.",
+          "extend": "Generated set Q06-A: Four fundamental subspaces (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Range, kernel, and rank",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -1342,6 +1398,20 @@
             "Eigenvalues",
             "Symmetric matrix"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $A=A^\\top$ have ordered eigenvalues $\\lambda_1\\ge\\cdots\\ge\\lambda_n$.\n\n1. Solve $\\min_{\\|x\\|=1}x^\\top Ax$. (2)\n2. Characterize all minimizers if $\\lambda_{n-k+1}=\\cdots=\\lambda_n<\\lambda_{n-k}$. (3)\n3. When is the minimizer unique up to sign? (2)",
+          "answer": "By the Rayleigh theorem,\n$$\\min_{\\|x\\|=1}x^\\top Ax=\\lambda_n.$$\nIf the smallest eigenvalue has multiplicity $k$, every minimizer is a unit vector in its eigenspace:\n$$x\\in\\operatorname{span}\\{v_{n-k+1},\\ldots,v_n\\},\\qquad\\|x\\|=1.$$\nThe minimizer is unique up to sign exactly when $\\lambda_n$ is simple; then the only minimizers are $v_n$ and $-v_n$.",
+          "extend": "Generated set Q07-A: Rayleigh minimization with multiplicity (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Eigenvalues, symmetric matrices, and the Rayleigh quotient",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -1559,6 +1629,20 @@
             "Skew-symmetric matrix",
             "Rank"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Under the Frobenius norm, find the closest symmetric matrix and the closest skew-symmetric matrix to a given $A\\in\\mathbb R^{n\\times n}$. Prove optimality using Frobenius orthogonality. (6)",
+          "answer": "Decompose\n$$A=S+K,\\qquad S=\\frac{A+A^\\top}{2},\\quad K=\\frac{A-A^\\top}{2}.$$\nHere $S$ is symmetric, $K$ is skew-symmetric, and the two subspaces are Frobenius-orthogonal because $\\operatorname{tr}(S^\\top K)=0$. For any symmetric $Y$,\n$$\\|A-Y\\|_F^2=\\|S-Y\\|_F^2+\\|K\\|_F^2,$$\nso the unique closest symmetric matrix is $S$. The analogous Pythagorean argument shows that the unique closest skew-symmetric matrix is $K$.",
+          "extend": "Generated set Q08-B: Orthogonal projection onto matrix subspaces (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Skew-symmetric matrices and quadratic forms",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -1717,6 +1801,20 @@
           "tags": [
             "SVD",
             "Geometry"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A matrix $A\\in\\mathbb R^{120\\times80}$ has singular values $\\sigma_i=20/i$ for $i=1,\\ldots,80$.\n\n1. Write the best rank-$k$ approximation $A_k$. (2)\n2. Give $\\|A-A_k\\|_F^2$ and $\\|A-A_k\\|_2$. (3)\n3. Using storage $k(m+n+1)$, determine the largest integer $k$ that uses less storage than $A$. (3)",
+          "answer": "The Eckart--Young approximation is\n$$A_k=\\sum_{i=1}^k\\sigma_i u_iv_i^\\top.$$\nIts errors are\n$$\\|A-A_k\\|_F^2=\\sum_{i=k+1}^{80}\\sigma_i^2=400\\sum_{i=k+1}^{80}\\frac1{i^2},\\qquad \\|A-A_k\\|_2=\\sigma_{k+1}=\\frac{20}{k+1}.$$\nThe dense matrix stores $120\\cdot80=9600$ scalars, while the factored rank-$k$ form stores $k(120+80+1)=201k$. Thus $201k<9600$, and the largest admissible integer is $k=47$.",
+          "extend": "Generated set Q10-A: Eckart-Young and storage (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Matrix norms and optimal low-rank approximation",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -1932,6 +2030,20 @@
             "Gradient",
             "Inner product",
             "Frobenius norm"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $A=U\\Sigma V^\\top$ be rank deficient and consider $\\min_x\\|Ax-b\\|_2$.\n\n1. Derive $A^+=V\\Sigma^+U^\\top$. (2)\n2. Show that $x^*=A^+b$ is the least-squares solution with minimum Euclidean norm. (4)\n3. State the complete set of least-squares solutions. (2)",
+          "answer": "Invert only the non-zero singular values:\n$$A^+=V\\Sigma^+U^\\top.$$\nThe vector $x^*=A^+b$ satisfies the normal equations and lies in $\\operatorname{range}(A^\\top)=\\operatorname{span}\\{v_1,\\ldots,v_r\\}$. Every other least-squares solution differs by a null-space vector, which is orthogonal to $x^*$ and therefore can only increase its norm. The complete solution set is\n$$x=A^+b+(I-A^+A)z,\\qquad z\\text{ arbitrary}.$$",
+          "extend": "Generated set Q09-B: Minimum-norm least squares (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Singular value decomposition and pseudoinverse",
+            "Cremers-style practice"
           ]
         }
       ]

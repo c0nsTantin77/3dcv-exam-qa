@@ -248,6 +248,34 @@
             "Epipolar constraint",
             "Epipolar plane"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $X_2=RX_1+T$ and $X_i=\\lambda_i x_i$ in normalized coordinates.\n\n1. Eliminate the depths and derive $x_2^\\top\\widehat T R x_1=0$. (5)\n2. Give a geometric interpretation in terms of a plane and three coplanar vectors. (2)\n3. Explain why the magnitude of $T$ cannot be recovered. (1)",
+          "answer": "From $\\lambda_2x_2=R\\lambda_1x_1+T$, left-multiply by $x_2^\\top\\widehat T$. The terms $x_2^\\top\\widehat T x_2$ and $\\widehat TT$ vanish, leaving\n$$x_2^\\top\\widehat TRx_1=0.$$\nThus $E=\\widehat TR$. Geometrically, $x_2$, $T$, and $Rx_1$ lie in one epipolar plane, so their scalar triple product is zero. Scaling $T$ only scales $E$, and the homogeneous constraint is unchanged; translation magnitude is unrecoverable from two calibrated views.",
+          "extend": "Generated set Q33-A: Deriving the epipolar constraint (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Epipolar constraint and epipolar lines",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $R=I$, $T=(1,0,0)^\\top$, and $x_1=(0.2,0.1,1)^\\top$.\n\n1. Compute $E$ and the epipolar line $l_2=Ex_1$. (3)\n2. Write the line equation in normalized image coordinates. (1)\n3. Decide whether $x_2=(0.4,0.1,1)^\\top$ satisfies the epipolar constraint. (2)",
+          "answer": "With $R=I$,\n$$E=\\widehat T=\\begin{bmatrix}0&0&0\\\\0&0&-1\\\\0&1&0\\end{bmatrix},\\qquad l_2=Ex_1=(0,-1,0.1)^\\top.$$\nThe normalized-image line equation is $-v+0.1=0$, or $v=0.1$. Since $x_2=(0.4,0.1,1)^\\top$ has second coordinate $0.1$, $x_2^\\top Ex_1=0$ and it satisfies the epipolar constraint.",
+          "extend": "Generated set Q33-B: A numerical epipolar line (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Epipolar constraint and epipolar lines",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -509,6 +537,34 @@
             "Essential matrix",
             "Constrained motion"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For $E=\\widehat TR$, prove\n\n$$EE^\\top E-\\frac12\\operatorname{tr}(EE^\\top)E=0.$$\n\nUse $RR^\\top=I$, $\\widehat T^\\top=-\\widehat T$, and $\\widehat T^2=TT^\\top-\\|T\\|^2I$. Clearly show the cancellation. (10)",
+          "answer": "Using $RR^\\top=I$ and $\\widehat T^\\top=-\\widehat T$,\n$$EE^\\top=-\\widehat T^2=\\|T\\|^2I-TT^\\top.$$\nBecause $T^\\top\\widehat T=0$,\n$$EE^\\top E=(\\|T\\|^2I-TT^\\top)\\widehat TR=\\|T\\|^2E.$$\nMoreover $\\operatorname{tr}(EE^\\top)=3\\|T\\|^2-\\|T\\|^2=2\\|T\\|^2$. Hence the second term is also $\\|T\\|^2E$, and\n$$EE^\\top E-\\tfrac12\\operatorname{tr}(EE^\\top)E=0.$$",
+          "extend": "Generated set Q38-A: Proving the essential cubic constraint (10 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "The 5-point algorithm and the Demazure constraint",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Given $E=U\\operatorname{diag}(\\sigma,\\sigma,0)V^\\top$, derive the two rotation candidates and the two signs of translation. Explain how to correct signs if a candidate rotation has determinant $-1$. Why are there four pose candidates? (9)",
+          "answer": "Let\n$$W=\\begin{bmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{bmatrix}.$$\nThe two rotation candidates are $R_1=UWV^\\top$ and $R_2=UW^\\top V^\\top$; the translation direction is $t=\\pm u_3$, where $u_3$ is the third column of $U$. Thus there are $2\\times2=4$ pose candidates. If a rotation has determinant $-1$, flip one consistent SVD column/sign so that $\\det R=+1$. Cheirality, not the algebra alone, selects the physical candidate.",
+          "extend": "Generated set Q39-A: Four pose candidates (9 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Decomposing an essential matrix",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -614,6 +670,20 @@
             "Projective geometry",
             "Proof",
             "Reconstruction"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $F\\in\\mathbb R^{3\\times3}$ have rank 2 and let $e'$ satisfy $e'^\\top F=0$. Set\n\n$$P=[I\\mid0],\\qquad P'=[\\widehat e'F\\mid e'].$$\n\nShow that this pair has fundamental matrix $F$ by proving the epipolar constraint for every corresponding projection. State a condition ensuring $P'$ has rank 3. (10)",
+          "answer": "A point seen as $x$ by $P=[I\\mid0]$ can be written $X=(x^\\top,\\lambda)^\\top$. The second camera gives\n$$x'=\\widehat e'Fx+\\lambda e'.$$\nLet $y=Fx$. Then\n$$x'^\\top Fx=(e'\\times y)^\\top y+\\lambda e'^\\top y=0,$$\nbecause a cross product is orthogonal to $y$ and $e'^\\top F=0$. Hence every correspondence satisfies the epipolar constraint of $F$. With $e'\\neq0$ and $\\operatorname{rank}F=2$, this canonical construction generically gives $\\operatorname{rank}P'=3$.",
+          "extend": "Generated set Q35-A: Constructing a camera pair from $F$ (10 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Any rank-2 matrix as a fundamental matrix",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -946,6 +1016,34 @@
             "Epipolar constraint",
             "Intrinsics"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "With $x_i=(u_i,v_i,1)^\\top$ and rows $\\pi_{i1}^\\top,\\pi_{i2}^\\top,\\pi_{i3}^\\top$ of $\\Pi_i$:\n\n1. Write the two independent DLT rows for view $i$. (3)\n2. State how $X$ is recovered using the SVD. (2)\n3. Explain the difference between algebraic error and reprojection error, and why DLT remains useful. (4)",
+          "answer": "For view $i$, two independent cross-product equations are\n$$(u_i\\pi_{i3}^\\top-\\pi_{i1}^\\top)X=0,\\qquad(v_i\\pi_{i3}^\\top-\\pi_{i2}^\\top)X=0.$$\nStacking all views gives $AX=0$; choose the right singular vector of $A$ associated with its smallest singular value and normalize it homogeneously. DLT minimizes a scale- and parameterization-dependent algebraic residual, not image reprojection error. It remains valuable because it is linear, fast, and supplies a strong initializer for nonlinear geometric refinement.",
+          "extend": "Generated set Q42-B: DLT versus geometric triangulation (9 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Multi-view rank constraints and DLT triangulation",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $r_1(t)=C_1+td_1$ and $r_2(s)=C_2+sd_2$, with unit directions. Derive the $2\\times2$ linear system for $(t^*,s^*)$ minimizing $\\|r_1(t)-r_2(s)\\|^2$, and give the midpoint estimate. State the degeneracy condition. (9)",
+          "answer": "Let $b=C_2-C_1$. The normal equations for the closest points are\n$$\\begin{bmatrix}d_1^\\top d_1&-d_1^\\top d_2\\\\-d_2^\\top d_1&d_2^\\top d_2\\end{bmatrix}\\begin{bmatrix}t\\\\s\\end{bmatrix}=\\begin{bmatrix}d_1^\\top b\\\\-d_2^\\top b\\end{bmatrix}.$$\nAfter solving for $(t^*,s^*)$, use\n$$X_{mid}=\\tfrac12(C_1+t^*d_1+C_2+s^*d_2).$$\nFor unit directions the determinant is $1-(d_1^\\top d_2)^2$, so parallel or nearly parallel rays make triangulation singular or ill-conditioned.",
+          "extend": "Generated set Q43-A: Shortest segment between viewing rays (9 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Midpoint triangulation",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -1103,6 +1201,34 @@
             "Rotation",
             "Correspondence",
             "Special orthogonal group"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $T=0$.\n\n1. What is $E$ and why can it not encode $R$? (2)\n2. Derive the image relation $x_2\\sim Rx_1$ for calibrated cameras. (2)\n3. Form a linear system in the nine entries of $R$ using $x_2\\times Rx_1=0$, state the generic number of correspondences needed, and explain how to project the result onto $SO(3)$. (4)",
+          "answer": "If $T=0$, then $E=\\widehat0R=0$, so the epipolar equation is an identity and contains no information about $R$. Depth cancels directly:\n$$x_2\\sim Rx_1.$$\nEach equation $x_2\\times Rx_1=0$ gives two independent linear constraints on the nine entries of $R$. Estimating them up to homogeneous scale generically needs four correspondences. If $\\widetilde R=U\\Sigma V^\\top$, project it to\n$$R=U\\operatorname{diag}(1,1,\\det(UV^\\top))V^\\top\\in SO(3).$$",
+          "extend": "Generated set Q44-A: What remains when translation vanishes? (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Pure rotation",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Embed normalized viewing directions as pure quaternions $p_1,p_2$ and let $p_2=qp_1q^*$.\n\n1. Rearrange this as a homogeneous linear system in $q$ using left/right quaternion multiplication matrices. (4)\n2. State how many non-collinear direction correspondences are generically needed. (2)\n3. Explain the sign ambiguity of the recovered quaternion. (2)",
+          "answer": "From $p_2=qp_1q^*$ and $q^*q=1$, multiply on the right by $q$ to obtain $p_2q=qp_1$. Quaternion left/right multiplication matrices therefore give\n$$\\bigl(L_{p_2}-R_{p_1}\\bigr)q=0.$$\nTwo non-collinear direction correspondences generically determine the three rotation degrees of freedom. The homogeneous null-space vector is first fixed by unit normalization, but $q$ and $-q$ remain indistinguishable because unit quaternions double-cover $SO(3)$.",
+          "extend": "Generated set Q44-B: Quaternion formulation of pure rotation (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Pure rotation",
+            "Cremers-style practice"
           ]
         }
       ]

@@ -17,6 +17,36 @@
           "answer": "**What it predicts.** A **DepthNet** produces a monocular depth map $D_t$ and a **PoseNet** a relative pose $T_{t't}$; in addition the network outputs a per-pixel **uncertainty** $\\Sigma_t$ and per-frame **affine brightness** parameters $a_t^{t'},b_t^{t'}$. These feed a classical front-end tracking / back-end optimisation pipeline.\n**How it is trained — self-supervised view synthesis.** No ground-truth depth is required: frame $t'$ is warped into frame $t$ using the predicted depth and pose, and the loss is the photometric residual\n$$L_{\\text{self}}=r\\big(a_t^{t'}I_t+b_t^{t'},\\ I_{t'\\to t}\\big).$$\nWith uncertainty this becomes $\\dfrac{r(\\cdot)}{\\Sigma_t}+\\log\\Sigma_t$.\n**Why each is useful.** **Depth** supplies the **metric scale** that a monocular system cannot observe, and initialises the inverse-depth of new points. **Pose** gives a good initialisation for the highly non-convex photometric alignment, enlarging its basin of convergence. **Uncertainty** re-weights the residuals so that moving objects, specularities and over-exposed regions contribute less. **Affine brightness** absorbs exposure changes that would otherwise violate brightness constancy.",
           "extend": "The loss is the same photometric residual as in direct SLAM — used at training time instead of test time. Geometry is not replaced, it is *initialised and weighted* by learning.",
           "tags": ["Deep learning", "Visual odometry", "SLAM", "Self-supervised"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "D3VO predicts a per-pixel uncertainty and uses a loss of the form $L(s)=r^2/s+\\log s$ for variance $s>0$. For fixed residual $r$, find the minimizing $s$, and explain why the logarithmic term is necessary and how the result changes the influence of difficult pixels.",
+          "answer": "Differentiate:\n$$\\frac{dL}{ds}=-\\frac{r^2}{s^2}+\\frac1s=0\\quad\\Longrightarrow\\quad s=r^2$$\nfor $r\\neq0$. Without $\\log s$, the network could drive every variance to infinity and make the weighted residual vanish. The logarithmic penalty balances that tendency. Large-residual pixels are assigned larger uncertainty and therefore smaller weight $1/s$, reducing the influence of moving objects, reflections, or over-exposure. The uncertainty is learned evidence weighting, not permission to ignore all pixels.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "D3VO",
+            "Uncertainty",
+            "Self-supervision"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Write the self-supervised view-synthesis pipeline that trains monocular depth and pose networks from two frames. Identify the geometric warp, the photometric loss, two degenerate explanations the network might exploit, and one reason a classical optimization back end is still useful.",
+          "answer": "Predict depth $D_t(x)$ and relative pose $T_{t'\\leftarrow t}$, back-project $x$ to $X=D_t(x)K^{-1}\\tilde x$, transform it, and sample\n$$I_{t'\\to t}(x)=I_{t'}\\!\\left(\\pi(KT_{t'\\leftarrow t}X)\\right).$$\nMinimize a robust photometric difference between $I_t$ and the synthesized image, often with smoothness and affine-brightness terms. Degeneracies include jointly rescaling depth and translation, explaining moving objects as camera motion, or using invalid pixels/occlusions. A geometric back end enforces multi-frame consistency, gauge handling, loop constraints, and joint refinement beyond a pairwise learned prediction.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "View synthesis",
+            "Depth prediction",
+            "Hybrid SLAM"
+          ]
         }
       ]
     },
@@ -33,6 +63,36 @@
           "answer": "**NeRF — implicit.** The scene lives in the weights of an MLP $F_\\Theta:(x,y,z,\\theta,\\phi)\\mapsto(c,\\sigma)$ mapping a 3D position and viewing direction to colour and volume density. Rendering is **volume rendering**: sample points along each camera ray and accumulate colour weighted by density and transmittance.\n**Gaussian splatting — explicit.** The scene is a set of millions of 3D Gaussians, each with a mean, an anisotropic covariance, an opacity and view-dependent colour. Rendering **splats** (projects) each Gaussian into the image and $\\alpha$-blends them front to back — a rasterisation.\n**Trade-offs.** Splatting renders in **real time** and trains in minutes, whereas a vanilla NeRF needs many network evaluations per ray and hours of training. NeRF is compact (a few MB of weights) and continuous; splatting needs hundreds of MB but is directly editable and prunable. Quality is broadly comparable on novel-view synthesis, with splatting sharper on fine texture.\n**What they share.** Both are trained by **photometric** reconstruction from a set of **posed** images (typically posed by classical SfM), both target novel-view synthesis rather than an explicit surface, and both need an extra step to extract a mesh.",
           "extend": "It is the same explicit-vs-implicit trade-off as meshes versus level sets in Chapter 8 — and note that both still depend on classical SfM to provide the camera poses.",
           "tags": ["NeRF", "Gaussian splatting", "Novel view synthesis"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For ordered NeRF samples with density $\\sigma_i$, color $c_i$, and spacing $\\delta_i$, write the discrete volume-rendering weight. Interpret transmittance and opacity, and contrast the operation with front-to-back alpha compositing of projected 3D Gaussians.",
+          "answer": "Define\n$$\\alpha_i=1-e^{-\\sigma_i\\delta_i},\\qquad T_i=\\exp\\!\\left(-\\sum_{j<i}\\sigma_j\\delta_j\\right)=\\prod_{j<i}(1-\\alpha_j).$$\nThe rendered color is\n$$C=\\sum_i T_i\\alpha_i c_i.$$\n$T_i$ is the probability that the ray reaches sample $i$ without termination; $\\alpha_i$ is its local opacity. NeRF evaluates an implicit field at many samples along every ray. Gaussian splatting projects explicit anisotropic primitives to screen space, sorts them, and performs analogous front-to-back alpha blending by rasterization, avoiding dense MLP ray sampling.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "NeRF",
+            "Volume rendering",
+            "Gaussian splatting"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A novel-view system must render in real time on a mobile device, allow deletion of one object, and fit in limited memory. Compare NeRF and 3D Gaussian Splatting against all three requirements, and explain why camera poses and viewing direction still matter for both.",
+          "answer": "Gaussian splatting is the stronger choice for real-time rasterization and explicit object-level editing, because primitives can be selected, pruned, or moved. Its weakness is memory: millions of Gaussians with covariance, opacity, and appearance can occupy hundreds of megabytes. A compact NeRF stores network weights more efficiently but normally requires many field evaluations per ray and is harder to edit locally. Both need calibrated/estimated camera poses to associate observations with rays, and both model view-dependent appearance: NeRF inputs viewing direction, while splats typically use spherical-harmonic color.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "NeRF",
+            "Gaussian splatting",
+            "Novel view synthesis"
+          ]
         }
       ]
     },
@@ -58,6 +118,36 @@
           "answer": "**Why classical SfM struggles.** It assumes a **static** scene, a **calibrated** camera and sufficient **parallax** with well-textured, matchable features. Casual video violates all of these: people and objects move, the intrinsics are unknown and may change (zoom, auto-focus), motion is often near-rotational or shaky, and clips are short with motion blur and rolling shutter.\n**The common pattern.** A **learned front end** supplies what matching alone cannot — per-frame depth or point maps, dense two-view associations, motion masks, and often the intrinsics — while a **classical geometric back end** (bundle adjustment, pose-graph optimisation) enforces global consistency across the sequence. Training is typically **self-supervised** on video, again through photometric / reprojection consistency.\n**Examples.** AnyCam predicts camera motion self-supervised on casual video; Align3R aligns per-frame 3D predictions into one reconstruction; ViSTA-SLAM combines symmetric two-view association with SLAM-style optimisation.",
           "extend": "The lesson of the chapter: learning replaces the brittle *correspondence* stage, not the geometry — the optimisation back end from Chapters 6 and 7 survives.",
           "tags": ["Structure from motion", "SLAM", "Deep learning", "Casual video"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Why can a single-view density field represent information that a depth map cannot? Describe a self-supervised training signal from video, then state two ambiguities that prevent one image alone from uniquely determining the hidden 3D scene.",
+          "answer": "A depth map stores only the first visible surface on each input ray. A density field assigns occupancy throughout 3D space, so it can represent surfaces behind the first hit and render them from a novel view. During training, predict the field from one frame, render it into nearby camera views using their poses, and minimize photometric/semantic disagreement. One image alone leaves occluded geometry unconstrained and admits shape--appearance trade-offs; scale and camera motion may also be ambiguous. Multi-view video and learned priors reduce these ambiguities but do not make the single image geometrically sufficient.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Density field",
+            "Scene completion",
+            "Self-supervision"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Casual video may have unknown intrinsics, moving objects, weak overlap, and noisy learned correspondences. Design a hybrid reconstruction pipeline and separate what the learned front end should predict from what bundle adjustment or a pose graph should enforce.",
+          "answer": "A learned front end can predict two-view associations, confidence, per-frame depth/3D, masks for dynamic regions, and initial intrinsics and relative poses. Use confidence-aware RANSAC or robust factors to initialize a graph. Bundle adjustment then jointly enforces multi-view reprojection consistency over poses, structure, and optionally intrinsics; a pose graph distributes drift and loop constraints globally. Dynamic masks and robust losses prevent moving content from defining the camera motion. The learned stage supplies priors and associations where classical matching fails; the geometric back end supplies global consistency, gauge control, and physically interpretable residuals.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Casual video",
+            "Bundle adjustment",
+            "Learned front end"
+          ]
         }
       ]
     },
@@ -74,6 +164,36 @@
           "answer": "**What it is.** A bio-inspired sensor in which each pixel operates **independently and asynchronously**, firing whenever the **logarithmic brightness** at that pixel changes by more than a threshold.\n**Output.** Not images but a stream of **events** $(x,y,t,p)$ — pixel coordinates, a microsecond-resolution timestamp, and the polarity (brightness up or down).\n**Advantages.** Microsecond temporal resolution and effectively **no motion blur**, so tracking survives very fast motion; a very high **dynamic range** (~120 dB), because each pixel adapts on its own instead of sharing a global exposure; and low power / bandwidth, since static parts of the scene produce no data.\n**Challenges.** There is **no absolute intensity** — only changes — so brightness constancy, conventional feature detectors and photometric residuals do not transfer directly and the whole front end must be redesigned. Events appear only where there is both a **gradient and motion**, so a stationary camera observes nothing, and the asynchronous, noisy stream needs its own representation before it can be fed to geometry or a network.\n**State of the art.** Systems range from geometric event-based tracking and mapping (EVO) and hybrid event+frame+IMU pipelines (Ultimate SLAM) to **DEVO**, a deep monocular event-only visual odometry evaluated on seven datasets; the **TUM VIE** dataset provides events, frames, IMU and motion-capture ground truth for benchmarking.",
           "extend": "An event camera measures the *temporal derivative* of log intensity — literally the $I_t$ term of the optical flow constraint, sampled asynchronously.",
           "tags": ["Event camera", "Visual odometry", "SLAM"]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "An event pixel triggers when the log intensity change since its last event reaches a contrast threshold $C$. Write the event condition including polarity. Show why a constant multiplicative brightness gain does not change the event stream, and explain why a static camera observing a static scene emits no ideal events.",
+          "answer": "An event $e_k=(x_k,y_k,t_k,p_k)$ satisfies\n$$\\log I(x_k,y_k,t_k)-\\log I(x_k,y_k,t_k^-)=p_kC,\\qquad p_k\\in\\{-1,+1\\}.$$\nIf intensity is multiplied by a constant $a>0$, then $\\log(aI)=\\log a+\\log I$ and the additive $\\log a$ cancels in the temporal difference. With a static camera and scene, the image at each pixel is constant, so the threshold is never crossed and no ideal events are produced. Events encode changes, not absolute brightness.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Event camera",
+            "Log intensity",
+            "Polarity"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Compare frames, events, and an IMU for high-speed HDR visual odometry. Give one strength and one failure mode of each, then explain why an event-only monocular system can still lose observability and how a hybrid sensor suite helps.",
+          "answer": "Frames provide absolute appearance and dense spatial context but suffer motion blur, limited dynamic range, and exposure latency. Events provide microsecond timing, high dynamic range, and no conventional motion blur, but contain no absolute intensity and produce little data under static motion or in gradient-free regions. An IMU measures angular velocity and specific force at high rate, but integration drifts and biases are unobservable without external correction. Event-only monocular VO still has scale and scene/motion observability limits. Frames anchor appearance, events constrain rapid edges, and the IMU bridges intervals and supplies inertial dynamics.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Event camera",
+            "Visual-inertial odometry",
+            "Observability"
+          ]
         }
       ]
     },

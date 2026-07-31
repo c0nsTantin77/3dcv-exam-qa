@@ -284,6 +284,20 @@
             "Nonlinear optimisation",
             "Normal equations"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $F(x)=\\frac12\\|r(x)\\|^2$.\n\n1. Derive the exact gradient and Hessian. (4)\n2. Identify the term omitted by Gauss-Newton. (2)\n3. Derive the Gauss-Newton update and state two situations in which the approximation is accurate. (3)",
+          "answer": "For $F(x)=\\tfrac12\\sum_i r_i(x)^2$,\n$$\\nabla F=J^\\top r,\\qquad \\nabla^2F=J^\\top J+\\sum_i r_i\\nabla^2r_i.$$\nGauss--Newton drops the residual-weighted second-derivative term and solves\n$$J^\\top J\\,\\Delta x=-J^\\top r.$$\nThe approximation is accurate near a well-fitting solution where residuals are small, or when the residual functions are nearly linear so their second derivatives are small.",
+          "extend": "Generated set Q47-B: From Newton to Gauss-Newton (9 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Linear least squares and Gauss-Newton",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -534,6 +548,20 @@
             "Pseudo-inverse",
             "Initialisation"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For monocular BA:\n\n1. Identify the global gauge freedoms. (3)\n2. Give two valid ways to remove them. (2)\n3. Compare optimizing depths plus poses with optimizing explicit 3D landmarks plus poses; state one advantage of each. (3)",
+          "answer": "Monocular bundle adjustment has a seven-dimensional global similarity gauge: three rotations, three translations, and one scale. One may fix the first camera pose and one distance or baseline, or impose equivalent anchor/gauge priors with an explicit scale constraint. Depth-plus-pose variables are compact and naturally tied to observation rays, which is useful in two-view or inverse-depth formulations. Explicit 3D landmarks are more symmetric across many views and fit the standard sparse bundle-adjustment structure.",
+          "extend": "Generated set Q46-B: Gauge fixing and parameterization (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Statistical modeling and bundle-adjustment formulations",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -587,6 +615,34 @@
             "Schur complement",
             "Power series",
             "Error analysis"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "There are $n_p$ cameras with $d_p$ parameters, $n_\\ell$ 3D landmarks, and $n_{obs}$ image observations, each producing a 2D residual.\n\n1. Give the dimensions of $J_p$, $J_\\ell$, and $J=[J_p\\ J_\\ell]$. (3)\n2. Describe exactly which blocks in one residual row can be nonzero. (3)\n3. Explain why $J_\\ell^\\top J_\\ell$ is block diagonal. (2)",
+          "answer": "The dimensions are\n$$J_p\\in\\mathbb R^{2n_{obs}\\times d_pn_p},\\qquad J_\\ell\\in\\mathbb R^{2n_{obs}\\times3n_\\ell},$$\n$$J=[J_p\\ J_\\ell]\\in\\mathbb R^{2n_{obs}\\times(d_pn_p+3n_\\ell)}.$$\nOne 2D observation depends only on its camera and landmark, so exactly those two parameter blocks can be non-zero in its residual rows. Distinct landmarks never occur in the same residual; therefore $J_\\ell^\\top J_\\ell$ is block diagonal with one $3\\times3$ block per landmark.",
+          "extend": "Generated set Q49-A: Dimensions and sparsity pattern (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "BA Jacobian sparsity and the Schur complement",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Given\n\n$$\n\\begin{bmatrix}U&W\\\\W^\\top&V\\end{bmatrix}\n\\begin{bmatrix}\\Delta x_p\\\\\\Delta x_\\ell\\end{bmatrix}\n=\n\\begin{bmatrix}b_p\\\\b_\\ell\\end{bmatrix},\n$$\n\nderive the reduced camera system and the landmark back-substitution. State the dimensions of the Schur complement and explain why landmarks, rather than cameras, are normally eliminated. (10)",
+          "answer": "Eliminating $\\Delta x_\\ell$ gives\n$$S=U-WV^{-1}W^\\top,$$\n$$S\\Delta x_p=b_p-WV^{-1}b_\\ell.$$\nAfter solving the reduced camera system, back-substitute\n$$\\Delta x_\\ell=V^{-1}(b_\\ell-W^\\top\\Delta x_p).$$\nThe Schur complement has size $d_pn_p\\times d_pn_p$. Landmarks are eliminated because $V$ consists of many small independent blocks whose inverses are cheap, and there are usually far more landmarks than cameras.",
+          "extend": "Generated set Q49-B: Eliminating landmarks (10 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "BA Jacobian sparsity and the Schur complement",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -745,6 +801,36 @@
             "Rayleigh quotient",
             "Eigenvalues",
             "Constrained optimisation"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For projected gradient descent on the Euclidean ball $\\mathcal C=\\{x\\in\\mathbb R^n\\mid\\|x\\|_2\\le r\\}$, derive the projection $\\Pi_{\\mathcal C}(y)$. Then write one complete iteration for a differentiable objective $f$ and explain why normalizing every iterate to norm $r$ is wrong.",
+          "answer": "If $\\|y\\|\\le r$, the closest feasible point is $y$. Otherwise the KKT conditions show that the closest point lies on the same ray with norm $r$. Hence\n$$\\Pi_{\\mathcal C}(y)=\\begin{cases}y,&\\|y\\|\\le r,\\\\r\\,y/\\|y\\|,&\\|y\\|>r.\\end{cases}$$\nOne iteration is\n$$y_k=x_k-\\tau\\nabla f(x_k),\\qquad x_{k+1}=\\Pi_{\\mathcal C}(y_k).$$\nAlways normalizing to norm $r$ projects onto the sphere, not the ball, and incorrectly moves feasible interior points to the boundary.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Projected gradient",
+            "Constraints",
+            "KKT"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $A=A^\\top$ and consider $\\min_{\\|x\\|=1}x^\\top Ax$. Derive the stationarity equation with a Lagrange multiplier, identify all stationary values, and explain why taking an unconstrained Newton step on $x^\\top Ax$ cannot solve the constrained problem.",
+          "answer": "With\n$$L(x,\\lambda)=x^\\top Ax-\\lambda(x^\\top x-1),$$\nstationarity gives\n$$2Ax-2\\lambda x=0,$$\nso every stationary point is a unit eigenvector and its objective value is the corresponding eigenvalue. The global minimum is attained in the eigenspace of $\\lambda_{\\min}(A)$. Unconstrained Newton minimizes the quadratic over all of $\\mathbb R^n$ and ignores feasibility; for a positive-definite $A$ it moves to $x=0$, which violates $\\|x\\|=1$. The constraint must be enforced by a manifold, multiplier, or projection method.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Rayleigh quotient",
+            "Lagrange multiplier",
+            "Eigenvalues"
           ]
         }
       ]

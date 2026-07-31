@@ -110,6 +110,36 @@
             "Extrinsics",
             "Coordinate frames"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A calibrated pinhole camera observes $X_c=(X,Y,Z)^\\top$ with $Z>0$. (a) Derive its normalized image coordinate. (b) Describe the complete 3D preimage of a normalized pixel $x=(u,v,1)^\\top$. (c) Explain why neither one image nor a different choice of imaging plane can recover the depth.",
+          "answer": "Intersect the viewing ray with the plane $z=1$:\n$$x=\\pi(X_c)=\\left(\\frac XZ,\\frac YZ,1\\right)^\\top.$$\nConversely, every 3D point\n$$X_c(\\lambda)=\\lambda(u,v,1)^\\top,\\qquad \\lambda>0,$$\nprojects to the same pixel, so the preimage is a ray from the camera center. Replacing the plane $z=1$ by another plane or a sphere merely chooses another representative on that same ray. Projection discards the radial scale $\\lambda$; a second view or an independent depth cue is required to recover it.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Pinhole camera",
+            "Backprojection",
+            "Scale ambiguity"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let $P\\in\\mathbb R^{3\\times4}$ be a full-rank pinhole camera matrix and let $C\\neq0$ span $\\ker P$. Prove that every point $X+\\lambda C$ has the same homogeneous image as $X$. What is the geometric meaning of $C$, and what happens when the third component of $PX$ is zero?",
+          "answer": "Because $PC=0$,\n$$P(X+\\lambda C)=PX+\\lambda PC=PX.$$\nThus the full projective line through $X$ and $C$ maps to one image point. The null-space vector $C$ is the homogeneous camera center: all viewing rays pass through it. If the third component of $PX$ is zero, the image is a point at infinity and Euclidean pixel normalization by that component is impossible. The trap is to treat $PX$ as an ordinary 2D point before performing the homogeneous division.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Camera matrix",
+            "Camera center",
+            "Projective geometry"
+          ]
         }
       ]
     },
@@ -262,6 +292,20 @@
             "Skew",
             "Calibration",
             "Perspective projection"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A canonical pinhole camera has zero skew and\n\n$$K=\\begin{bmatrix}f_x&0&o_x\\\\0&f_y&o_y\\\\0&0&1\\end{bmatrix}.$$\n\nThe 3D points $X_1=(1,0,2)^\\top$ and $X_2=(0,1,4)^\\top$ appear at pixels $(500,200)^\\top$ and $(300,275)^\\top$. Recover $f_x,f_y,o_x,o_y$ with explicit equations. (7)",
+          "answer": "The pinhole equations are $u=f_xX/Z+o_x$ and $v=f_yY/Z+o_y$. From $X_1$,\n$$500=\\frac{f_x}{2}+o_x,\\qquad 200=o_y.$$\nFrom $X_2$,\n$$300=o_x,\\qquad 275=\\frac{f_y}{4}+o_y.$$\nTherefore\n$$(f_x,f_y,o_x,o_y)=(400,300,300,200).$$",
+          "extend": "Generated set Q22-B: Recovering intrinsic parameters (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Pinhole projection, intrinsics, and extrinsics",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -604,6 +648,20 @@
             "Extrinsics",
             "Projective geometry"
           ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "A camera center is $C=(1,0,0)^\\top$. Its rotation from camera coordinates to world coordinates is\n\n$$R_{cw}=\\begin{bmatrix}0&-1&0\\\\1&0&0\\\\0&0&1\\end{bmatrix},$$\n\nand\n\n$$K=\\begin{bmatrix}400&0&320\\\\0&300&240\\\\0&0&1\\end{bmatrix}.$$\n\nProject $X_w=(1,2,4)^\\top$ into the image. Show the world-to-camera conversion, depth check, normalized coordinate, and final pixel coordinate. (8)",
+          "answer": "The given rotation maps camera to world coordinates, so\n$$X_c=R_{cw}^\\top(X_w-C)=(2,0,4)^\\top.$$\nIts depth is positive. Dividing by depth gives the normalized image point $(1/2,0,1)^\\top$. Applying $K$ yields\n$$u=400\\cdot\\frac12+320=520,\\qquad v=300\\cdot0+240=240.$$\nThus the pixel coordinate is $(520,240)^\\top$.",
+          "extend": "Generated set Q22-A: Camera-to-world versus world-to-camera (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Pinhole projection, intrinsics, and extrinsics",
+            "Cremers-style practice"
+          ]
         }
       ]
     },
@@ -678,6 +736,34 @@
             "Projective geometry",
             "Preimage",
             "Coimage"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "In $\\mathbb P^2$, let $x_1=(1,0,1)^\\top$, $x_2=(3,2,1)^\\top$, and let $l_2=(1,-1,-2)^\\top$.\n\n1. Compute the line $l_1$ through $x_1$ and $x_2$. (2)\n2. Compute the intersection $x=l_1\\times l_2$ and normalize it if possible. (2)\n3. Two Euclidean lines have equal first two coefficients but different offsets. Show that their projective intersection is a point at infinity and interpret its direction. (3)",
+          "answer": "The line through the two points is\n$$l_1=x_1\\times x_2=(-2,2,2)^\\top\\sim(-1,1,1)^\\top.$$\nIts intersection with $l_2$ is\n$$x=l_1\\times l_2=(-1,-1,0)^\\top\\sim(1,1,0)^\\top.$$\nThe third coordinate is zero, so this is a point at infinity and cannot be normalized to $(u,v,1)$. More generally, $(a,b,c_1)^\\top$ and $(a,b,c_2)^\\top$ meet at a point with third coordinate zero, representing their common Euclidean direction.",
+          "extend": "Generated set Q21-A: Lines and points at infinity (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Homogeneous coordinates and projective incidence",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Let image points transform as $x'\\sim Hx$ with nonsingular $H\\in\\mathbb R^{3\\times3}$.\n\n1. Derive the transformation rule for a line $l$ such that incidence is preserved. (4)\n2. Show explicitly that $l^\\top x=0$ implies $l'^\\top x'=0$. (2)\n3. Why are both point and line coordinates defined only up to scale? (1)",
+          "answer": "Let $x'=Hx$. Incidence must satisfy $l'^\\top x'=0$ whenever $l^\\top x=0$. Choosing\n$$l'=H^{-\\top}l$$\ngives\n$$l'^\\top x'=l^\\top H^{-1}Hx=l^\\top x=0.$$\nThus points transform covariantly by $H$, while lines transform contravariantly by $H^{-\\top}$. Homogeneous point and line vectors represent one-dimensional subspaces, so multiplying either by any non-zero scalar leaves the geometric object unchanged.",
+          "extend": "Generated set Q21-B: Transforming lines under a homography (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Homogeneous coordinates and projective incidence",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -755,6 +841,34 @@
           ],
           "tags": [
             "Spherical projection"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "For $X=(-2,1,2)^\\top$:\n\n1. Compute the spherical projection $\\pi_s(X)=X/\\|X\\|$. (2)\n2. Compute the spherical projection of $5X$ and interpret the result. (2)\n3. What is the scale factor $\\lambda$ for a spherical imaging surface, and how does it differ from the planar pinhole case? (2)",
+          "answer": "Since $\\|X\\|=3$,\n$$\\pi_s(X)=\\frac{X}{\\|X\\|}=(-2/3,1/3,2/3)^\\top.$$\nFor any positive scale, $\\pi_s(5X)=\\pi_s(X)$, so the projection retains direction but discards radial distance. The spherical scale factor is $\\lambda=\\|X\\|$, whereas a planar pinhole image conventionally uses $\\lambda=Z$ to intersect the ray with the plane $z=1$.",
+          "extend": "Generated set Q24-A: Projection onto the unit sphere (6 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Spherical perspective projection",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Compare planar pinhole and spherical projection with respect to field of view, singular viewing directions, depth ambiguity, and the homogeneous relation $x'\\sim K\\Pi_0gX$. Explain why changing the imaging surface does not change the underlying viewing ray. (7)",
+          "answer": "A spherical image parameterizes viewing directions naturally over a full surround, whereas planar pinhole coordinates diverge for rays approaching $Z=0$. Both projections lose radial depth: they choose different intersections with the same ray from the camera center. Consequently the underlying homogeneous viewing direction is unchanged. A sphere still requires multiple coordinate charts or an angular map with poles and a seam; it does not provide one globally non-singular 2D parameterization.",
+          "extend": "Generated set Q24-B: Planar versus spherical imaging surfaces (7 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Spherical perspective projection",
+            "Cremers-style practice"
           ]
         }
       ]
@@ -986,6 +1100,34 @@
           "tags": [
             "Radial distortion",
             "Undistortion"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "The FOV model is\n\n$$r_d=\\frac1\\omega\\arctan\\left(2r_u\\tan\\frac\\omega2\\right).$$\n\n1. Derive $r_u$ as a function of $r_d$. (3)\n2. Derive the vector-valued undistortion map for a measured point $x_d\\neq0$. (3)\n3. Show that $r_d\\to r_u$ as $\\omega\\to0$. (2)",
+          "answer": "Taking the tangent of both sides gives\n$$\\tan(\\omega r_d)=2r_u\\tan(\\omega/2),$$\nso\n$$r_u=\\frac{\\tan(\\omega r_d)}{2\\tan(\\omega/2)}.$$\nFor a measured vector $x_d\\neq0$, radial symmetry gives $x_u=(r_u/r_d)x_d$; define $x_u=0$ at the origin. Finally, $\\tan(\\omega/2)\\sim\\omega/2$ and $\\arctan(\\omega r_u)\\sim\\omega r_u$, hence $r_d\\to r_u$ as $\\omega\\to0$.",
+          "extend": "Generated set Q25-A: Closed-form inversion and the no-distortion limit (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "FOV/ATAN radial distortion",
+            "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI practice"
+          ],
+          "q": "Extend the model denominator to $1+k_1r_d^2+k_2r_d^4$.\n\n1. Show whether the collinearity equation remains linear in $(k_1,k_2)$. (3)\n2. Stack $M$ line-triplet constraints as a least-squares problem. (2)\n3. State the minimum number of independent triplets required for two unknown coefficients and discuss why more are desirable. (3)",
+          "answer": "After inserting the denominator $1+k_1r_d^2+k_2r_d^4$, each straight-line triplet produces a constraint of the form\n$$A+k_1B_2+k_2B_4=0,$$\nwhich is still linear in the unknown coefficients. Stacking $M$ constraints gives $Ck=-a$ and the least-squares problem $\\min_k\\|Ck+a\\|^2$. At least two linearly independent triplets are required for two coefficients. In practice many triplets spanning different radii and directions are needed for conditioning and noise robustness.",
+          "extend": "Generated set Q26-B: Estimating several distortion coefficients (8 credits). Cremers-style practice; not a past-paper citation.",
+          "tags": [
+            "Distortion estimation from straight lines",
+            "Cremers-style practice"
           ]
         }
       ]
