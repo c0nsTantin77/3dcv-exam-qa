@@ -39,10 +39,12 @@ Cards from a **Cremers** paper carry a ★ badge, an amber source chip and a lef
 - Site-wide **search** (keyword, concept tag, or an exact code like `25EDC 1.1`), **tag** browsing and
   **browse-by-exam**.
 - **Study system**: Reviewed / wrong book / notes (Markdown + math) / Ebbinghaus spaced repetition,
-  flashcards, a progress dashboard, and Export/Import JSON — all in `localStorage`.
+  flashcards, a progress dashboard, and versioned Backup/Import JSON — all in `localStorage` first.
 - Optional **Google sign-in cloud sync** and a live green online counter. Use a
   dedicated Firebase project and follow [docs/firebase-setup.md](docs/firebase-setup.md);
   do not reuse the I2DL Firebase project.
+- Cloud progress expires after 180 days without a successful sign-in or sync; the login account remains
+  available. The monthly cleanup is documented in [docs/progress-retention.md](docs/progress-retention.md).
 
 Coverage of the past papers is tracked in [COVERAGE.md](COVERAGE.md): **98 % of 25EDC, 97 % of 25RDC,
 90 % of 22RDC and 89 % of 24EDC** are cited directly. The 2022 endterm (22EDC) is a scan with no text

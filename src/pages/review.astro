@@ -9,7 +9,7 @@ import { url } from "../lib/paths";
 <Layout title="Review · 3DCV Exam Q&A">
   <Topbar backHref={url("/")} backFull=" chapters">
     <div class="filters" slot="filters">
-      <button id="exportBtn" type="button" class="io-btn">⬇ Export</button>
+      <button id="exportBtn" type="button" class="io-btn">⬇ Backup</button>
       <label class="io-btn" for="importFile">⬆ Import</label>
       <input id="importFile" type="file" accept="application/json" hidden />
       <button id="resetBtn" type="button" class="io-btn danger">⟳ Reset</button>
@@ -24,7 +24,7 @@ import { url } from "../lib/paths";
     <p>
       This permanently clears your <b>reviewed</b>, <b>wrong book</b>, <b>notes</b> and
       <b>spaced-repetition</b> data <b>in this browser</b>. It cannot be undone — consider
-      <b>⬇ Export</b> first.
+      <b>⬇ Backup</b> first.
     </p>
     <label class="reset-ack"><input type="checkbox" id="resetAck" /> I understand this erases everything.</label>
     <div class="reset-actions">

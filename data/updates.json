@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-07-31",
+    "text": "Added versioned progress backups and a guarded 180-day cloud-progress retention workflow."
+  },
+  {
     "date": "2026-07-30",
     "text": "Added 18 Cremers-style AI practice questions — two per chapter — targeting previously uncovered concepts, with full derivations and exam traps."
   },

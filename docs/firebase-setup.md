@@ -48,9 +48,10 @@ Web 配置用于标识 Firebase 项目，不是服务账号私钥。绝对不要
 4. 发布仓库内 `firestore.rules`。它只允许登录用户读写自己的
    `users/{uid}` 文档，并要求 `lastActiveAt` 使用服务器时间。
 
-`lastActiveAt` 和 `retentionPolicyVersion` 参考 I2DL 的保留策略设计，方便将来对
-长期不活跃的云进度做 180 天清理。当前仓库不会自动删除任何文档；启用清理任务前
-必须先做 dry-run 和旧文档迁移，不能把“进度文档数量”称为“网站用户数”。
+`lastActiveAt` 和 `retentionPolicyVersion` 用于 180 天云进度保留策略。仓库已经包含
+每月清理工作流，但在完成 Workload Identity Federation、dry-run 和旧文档迁移前会保持
+安全预览模式。完整配置和启用顺序见
+[学习进度备份与 180 天自动清理](progress-retention.md)。
 
 ## 4. 配置 Realtime Database 在线人数
 
@@ -98,6 +99,7 @@ npm run dev
 3. 关闭无痕窗口后，人数应下降；异常断线最多约 5 分钟后不再计数。
 4. Google 登录后，在 Firestore Data 中应出现且只出现当前 UID 的
    `users/{uid}` 文档。
+5. Review 页下载的文件名应为 `3dcv-backup-YYYY-MM-DD.json`；重新导入后进度应恢复。
 
 最后推送到 `main`，GitHub Actions 会重新部署 GitHub Pages。
 
@@ -105,6 +107,7 @@ npm run dev
 
 - Realtime Database 只公开无个人信息的 `/presence`；其他路径默认拒绝访问。
 - Firestore 不允许匿名访客读写进度。
+- 180 天任务只删除 Firestore 云进度，不删除 Firebase Authentication 账户或浏览器本地备份。
 - 在线人数、Firebase Authentication 账户、Firestore 进度文档和 GA4 访客是四个
   不同指标，不能相加或互相替代。
 - 如果公开流量明显增加，再配置 Firebase App Check；先在未强制模式验证请求，
