@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import type { SearchEntry } from "../../lib/types";
 import { loadIndex, questionHref, TYPE_LABEL } from "../../lib/client/index-data";
 import { Store, onChange } from "../../lib/client/store";
+import { downloadProgressBackup } from "../../lib/client/review-io";
 import FlashcardDeck from "./FlashcardDeck.vue";
 
 const index = ref<SearchEntry[]>([]);
@@ -139,6 +140,19 @@ onUnmounted(() => unsub());
     <p class="tp-sub">
       Your spaced-repetition queue and wrong book — saved in this browser (and synced if you sign in).
     </p>
+
+    <section class="retention-card" aria-labelledby="retention-title">
+      <div class="retention-copy">
+        <b id="retention-title">Keep a copy of your study data</b>
+        <span>
+          Cloud progress and notes are kept for 180 days after your last successful sign-in or sync.
+          Your account is not deleted. Download a JSON backup anytime and import it later to restore everything.
+        </span>
+      </div>
+      <button type="button" class="io-btn retention-download" @click="downloadProgressBackup">
+        ⬇ Download backup
+      </button>
+    </section>
 
     <nav class="rv-jump" aria-label="Jump to section">
       <a href="#rv-flashcards" class="rv-jump-pill">🃏 Flashcards</a>

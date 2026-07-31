@@ -26,6 +26,9 @@
 .hero-cta-pills .share-pill{margin:0}
 .hero-cta-pills .share-pill.doner{background:rgba(255,193,90,.2);border-color:rgba(255,193,90,.5)}
 .hero-cta-pills .share-pill.doner:hover{background:rgba(255,193,90,.32);border-color:rgba(255,193,90,.7)}
+.hero-retention{margin:18px 0 0;font-size:.8rem;line-height:1.5;color:rgba(255,255,255,.78)}
+.hero-retention a{color:#fff;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.hero-retention a:hover{color:#fff}
 @media(max-width:560px){.hero-cta{gap:16px}.hero-cta-text{font-size:1.06rem}}
 @media(max-width:680px){.hero-points{grid-template-columns:1fr;gap:10px}}
 .exams{display:flex;flex-wrap:wrap;gap:8px}
@@ -133,4 +136,3 @@ details.q.flash{animation:flash 1.6s ease}
 .how ul{margin:0;padding-left:1.1em}
 .how li{margin:.4em 0}
 .hubfoot,.pagefoot{color:var(--muted);font-size:.85rem;margin-top:32px}
-

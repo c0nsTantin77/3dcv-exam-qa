@@ -1,0 +1,103 @@
+name: Clean up inactive progress
+
+# Scheduled workflows run from the default branch. The cleanup remains a
+# preview until PROGRESS_CLEANUP_DRY_RUN is deliberately set to false.
+on:
+  schedule:
+    - cron: "17 3 1 * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "cleanup deletes expired docs; migrate gives legacy docs a new 180-day grace period"
+        required: true
+        default: cleanup
+        type: choice
+        options:
+          - cleanup
+          - migrate
+          - all
+      dry_run:
+        description: "Preview counts without changing Firestore"
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: progress-retention
+  cancel-in-progress: false
+
+jobs:
+  retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud without a stored key
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Select safe cleanup mode
+        shell: bash
+        env:
+          INPUT_MODE: ${{ inputs.mode }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run }}
+          SCHEDULE_DRY_RUN: ${{ vars.PROGRESS_CLEANUP_DRY_RUN }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "CLEANUP_MODE=${INPUT_MODE:-cleanup}" >> "$GITHUB_ENV"
+            echo "CLEANUP_DRY_RUN=${INPUT_DRY_RUN:-true}" >> "$GITHUB_ENV"
+          else
+            echo "CLEANUP_MODE=cleanup" >> "$GITHUB_ENV"
+            echo "CLEANUP_DRY_RUN=${SCHEDULE_DRY_RUN:-true}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Migrate or clean progress documents
+        env:
+          FIREBASE_PROJECT_ID: dcv-exam-qa
+          FIRESTORE_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          CLEANUP_CONFIRM_PROJECT: dcv-exam-qa
+          RETENTION_DAYS: "180"
+          CLEANUP_MAX_SCANNED: "10000"
+          CLEANUP_MAX_CHANGES: "10000"
+        run: node tools/cleanup-stale-progress.mjs
+
+  keep-schedule-active:
+    if: ${{ always() && github.event_name == 'schedule' }}
+    needs: retention
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Record monthly maintenance activity on an isolated branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin maintenance-heartbeat; then
+            git fetch origin maintenance-heartbeat
+            git switch --detach FETCH_HEAD
+          else
+            git switch --orphan maintenance-heartbeat
+          fi
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > cleanup-heartbeat.txt
+          git add cleanup-heartbeat.txt
+          git commit -m "chore: keep retention schedule active"
+          git push origin HEAD:maintenance-heartbeat

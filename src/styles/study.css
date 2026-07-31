@@ -104,6 +104,9 @@ details.q.has-note .note-btn{background:#fffaf0;border-color:#ffe2a8;color:#b886
 .pbar-track{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden}
 .pbar-fill{display:block;height:100%;background:var(--tum);border-radius:999px;transition:width .6s ease}
 .pbar-n{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.76rem}
+.cloud-retention{margin:14px 0 0;padding-top:12px;border-top:1px solid var(--line);
+  font-size:.78rem;line-height:1.5;color:var(--muted)}
+.cloud-retention a{font-weight:700;color:var(--tum)}
 
 /* ---- review page ---- */
 .io-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 13px;font-size:.82rem;
@@ -119,6 +122,12 @@ details.q.has-note .note-btn{background:#fffaf0;border-color:#ffe2a8;color:#b886
 .reset-ack{display:flex;align-items:center;gap:8px;font-size:.88rem;font-weight:600;margin-bottom:16px}
 .reset-actions{display:flex;justify-content:flex-end;gap:10px}
 .reset-dlg .io-btn.danger:disabled{opacity:.55;cursor:not-allowed;background:#fff}
+.retention-card{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 18px;
+  padding:15px 17px;background:#fffaf0;border:1px solid #ffe2a8;border-radius:12px}
+.retention-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+.retention-copy b{font-size:.95rem;color:var(--ink)}
+.retention-copy span{font-size:.82rem;line-height:1.5;color:var(--muted)}
+.retention-download{flex:none;white-space:nowrap}
 .tp-ch .cnt{font-size:.78rem;font-weight:700;background:#eef2f7;color:var(--muted);border-radius:999px;padding:1px 9px;margin-left:6px}
 .tp-empty{color:var(--muted);font-size:.9rem;background:#f7faff;border:1px solid var(--line);border-radius:10px;padding:14px}
 .ghit-row{display:flex;align-items:center;gap:10px;padding-right:10px}
@@ -244,6 +253,8 @@ details.q.has-note .note-btn{background:#fffaf0;border-color:#ffe2a8;color:#b886
 .fc-note-btn.has{background:#fffaf0;border-color:#ffe2a8;color:#b8860b}
 .fc-note-wrap{margin-top:10px}
 @media(max-width:560px){
+  .retention-card{align-items:stretch;flex-direction:column;gap:11px}
+  .retention-download{align-self:flex-start}
   .fc-rate{grid-template-columns:repeat(2,1fr)}
   .rv-group-head{gap:9px;padding:10px 12px}
   .rv-group-title{font-size:.9rem}
@@ -251,4 +262,3 @@ details.q.has-note .note-btn{background:#fffaf0;border-color:#ffe2a8;color:#b886
   .rv-jump-pill{font-size:.8rem;padding:6px 12px}
   .fc-body{padding:16px 15px 20px}
 }
-

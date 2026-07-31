@@ -3,17 +3,20 @@ import { Store } from "./store";
 // Export / import the progress blob. The buttons live in the review-page
 // topbar; the ReviewPage island refreshes itself via the store's onChange.
 
+export function downloadProgressBackup(): void {
+  const blob = new Blob([Store.exportBlob()], { type: "application/json" });
+  const a = document.createElement("a");
+  const day = new Date().toISOString().slice(0, 10);
+  a.href = URL.createObjectURL(blob);
+  a.download = `3dcv-backup-${day}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 export function initReviewIO(): void {
   const exp = document.getElementById("exportBtn");
   if (exp) {
-    exp.addEventListener("click", () => {
-      const blob = new Blob([Store.exportBlob()], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "3dcv-progress.json";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
+    exp.addEventListener("click", downloadProgressBackup);
   }
 
   const imp = document.getElementById("importFile") as HTMLInputElement | null;
@@ -25,9 +28,12 @@ export function initReviewIO(): void {
       r.onload = () => {
         try {
           Store.importBlob(String(r.result));
-          alert("Progress imported.");
-        } catch {
-          alert("Invalid file.");
+          alert("Backup imported. It will sync to the cloud if you are signed in.");
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Invalid backup file.";
+          alert("Could not import backup: " + message);
+        } finally {
+          imp.value = "";
         }
       };
       r.readAsText(f);
