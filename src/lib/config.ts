@@ -29,6 +29,6 @@ export const APP_CONFIG: {
     measurementId: "G-M2F3GMJSLY",
     databaseURL: "https://dcv-exam-qa-default-rtdb.europe-west1.firebasedatabase.app",
   },
-  // Google Form "embed" URL (Send -> <> -> copy the iframe src).
-  feedbackFormUrl: "",
+  // Public Google Form responder URL.
+  feedbackFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSddAnHaIC1mAepYJ5timlfF2ES1OSYnjBWEHpsG9kWQFYW2qg/viewform",
 };
