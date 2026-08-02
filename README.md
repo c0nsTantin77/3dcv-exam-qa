@@ -58,6 +58,8 @@ npm run dev        # http://localhost:4321/3dcv-exam-qa/
 npm run build      # -> dist/
 npm run check      # astro check (types)
 npm run check:ai   # every knowledge point has at least two AI questions
+npm run check:exam # every listed exam/exercise has at least one question
+npm run test:notes # notes survive an immediate refresh
 npm run preview
 ```
 
@@ -86,6 +88,7 @@ GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`, `withastro/acti
 
 ## Recent updates
 
+- **2026-08-02** — Added all 8 EX05 and 5 EX06 problems with official solutions, and fixed notes being lost on an immediate refresh.
 - **2026-07-31** — Expanded the AI practice set to 101 questions, guaranteeing at least two for every knowledge point.
 - **2026-07-30** — Added 18 Cremers-style AI questions, two per chapter, covering previously untested concepts.
 - **2026-07-25** — First release: all 9 chapters, from 12 past papers and 8 exercise sheets.

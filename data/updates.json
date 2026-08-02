@@ -1,5 +1,9 @@
 [
   {
+    "date": "2026-08-02",
+    "text": "Added all 8 EX05 and 5 EX06 problems with official solutions, and fixed notes being lost on an immediate refresh."
+  },
+  {
     "date": "2026-07-31",
     "text": "Expanded the Cremers-style AI practice set to 101 questions, guaranteeing at least two for every knowledge point."
   },
