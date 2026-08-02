@@ -5,6 +5,7 @@ import { initStudy } from "./study";
 import { initOpenAnswer } from "./open-answer";
 import { initMode } from "./mode";
 import { initChapterUI } from "./chapter-ui";
+import { initExamReturn } from "./exam-return";
 import { initProgress } from "./progress";
 import { initShare } from "./share";
 import { initHomeView, initFeedbackLink } from "./home";
@@ -24,6 +25,7 @@ initStudy();
 
 // chapter-page chrome (filter / expand / back-to-top / deep-link / contents pill)
 initChapterUI();
+initExamReturn();
 
 // homepage chrome
 initHomeView();

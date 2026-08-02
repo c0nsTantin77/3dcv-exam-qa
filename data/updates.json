@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-08-02",
+    "text": "Added a context-aware Back to exam button on questions opened from Browse by exam, with refresh-safe URLs and validation against incorrect exam codes."
+  },
+  {
+    "date": "2026-08-02",
     "text": "Completed both 2023 papers (Endterm 25/25, Retake 27/27), with official answers, an exam figure, updated recaps for all 20 affected knowledge points, and exact coverage checks."
   },
   {

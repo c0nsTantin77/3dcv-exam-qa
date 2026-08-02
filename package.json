@@ -6,13 +6,14 @@
   "description": "3D Computer Vision (TUM IN2228) exam Q&A revision site — Astro + Vue islands",
   "scripts": {
     "dev": "astro dev",
-    "build": "npm run check:ai && npm run check:exam && npm run test:notes && astro build",
+    "build": "npm run check:ai && npm run check:exam && npm run test:notes && npm run test:exam-return && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
     "check:ai": "node tools/check_ai_coverage.mjs",
     "check:exam": "node tools/check_exam_coverage.mjs",
-    "test:notes": "node tools/test_note_persistence.mjs"
+    "test:notes": "node tools/test_note_persistence.mjs",
+    "test:exam-return": "node tools/test_exam_return.mjs"
   },
   "dependencies": {
     "@astrojs/vue": "^6.0.1",
