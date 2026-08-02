@@ -283,7 +283,7 @@
           "sources": [
             "EX05 1"
           ],
-          "q": "Two calibrated cameras observe the same 3D point, with $X_2=RX_1+T$ and $X_i=\\lambda_i x_i$. (a) Derive the epipolar constraint $x_2^\\top E x_1=0$ with $E=\\hat T R$. (b) How many degrees of freedom does $E$ have, and why is translation recoverable only up to scale? (c) Interpret $l_2=Ex_1$ and $l_1=E^\\top x_2$ geometrically.",
+          "q": "The Epipolar Constraint. Two cameras observe the same 3D point $X$. Camera 1 is at the origin with identity rotation; camera 2 has relative pose $(R,T)$, so $X_2=RX_1+T$. Let $x_1,x_2$ be the normalized-coordinate projections after removing $K$. (a) Show that $x_2^\\top Ex_1=0$ with $E=\\hat T R$, where $\\hat Tv=T\\times v$. (b) How many degrees of freedom does $E$ have? Why is $T$ recoverable only up to scale? (c) What is the geometric meaning of $l_2=Ex_1$ and $l_1=E^\\top x_2$?",
           "answer": "**(a)** Substitute the projective depths:\n$$\\lambda_2x_2=\\lambda_1Rx_1+T.$$\nLeft-multiplying by $x_2^\\top\\hat T$ gives\n$$\\lambda_2x_2^\\top\\hat T x_2=\\lambda_1x_2^\\top\\hat TRx_1+x_2^\\top\\hat TT.$$\nThe left side vanishes because $x_2\\cdot(T\\times x_2)=0$, and $\\hat TT=T\\times T=0$, hence\n$$\\boxed{x_2^\\top\\hat TRx_1=0},\\qquad E=\\hat TR.$$\n**(b)** Rotation contributes 3 DOF and the direction of $T$ contributes 2, so $E$ has 5 DOF. Scaling $T$ only scales the homogeneous equation and is therefore unobservable.\n**(c)** $l_2=Ex_1$ is the epipolar line in image 2 on which $x_2$ must lie; it is the projection of the first viewing ray into image 2. Likewise $l_1=E^\\top x_2$ is the corresponding line in image 1.",
           "tags": [
             "Epipolar constraint",
@@ -727,7 +727,7 @@
           "sources": [
             "EX05 6"
           ],
-          "q": "(a) Prove the Demazure constraint $EE^\\top E-\\frac12\\operatorname{tr}(EE^\\top)E=0$ for $E=\\hat TR$. **Hint:** Use $\\hat T^\\top=-\\hat T$ and $\\hat T^2=TT^\\top-\\|T\\|^2I$, and compute $EE^\\top=\\hat TRR^\\top\\hat T^\\top$ first. (b) Derive the RANSAC iteration bound for minimal sample size $s$, inlier ratio $w$, and success probability $p$. (c) Evaluate it for $w=0.5$, $p=0.99$ using the five- and eight-point algorithms.",
+          "q": "The 5-Point Algorithm and the Demazure Constraint. The essential matrix has only five degrees of freedom, so five correspondences should suffice in principle. The 5-point algorithm uses an algebraic constraint that characterizes essential matrices. (a) Prove that an essential matrix $E=\\hat TR$ satisfies $$EE^\\top E-\\tfrac12\\operatorname{tr}(EE^\\top)E=0.$$ **Hint:** Use $\\hat T^\\top=-\\hat T$ and $\\hat T^2=TT^\\top-\\|T\\|^2I$, and compute $EE^\\top$ first. (b) RANSAC draws minimal samples of size $s$ from correspondences with inlier ratio $w$. Derive the iteration count $k$ required for success probability at least $p$. (c) For $w=0.5$ and $p=0.99$, compare the 5-point and 8-point algorithms.",
           "answer": "**(a)** Since $RR^\\top=I$, $\\hat T^\\top=-\\hat T$, and $\\hat T^2=TT^\\top-\\|T\\|^2I$,\n$$EE^\\top=-\\hat T^2=\\|T\\|^2I-TT^\\top.$$\nBecause $T^\\top\\hat T=0$,\n$$EE^\\top E=(\\|T\\|^2I-TT^\\top)\\hat TR=\\|T\\|^2E.$$\nAlso $\\operatorname{tr}(EE^\\top)=2\\|T\\|^2$, so the two terms in the Demazure expression cancel.\n**(b)** One sample is all-inlier with probability $w^s$. Requiring $1-(1-w^s)^k\\ge p$ gives\n$$\\boxed{k\\ge\\frac{\\log(1-p)}{\\log(1-w^s)}}.$$\n**(c)** For $s=5$, $k\\ge145$; for $s=8$, $k\\ge1177$ (rounded up). The five-point solver needs roughly eight times fewer RANSAC samples.",
           "tags": [
             "Demazure constraint",
@@ -747,7 +747,7 @@
           "sources": [
             "EX05 7"
           ],
-          "q": "Recovering $(R,T)$ from $E$. Given $E=U\\Sigma V^\\top$ with $\\Sigma=\\operatorname{diag}(\\sigma,\\sigma,0)$, use the two $\\pm\\pi/2$ rotations about the $z$-axis. (a) Show that the resulting translation matrices $\\hat T_1,\\hat T_2$ are skew-symmetric and that the rotation candidates $R_1,R_2$ lie in $SO(3)$. (b) This gives four combinations $(R_i,T_j)$. How do we select the correct one?",
+          "q": "Recovering $(R,T)$ from $E$. Let $E=U\\Sigma V^\\top$ with $\\Sigma=\\operatorname{diag}(\\sigma,\\sigma,0)$. The candidate rotations and translation matrices are $$R_1=UR_z(+\\pi/2)^\\top V^\\top,\\qquad R_2=UR_z(-\\pi/2)^\\top V^\\top,$$ $$\\hat T_1=UR_z(+\\pi/2)\\Sigma U^\\top,\\qquad \\hat T_2=UR_z(-\\pi/2)\\Sigma U^\\top.$$ (a) Show that $\\hat T_1,\\hat T_2$ are skew-symmetric and $R_1,R_2\\in SO(3)$. (b) These give four combinations $(R_i,T_j)$. How is the correct one selected?",
           "answer": "Let $W=R_z(\\pi/2)$. The standard candidates can be written\n$$R_1=UW^\\top V^\\top,\\qquad R_2=UWV^\\top,$$\nwith translation direction $T=\\pm u_3$, equivalently represented by the two skew matrices obtained from $UW\\Sigma U^\\top$ and $UW^\\top\\Sigma U^\\top$. Since\n$$W\\Sigma=\\begin{pmatrix}0&-\\sigma&0\\\\\\sigma&0&0\\\\0&0&0\\end{pmatrix},$$\nits transpose is its negative, so conjugation by $U$ remains skew-symmetric. Orthogonality follows from $U,V,W\\in O(3)$; choose the SVD column signs so that each candidate has determinant $+1$.\nThere are two possible rotations and two signs for translation, hence four combinations. Triangulate at least one correspondence for each and keep the unique candidate with positive depth in both cameras.",
           "tags": [
             "Essential matrix decomposition",
@@ -922,7 +922,7 @@
           "sources": [
             "EX05 2"
           ],
-          "q": "(a) Show that the epipoles satisfy $Ee_1=0$ and $e_2^\\top E=0^\\top$, and state the rank consequence. (b) Starting from pixel coordinates $x_{i,px}=K_ix_i$, derive the fundamental matrix. (c) Compare the degrees of freedom of $F$ and $E$.",
+          "q": "Epipoles and the Fundamental Matrix. The epipole $e_2$ is the projection of camera 1's center into image 2, and $e_1$ is the projection of camera 2's center into image 1. (a) Show that $Ee_1=0$ and $e_2^\\top E=0^\\top$. What does this imply about $\\operatorname{rank}(E)$? (b) In practice, pixel coordinates satisfy $x_{i,\\mathrm{px}}=K_ix_i$. Substitute this into the epipolar constraint and derive the fundamental matrix $F$ in terms of $E,K_1,K_2$. (c) How many degrees of freedom does $F$ have, and how does this compare with $E$?",
           "answer": "Camera 2's center in frame 1 projects along $e_1\\sim R^\\top T$, so\n$$Ee_1=\\hat TRR^\\top T=\\hat TT=0.$$\nCamera 1's center projects in image 2 along $e_2\\sim T$, hence $e_2^\\top E=T^\\top\\hat TR=0^\\top$. Both null spaces are non-trivial, so $\\operatorname{rank}E\\le2$ (non-zero translation gives rank 2).\nSubstitute $x_i=K_i^{-1}x_{i,px}$ into $x_2^\\top Ex_1=0$:\n$$x_{2,px}^\\top\\underbrace{K_2^{-\\top}EK_1^{-1}}_F x_{1,px}=0,$$\nthus $F=K_2^{-\\top}EK_1^{-1}$.\n$F$ has 7 DOF: nine entries minus global scale and the rank-2 constraint. $E$ has 5 DOF because its two non-zero singular values must additionally be equal.",
           "tags": [
             "Epipole",
@@ -1272,7 +1272,7 @@
           "sources": [
             "EX05 4"
           ],
-          "q": "For normalized points $x_1=(x_1,y_1,1)^\\top$ and $x_2=(x_2,y_2,1)^\\top$: (a) write the epipolar constraint as one row of a homogeneous linear system in the nine row-major entries of $E$; (b) explain why at least eight correspondences are needed; (c) state how the SVD estimate is projected onto the essential space.",
+          "q": "The 8-Point Algorithm. The epipolar constraint $x_2^\\top Ex_1=0$ is linear in the nine entries of $E$. (a) Vectorize $E$ into a nine-vector and show that each correspondence gives one explicit linear equation in these unknowns. (b) Stacking $N$ correspondences gives $Xe=0$ with $X\\in\\mathbb{R}^{N\\times9}$. Why are at least eight points needed? (c) Why does the SVD solution generally fail to be a valid essential matrix, and how is it projected onto the essential space?",
           "answer": "**(a)** If $e=\\operatorname{vec}(E)$ in row-major order, one correspondence gives\n$$\\big(x_2x_1,\\ x_2y_1,\\ x_2,\\ y_2x_1,\\ y_2y_1,\\ y_2,\\ x_1,\\ y_1,\\ 1\\big)e=0.$$\nStacking these rows gives $Xe=0$.\n**(b)** $E$ has nine entries but the homogeneous scale is irrelevant, leaving eight effective linear unknowns. Eight generic rows leave a one-dimensional null space.\n**(c)** The last right singular vector of $X$ gives $\\hat E$. If $\\hat E=U\\operatorname{diag}(\\sigma_1,\\sigma_2,\\sigma_3)V^\\top$, project to\n$$E^*=U\\operatorname{diag}(\\bar\\sigma,\\bar\\sigma,0)V^\\top,\\qquad \\bar\\sigma=\\frac{\\sigma_1+\\sigma_2}{2}.$$\nA mere rank-2 projection is insufficient for an essential matrix because its two non-zero singular values must be equal.",
           "tags": [
             "Eight-point algorithm",
@@ -1457,7 +1457,7 @@
           "sources": [
             "EX06 1"
           ],
-          "q": "A homogeneous 3D point $X$ is observed as $x_i\\sim\\Pi_iX$ in $N$ views. Define $W=(\\hat x_1\\Pi_1;\\ldots;\\hat x_N\\Pi_N)\\in\\mathbb R^{3N\\times4}$. (a) Show that $WX=0$ and $\\operatorname{rank}W\\le3$, with a geometric interpretation. (b) Why does each $3\\times4$ block contribute only two independent equations, and how many views are minimally required?",
+          "q": "The Multi-View Rank Constraint. A homogeneous 3D point $X\\in\\mathbb{R}^4$ is observed in $N$ views with projection matrices $\\Pi_i\\in\\mathbb{R}^{3\\times4}$, producing homogeneous image points $x_i\\in\\mathbb{R}^3$. Define $$W=\\begin{pmatrix}\\hat x_1\\Pi_1\\\\\\vdots\\\\\\hat x_N\\Pi_N\\end{pmatrix}\\in\\mathbb{R}^{3N\\times4},$$ where $\\hat x$ is the $3\\times3$ skew-symmetric matrix of $x$. (a) Show that $WX=0$, conclude $\\operatorname{rank}(W)\\le3$, and explain the rank deficiency geometrically. (b) Each block $\\hat x_i\\Pi_i$ is $3\\times4$ but contributes only two independent equations. Explain why and deduce the minimum number of views that determine $X$.",
           "answer": "Since $\\Pi_iX=\\lambda_ix_i$,\n$$\\hat x_i\\Pi_iX=\\lambda_i(x_i\\times x_i)=0.$$\nThus the non-zero vector $X$ is in the null space of every block and of $W$, so $\\operatorname{rank}W\\le3$. Geometrically, the rank deficiency encodes that all viewing rays are consistent with one common 3D point.\nThe skew matrix $\\hat x_i$ has rank 2 and null space $\\operatorname{span}(x_i)$, so $\\hat x_i\\Pi_i$ contributes at most two independent equations. A homogeneous 3D point has three effective DOF; therefore $2N\\ge3$ and at least two views are required in the generic case.",
           "tags": [
             "Multi-view geometry",
@@ -1495,7 +1495,7 @@
           "sources": [
             "EX06 3"
           ],
-          "q": "Two noisy viewing rays are $r_1(t)=C_1+td_1$ and $r_2(s)=C_2+sd_2$. (a) Derive the $2\\times2$ system for the closest points and give the midpoint estimate. (b) Is this equivalent to minimizing reprojection error, and what qualitative bias does midpoint triangulation have for a short baseline?",
+          "q": "Midpoint Triangulation. Due to noise, the two viewing rays of a stereo pair are skew and do not meet. The midpoint method uses the point halfway along their shortest connecting segment. Let $r_1(t)=C_1+td_1$ and $r_2(s)=C_2+sd_2$. (a) Derive the linear system for $t^*,s^*$ minimizing $\\|r_1(t)-r_2(s)\\|^2$, and give the resulting 3D estimate. (b) Is minimizing this 3D ray distance equivalent to minimizing reprojection error? Explain and state the qualitative bias of the midpoint estimate.",
           "answer": "Let $w=C_1-C_2$ and minimize $\\|w+td_1-sd_2\\|^2$. Setting both derivatives to zero gives\n$$\\begin{pmatrix}d_1^\\top d_1&-d_1^\\top d_2\\\\-d_1^\\top d_2&d_2^\\top d_2\\end{pmatrix}\\begin{pmatrix}t^*\\\\s^*\\end{pmatrix}=\\begin{pmatrix}-d_1^\\top w\\\\d_2^\\top w\\end{pmatrix}.$$\nThe estimate is\n$$X=\\frac12\\big(r_1(t^*)+r_2(s^*)\\big).$$\nThis minimizes a distance in 3D world coordinates, not 2D pixel reprojection error; perspective projection is nonlinear, so the objectives differ. With a short baseline and nearly parallel rays, midpoint triangulation is depth-insensitive and is biased toward points that are too close to the cameras.",
           "tags": [
             "Midpoint triangulation",

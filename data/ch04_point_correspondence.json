@@ -47,7 +47,7 @@
           "sources": [
             "EX04 1"
           ],
-          "q": "From $I(x+v,t{+}1)=I(x,t)$: (a) apply a first-order Taylor expansion and derive the optical flow constraint $I_{x_1}v_1+I_{x_2}v_2+I_t=0$. (b) How many solutions does this one equation in two unknowns have? Which component of the flow can be determined and which stays unknown? (c) Name three real-world situations where brightness constancy fails.",
+          "q": "The Brightness Constancy Assumption. Observe a scene in consecutive frames $I(x,t)$ and $I(x,t+1)$. Assume intensities are preserved under motion: $$I(x+v,t+1)=I(x,t),$$ where $v=(v_1,v_2)^\\top$ is the unknown displacement (optical flow). (a) Apply a first-order Taylor expansion to $I(x+v,t+1)$ and derive $I_{x_1}v_1+I_{x_2}v_2+I_t=0$. (b) This is one equation in two unknowns. How many solutions are there? Which flow component is determined and which remains unknown? (c) Name three real-world situations in which brightness constancy fails.",
           "answer": "**(a)** $I(x+v,t{+}1)\\approx I(x,t)+I_{x_1}v_1+I_{x_2}v_2+I_t$. Setting this equal to $I(x,t)$ and cancelling gives\n$$I_{x_1}v_1+I_{x_2}v_2+I_t=0.$$\n**(b)** **Infinitely many** solutions — a one-parameter family (a line in $v$-space). Writing the constraint as $\\nabla I^\\top v=-I_t$ shows it fixes the component of $v$ **in the direction of $\\nabla I$**, namely $v_{\\text{normal}}=-I_t/\\|\\nabla I\\|$. The component **perpendicular to $\\nabla I$** — along the image edge — is completely unconstrained. This is the **aperture problem**.\n**(c)** (1) **Illumination changes** — moving light sources or auto-exposure. (2) **Specular reflections** — highlights shift with the viewpoint rather than with the surface. (3) **Occlusion** — surfaces appear or disappear, so no correspondence exists at all.",
           "extend": "The Taylor expansion is first-order, which is precisely why the whole method only works for **small** displacements — hence the coarse-to-fine pyramid.",
           "tags": [
@@ -187,7 +187,7 @@
           "sources": [
             "EX04 2"
           ],
-          "q": "For $E(v)=\\int_{W(x)}G(x-x')\\big(\\nabla I(x',t)^\\top v+I_t(x',t)\\big)^2dx'$: (a) expand the square and write $E(v)=v^\\top Mv+2q^\\top v+c$, identifying $M$ and $q$; (b) derive the optimal flow $\\hat v$; (c) show that a constant gradient direction makes $M$ rank 1; (d) write out $\\hat v_1,\\hat v_2$ explicitly.",
+          "q": "Lucas-Kanade. To overcome the aperture problem, assume the flow is constant inside a window $W(x)$ and minimize $$E(v)=\\int_{W(x)}G(x-x')\\bigl(\\nabla I(x',t)^\\top v+I_t(x',t)\\bigr)^2dx',$$ where $G$ is a Gaussian weighting kernel with $G(x-x')=0$ outside $W(x)$. Write $G*f$ for the convolution $(G*f)(x)=\\int G(x-x')f(x')dx'$. (a) Expand the squared term and write $E(v)=v^\\top Mv+2q^\\top v+c$. What are $M$ and $q$? (b) Differentiate $E$, set the gradient to zero, and derive the optimal flow $\\hat v$. (c) Show that if $\\nabla I(x')=\\alpha(x')u$ throughout the window, then $M$ has rank 1 and cannot be inverted. (d) Write $\\hat v_1$ and $\\hat v_2$ explicitly in terms of $m_{ij}$ and $q_i$.",
           "answer": "**(a)** $(\\nabla I^\\top v+I_t)^2=v^\\top(\\nabla I\\nabla I^\\top)v+2I_t(\\nabla I^\\top v)+I_t^2$, so integrating with weight $G$:\n$$M=G*(\\nabla I\\nabla I^\\top)=\\begin{pmatrix}G*I_{x_1}^2&G*(I_{x_1}I_{x_2})\\\\G*(I_{x_1}I_{x_2})&G*I_{x_2}^2\\end{pmatrix},\\qquad q=G*(I_t\\nabla I)=\\begin{pmatrix}G*(I_{x_1}I_t)\\\\G*(I_{x_2}I_t)\\end{pmatrix},\\qquad c=G*I_t^2.$$\n**(b)** $\\frac{\\partial E}{\\partial v}=2Mv+2q=0\\ \\Rightarrow\\ \\hat v=-M^{-1}q$.\n**(c)** If $\\nabla I(x')=\\alpha(x')u$ for all $x'\\in W$ then $M=G*(\\alpha^2uu^\\top)=(G*\\alpha^2)uu^\\top$ — an outer product, hence **rank 1**, with eigenvalues $\\lambda_1=(G*\\alpha^2)\\|u\\|^2$ and $\\lambda_2=0$. $M$ is singular: a straight edge gives a constant gradient direction and Lucas–Kanade cannot determine the flow along the edge.\n**(d)** With $M^{-1}=\\frac{1}{m_{11}m_{22}-m_{12}^2}\\begin{pmatrix}m_{22}&-m_{12}\\\\-m_{12}&m_{11}\\end{pmatrix}$,\n$$\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2},\\qquad \\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}.$$",
           "extend": "The denominator $m_{11}m_{22}-m_{12}^2=\\det(M)=\\lambda_1\\lambda_2$ — which is precisely the quantity the Harris detector thresholds.",
           "tags": [
@@ -394,17 +394,21 @@
             "24EDC 4.7",
             "EX04 4"
           ],
-          "q": "Eigenvalues of the Structure Tensor. The $2\\times2$ matrix $M$ from Lucas-Kanade is symmetric and positive semi-definite, with eigenvalues $\\lambda_1\\ge\\lambda_2\\ge0$. (a) For each case - a flat region, a straight edge, and a corner - describe qualitatively what $\\lambda_1$ and $\\lambda_2$ look like. Relate your answer to whether $M$ is invertible and whether Lucas-Kanade can estimate the flow reliably.",
-          "answer": "**(1) $\\lambda_1\\approx\\lambda_2\\approx0$** — the neighbourhood has **no dominant gradient direction**, i.e. it is a **flat / untextured** region ($\\nabla I\\approx0$, so $M\\approx0$). $M$ is not invertible and Lucas–Kanade fails: there is no texture to track.\n**(2) $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$** — **one dominant gradient direction**, i.e. an **edge**. Here $\\nabla I=\\alpha u$ so $M=(G*\\alpha^2)uu^\\top$ is rank 1 and singular; only the flow component along $u$ (perpendicular to the edge) can be determined — the aperture problem.\n**(3) $\\lambda_1\\gg0,\\ \\lambda_2\\gg0$** — **more than one dominant gradient direction**, i.e. a **corner** (or well-textured patch). $M$ is well conditioned, $\\hat v=-M^{-1}q$ is reliable, and this is exactly what a corner detector selects.",
-          "extend": "The eigenvector of the *large* eigenvalue is the gradient direction, so it is **perpendicular** to the edge: $v_1\\approx(0,1)^\\top$ means a horizontal edge.",
+          "q": "Eigenvalues of the Structure Tensor. The $2\\times2$ matrix $M$ from Lucas-Kanade is symmetric and positive semi-definite (why?), so it has eigenvalues $\\lambda_1\\ge\\lambda_2\\ge0$ with a direct geometric meaning for local image structure. (a) For a flat region, a straight edge, and a corner, describe qualitatively what $\\lambda_1$ and $\\lambda_2$ look like. Relate this to whether $M$ is invertible and whether Lucas-Kanade estimates flow reliably. (b) Harris proposed $$C=\\det(M)-\\kappa\\operatorname{tr}(M)^2.$$ Express $\\det(M)$ and $\\operatorname{tr}(M)$ in terms of $\\lambda_1,\\lambda_2$. Why can $C$ be computed without eigenvalues? (c) For a flat region, edge, and corner, determine the sign of $C$. For a corner, what condition on $\\kappa$ ensures $C>0$? (d) How does $\\kappa$ control the trade-off between detecting corners and strong edges? What happens as $\\kappa\\to0$ and $\\kappa\\to1/4$?",
+          "answer": "**(a)** **(1) $\\lambda_1\\approx\\lambda_2\\approx0$** — the neighbourhood has **no dominant gradient direction**, i.e. it is a **flat / untextured** region ($\\nabla I\\approx0$, so $M\\approx0$). $M$ is not invertible and Lucas–Kanade fails: there is no texture to track.\n**(2) $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$** — **one dominant gradient direction**, i.e. an **edge**. Here $\\nabla I=\\alpha u$ so $M=(G*\\alpha^2)uu^\\top$ is rank 1 and singular; only the flow component along $u$ (perpendicular to the edge) can be determined — the aperture problem.\n**(3) $\\lambda_1\\gg0,\\ \\lambda_2\\gg0$** — **more than one dominant gradient direction**, i.e. a **corner** (or well-textured patch). $M$ is well conditioned, $\\hat v=-M^{-1}q$ is reliable, and this is exactly what a corner detector selects.\n**(b)** $\\det(M)=\\lambda_1\\lambda_2$ and $\\operatorname{trace}(M)=\\lambda_1+\\lambda_2$, so $C=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2$. But neither quantity needs an eigen-decomposition: $\\det(M)=m_{11}m_{22}-m_{12}^2$ and $\\operatorname{trace}(M)=m_{11}+m_{22}$ come straight from the entries — no square root required.\n**(c)** Flat: $\\lambda_1\\approx\\lambda_2\\approx0\\Rightarrow C\\approx0$. Edge: $\\lambda_1\\gg0$, $\\lambda_2\\approx0\\Rightarrow C\\approx0-\\kappa\\lambda_1^2<0$. Corner with $\\lambda_1\\approx\\lambda_2\\approx\\lambda$: $C\\approx\\lambda^2-\\kappa(2\\lambda)^2=\\lambda^2(1-4\\kappa)$, so $C>0$ requires $\\kappa<\\tfrac14$. In general $C>0\\iff\\frac{\\lambda_1\\lambda_2}{(\\lambda_1+\\lambda_2)^2}>\\kappa$, so a smaller $\\kappa$ accepts corners with more unequal eigenvalues.\n**(d)** As $\\kappa\\to0$: $C\\to\\det(M)=\\lambda_1\\lambda_2$, positive whenever both eigenvalues are non-zero — even strong edges (large $\\lambda_1$, small but non-zero $\\lambda_2$) score positively, so the detector becomes **less selective**. As $\\kappa\\to\\tfrac14$: even $\\lambda_1=10,\\lambda_2=8$ gives $C=80-0.25\\cdot324=-1<0$; only $\\lambda_1=\\lambda_2$ survives, so the detector rejects everything but perfectly symmetric corners.",
+          "extend": "The eigenvector of the *large* eigenvalue is the gradient direction, so it is **perpendicular** to the edge: $v_1\\approx(0,1)^\\top$ means a horizontal edge.\n$\\kappa$ is a knob on \"how square must a corner be\": small $\\kappa$ = permissive (edges leak in), large $\\kappa$ = strict.",
           "tags": [
             "Structure tensor",
             "Eigenvalues",
             "Corner detection",
-            "Aperture problem"
+            "Aperture problem",
+            "Harris corner detector"
           ],
           "coverage": [
-            "EX04 4a"
+            "EX04 4a",
+            "EX04 4b",
+            "EX04 4c",
+            "EX04 4d"
           ],
           "id": "q863ec39f6"
         },
@@ -542,30 +546,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX04 4"
-          ],
-          "q": "Eigenvalues of the Structure Tensor. (b) Harris proposed $C=\\det(M)-\\kappa\\,\\operatorname{tr}(M)^2$. Express $\\det(M)$ and $\\operatorname{tr}(M)$ in terms of $\\lambda_1,\\lambda_2$. Why can $C$ be computed without eigenvalues? (c) For a flat region, edge, and corner, determine the sign of $C$. For a corner, what condition on $\\kappa$ ensures $C>0$? (d) How does $\\kappa$ control the trade-off between detecting corners and strong edges? What happens as $\\kappa\\to0$ and as $\\kappa\\to1/4$?",
-          "answer": "**(a)** $\\det(M)=\\lambda_1\\lambda_2$ and $\\operatorname{trace}(M)=\\lambda_1+\\lambda_2$, so $C=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2$. But neither quantity needs an eigen-decomposition: $\\det(M)=m_{11}m_{22}-m_{12}^2$ and $\\operatorname{trace}(M)=m_{11}+m_{22}$ come straight from the entries — no square root required.\n**(b)** Flat: $\\lambda_1\\approx\\lambda_2\\approx0\\Rightarrow C\\approx0$. Edge: $\\lambda_1\\gg0$, $\\lambda_2\\approx0\\Rightarrow C\\approx0-\\kappa\\lambda_1^2<0$. Corner with $\\lambda_1\\approx\\lambda_2\\approx\\lambda$: $C\\approx\\lambda^2-\\kappa(2\\lambda)^2=\\lambda^2(1-4\\kappa)$, so $C>0$ requires $\\kappa<\\tfrac14$. In general $C>0\\iff\\frac{\\lambda_1\\lambda_2}{(\\lambda_1+\\lambda_2)^2}>\\kappa$, so a smaller $\\kappa$ accepts corners with more unequal eigenvalues.\n**(c)** As $\\kappa\\to0$: $C\\to\\det(M)=\\lambda_1\\lambda_2$, positive whenever both eigenvalues are non-zero — even strong edges (large $\\lambda_1$, small but non-zero $\\lambda_2$) score positively, so the detector becomes **less selective**. As $\\kappa\\to\\tfrac14$: even $\\lambda_1=10,\\lambda_2=8$ gives $C=80-0.25\\cdot324=-1<0$; only $\\lambda_1=\\lambda_2$ survives, so the detector rejects everything but perfectly symmetric corners.",
-          "extend": "$\\kappa$ is a knob on \"how square must a corner be\": small $\\kappa$ = permissive (edges leak in), large $\\kappa$ = strict.",
-          "tags": [
-            "Harris corner detector",
-            "Structure tensor",
-            "Eigenvalues"
-          ],
-          "coverage": [
-            "EX04 4b",
-            "EX04 4c",
-            "EX04 4d"
-          ],
-          "id": "q5cc7e8fc9"
-        },
-        {
-          "type": "open",
-          "freq": 1,
-          "sources": [
             "EX04 5"
           ],
-          "q": "(a) An image is rotated by $R\\in SO(2)$. How do $\\nabla I$ and $M$ transform, and is the Harris score $C$ unchanged? (b) The image is uniformly scaled (zoomed in or out). Is $C$ unchanged? Why or why not?",
+          "q": "Invariance Properties. (a) An image is rotated by $R\\in SO(2)$. How does $\\nabla I$ transform? How does $M$ transform? Is the Harris score $C$ unchanged? (b) The image is uniformly scaled (zoomed in or out). Is $C$ unchanged? Why or why not?",
           "answer": "**(a)** The gradient rotates, $\\nabla I\\to R\\nabla I$, hence $\\nabla I\\nabla I^\\top\\to R(\\nabla I\\nabla I^\\top)R^\\top$ and $M\\to RMR^\\top$. Since $\\det(RMR^\\top)=\\det(R)\\det(M)\\det(R^\\top)=\\det(M)$ and $\\operatorname{trace}(RMR^\\top)=\\operatorname{trace}(M)$ (cyclic invariance), the score $C=\\det M-\\kappa\\operatorname{trace}(M)^2$ is **unchanged**: Harris is **rotation invariant**.\n**(b)** **No — Harris is not scale invariant.** $M$ is computed within a **fixed-size window**, so when the image is scaled the same window covers a different amount of the scene. A corner at one scale may look like an edge (zoomed in so far that the window sees only one side) or like texture (zoomed out so far that the corner is sub-pixel). The eigenvalues of $M$ change, and so does $C$.",
           "extend": "Rotation invariance comes free from $\\det$ and $\\operatorname{trace}$ being similarity invariants; scale invariance has to be engineered, e.g. by searching over a scale space as SIFT does.",
           "tags": [
@@ -725,7 +708,7 @@
           "sources": [
             "EX04 3"
           ],
-          "q": "(a) If an image is downscaled by a factor 2 at each pyramid level, what displacement does a motion of $(dx,dy)$ pixels at the original resolution correspond to at level $L$? (b) Describe the complete coarse-to-fine algorithm and how a coarse estimate initialises the next finer level. (c) If Lucas–Kanade can handle at most $d_{\\max}$ pixels at a single level, what is the maximum total displacement with an $L$-level pyramid?",
+          "q": "Coarse-to-Fine Estimation. The Taylor expansion in Problem 1 is valid only for small displacements. For large motions, use an image pyramid. (a) If the image is downscaled by a factor of 2 at every pyramid level, what displacement corresponds at level $L$ to a motion of $(d_x,d_y)$ pixels at full resolution? (b) Describe the complete coarse-to-fine algorithm. How does a coarse estimate initialize the next finer level? (c) If Lucas-Kanade handles at most $d_{\\max}$ pixels at one level, what maximum total displacement can an $L$-level pyramid handle?",
           "answer": "**(a)** $\\big(dx/2^L,\\ dy/2^L\\big)$.\n**(b)** 1. Build a Gaussian pyramid $I^{(0)},\\dots,I^{(L)}$ by repeated smoothing and downsampling. 2. At the coarsest level $L$, run Lucas–Kanade initialised at $v=0$. 3. For $l=L{-}1,\\dots,0$: upsample $\\hat v_{l+1}$ by a factor 2, **warp** the second frame by this flow so that the already-estimated motion is removed, run Lucas–Kanade on the warped pair to get a residual correction $\\Delta v_l$, and combine:\n$$\\hat v_l=2\\hat v_{l+1}+\\Delta v_l.$$\n**(c)** $d_{\\max}\\cdot2^L+d_{\\max}\\cdot2^{L-1}+\\dots+d_{\\max}=d_{\\max}(2^{L+1}-1)\\approx2^{L+1}d_{\\max}$.",
           "extend": "Warping is the essential step — without it the residual at the finer level would re-estimate the whole motion rather than the correction.",
           "tags": [
@@ -815,7 +798,7 @@
           "sources": [
             "EX04 6"
           ],
-          "q": "Two patches (or descriptors) are vectors $p,q\\in\\mathbb{R}^d$. Show that when $\\|p\\|=\\|q\\|=1$, minimising the sum of squared differences and maximising the inner product rank pairs identically: $\\arg\\min_q\\|p-q\\|^2=\\arg\\max_qp^\\top q$.",
+          "q": "SSD vs. Inner Product. Two image patches (or feature descriptors) are represented as vectors $p,q\\in\\mathbb{R}^d$. Their SSD dissimilarity is $\\operatorname{SSD}(p,q)=\\|p-q\\|^2$, while their inner-product similarity is $p^\\top q$. Show that when $\\|p\\|=\\|q\\|=1$, the two measures rank pairs identically: $\\arg\\min_q\\|p-q\\|^2=\\arg\\max_q p^\\top q$.",
           "answer": "Expand:\n$$\\|p-q\\|^2=(p-q)^\\top(p-q)=\\|p\\|^2+\\|q\\|^2-2p^\\top q=2-2p^\\top q,$$\nusing $\\|p\\|=\\|q\\|=1$. So $\\|p-q\\|^2$ is an **affine, strictly decreasing** function of $p^\\top q$; minimising the left-hand side is therefore equivalent to maximising the right-hand side.\n**Consequence.** For $\\ell_2$-normalised descriptors (standardised patches, normalised SIFT), nearest-neighbour search under Euclidean distance and under cosine similarity return the **same ranking** — implementations simply pick whichever is cheaper to compute.",
           "extend": "The equivalence needs **both** vectors normalised; without it, a long $q$ can win on inner product while being far away in Euclidean distance.",
           "tags": [

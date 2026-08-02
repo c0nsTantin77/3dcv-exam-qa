@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-08-02",
+    "text": "Restored complete EX01–EX08 problem statements from the original PDFs, including shared preambles, coordinate definitions, assumptions, setup equations, subparts and hints; merged EX04 Problem 4 into one card and added regression checks for all 63 exercise problems."
+  },
+  {
+    "date": "2026-08-02",
     "text": "Restored exercise source badges to problem-level labels such as EX02 6, while keeping all 151 sub-questions in hidden coverage checks; expanded shortened exercise prompts to include every original subpart and required equation."
   },
   {
