@@ -92,6 +92,10 @@ function emit(): void {
 }
 
 function persist(): void {
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
   try {
     localStorage.setItem(KEY, JSON.stringify(P));
   } catch {
@@ -102,9 +106,13 @@ function persist(): void {
   emit();
 }
 
-function save(): void {
+function save(immediate = false): void {
   dirty = true;
   if (timer) clearTimeout(timer);
+  if (immediate) {
+    persist();
+    return;
+  }
   timer = setTimeout(persist, 600);
 }
 
@@ -122,6 +130,11 @@ export function setCloudSchedule(fn: (p: Progress) => void): void {
 if (typeof window !== "undefined") {
   window.addEventListener("visibilitychange", () => {
     if (document.hidden && dirty) persist();
+  });
+  // pagehide also fires for reloads and bfcache navigations where beforeunload
+  // is skipped or unreliable (notably on mobile Safari).
+  window.addEventListener("pagehide", () => {
+    if (dirty) persist();
   });
   window.addEventListener("beforeunload", () => {
     if (dirty) persist();
@@ -185,7 +198,10 @@ export const Store = {
   setNote(id: string, text: string): void {
     if (text) P.notes[id] = text;
     else delete P.notes[id];
-    save();
+    // Notes are user-authored text and must survive an immediate refresh. The
+    // old 600 ms debounce could lose a just-typed note if the page reloaded
+    // before the timer or a lifecycle event flushed it.
+    save(true);
   },
 
   dueList(ids: string[]): string[] {

@@ -276,6 +276,34 @@
             "Epipolar constraint and epipolar lines",
             "Cremers-style practice"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 1"
+          ],
+          "q": "Two calibrated cameras observe the same 3D point, with $X_2=RX_1+T$ and $X_i=\\lambda_i x_i$. (a) Derive the epipolar constraint $x_2^\\top E x_1=0$ with $E=\\hat T R$. (b) How many degrees of freedom does $E$ have, and why is translation recoverable only up to scale? (c) Interpret $l_2=Ex_1$ and $l_1=E^\\top x_2$ geometrically.",
+          "answer": "**(a)** Substitute the projective depths:\n$$\\lambda_2x_2=\\lambda_1Rx_1+T.$$\nLeft-multiplying by $x_2^\\top\\hat T$ gives\n$$\\lambda_2x_2^\\top\\hat T x_2=\\lambda_1x_2^\\top\\hat TRx_1+x_2^\\top\\hat TT.$$\nThe left side vanishes because $x_2\\cdot(T\\times x_2)=0$, and $\\hat TT=T\\times T=0$, hence\n$$\\boxed{x_2^\\top\\hat TRx_1=0},\\qquad E=\\hat TR.$$\n**(b)** Rotation contributes 3 DOF and the direction of $T$ contributes 2, so $E$ has 5 DOF. Scaling $T$ only scales the homogeneous equation and is therefore unobservable.\n**(c)** $l_2=Ex_1$ is the epipolar line in image 2 on which $x_2$ must lie; it is the projection of the first viewing ray into image 2. Likewise $l_1=E^\\top x_2$ is the corresponding line in image 1.",
+          "tags": [
+            "Epipolar constraint",
+            "Essential matrix",
+            "Epipolar line"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 8"
+          ],
+          "q": "For a noisy normalized correspondence $(x_1,x_2)$ and essential matrix $E$: (a) derive the geometric distance from $x_2$ to its epipolar line in image 2; (b) formulate a relative-pose refinement over $(R,T)$ using this distance and no 3D points; (c) explain whether this objective distinguishes the four decompositions of $E$.",
+          "answer": "**(a)** The line is $l_2=Ex_1=(a,b,c)^\\top$, hence\n$$d(x_2,l_2)=\\frac{|ax_2+by_2+c|}{\\sqrt{a^2+b^2}}=\\frac{|x_2^\\top Ex_1|}{\\sqrt{(Ex_1)_1^2+(Ex_1)_2^2}}.$$\n**(b)** With $E=\\hat TR$ and $\\|T\\|=1$, minimize\n$$\\min_{R\\in SO(3),\\,\\|T\\|=1}\\sum_{j=1}^N\\frac{\\big((x_2^j)^\\top\\hat TRx_1^j\\big)^2}{(\\hat TRx_1^j)_1^2+(\\hat TRx_1^j)_2^2}.$$\nThis has five pose unknowns regardless of $N$.\n**(c)** All four pose candidates produce the same essential matrix and therefore the same epipolar lines and objective value. Triangulate points and apply the positive-depth (cheirality) test in both cameras to select the physical decomposition.",
+          "tags": [
+            "Epipolar distance",
+            "Pose refinement",
+            "Cheirality"
+          ]
         }
       ]
     },
@@ -565,6 +593,34 @@
             "Decomposing an essential matrix",
             "Cremers-style practice"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 6"
+          ],
+          "q": "(a) Prove the Demazure constraint $EE^\\top E-\\frac12\\operatorname{tr}(EE^\\top)E=0$ for $E=\\hat TR$. (b) Derive the RANSAC iteration bound for minimal sample size $s$, inlier ratio $w$, and success probability $p$. (c) Evaluate it for $w=0.5$, $p=0.99$ using the five- and eight-point algorithms.",
+          "answer": "**(a)** Since $RR^\\top=I$, $\\hat T^\\top=-\\hat T$, and $\\hat T^2=TT^\\top-\\|T\\|^2I$,\n$$EE^\\top=-\\hat T^2=\\|T\\|^2I-TT^\\top.$$\nBecause $T^\\top\\hat T=0$,\n$$EE^\\top E=(\\|T\\|^2I-TT^\\top)\\hat TR=\\|T\\|^2E.$$\nAlso $\\operatorname{tr}(EE^\\top)=2\\|T\\|^2$, so the two terms in the Demazure expression cancel.\n**(b)** One sample is all-inlier with probability $w^s$. Requiring $1-(1-w^s)^k\\ge p$ gives\n$$\\boxed{k\\ge\\frac{\\log(1-p)}{\\log(1-w^s)}}.$$\n**(c)** For $s=5$, $k\\ge145$; for $s=8$, $k\\ge1177$ (rounded up). The five-point solver needs roughly eight times fewer RANSAC samples.",
+          "tags": [
+            "Demazure constraint",
+            "Five-point algorithm",
+            "RANSAC"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 7"
+          ],
+          "q": "Let $E=U\\Sigma V^\\top$ with $\\Sigma=\\operatorname{diag}(\\sigma,\\sigma,0)$. Using the two $\\pm\\pi/2$ rotations about the $z$-axis, explain why the resulting translation matrices are skew-symmetric and the rotation candidates lie in $SO(3)$. Why are there four pose candidates, and how is the correct one selected?",
+          "answer": "Let $W=R_z(\\pi/2)$. The standard candidates can be written\n$$R_1=UW^\\top V^\\top,\\qquad R_2=UWV^\\top,$$\nwith translation direction $T=\\pm u_3$, equivalently represented by the two skew matrices obtained from $UW\\Sigma U^\\top$ and $UW^\\top\\Sigma U^\\top$. Since\n$$W\\Sigma=\\begin{pmatrix}0&-\\sigma&0\\\\\\sigma&0&0\\\\0&0&0\\end{pmatrix},$$\nits transpose is its negative, so conjugation by $U$ remains skew-symmetric. Orthogonality follows from $U,V,W\\in O(3)$; choose the SVD column signs so that each candidate has determinant $+1$.\nThere are two possible rotations and two signs for translation, hence four combinations. Triangulate at least one correspondence for each and keep the unique candidate with positive depth in both cameras.",
+          "tags": [
+            "Essential matrix decomposition",
+            "SVD",
+            "Cheirality"
+          ]
         }
       ]
     },
@@ -684,6 +740,34 @@
           "tags": [
             "Any rank-2 matrix as a fundamental matrix",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 2"
+          ],
+          "q": "(a) Show that the epipoles satisfy $Ee_1=0$ and $e_2^\\top E=0^\\top$, and state the rank consequence. (b) Starting from pixel coordinates $x_{i,px}=K_ix_i$, derive the fundamental matrix. (c) Compare the degrees of freedom of $F$ and $E$.",
+          "answer": "Camera 2's center in frame 1 projects along $e_1\\sim R^\\top T$, so\n$$Ee_1=\\hat TRR^\\top T=\\hat TT=0.$$\nCamera 1's center projects in image 2 along $e_2\\sim T$, hence $e_2^\\top E=T^\\top\\hat TR=0^\\top$. Both null spaces are non-trivial, so $\\operatorname{rank}E\\le2$ (non-zero translation gives rank 2).\nSubstitute $x_i=K_i^{-1}x_{i,px}$ into $x_2^\\top Ex_1=0$:\n$$x_{2,px}^\\top\\underbrace{K_2^{-\\top}EK_1^{-1}}_F x_{1,px}=0,$$\nthus $F=K_2^{-\\top}EK_1^{-1}$.\n$F$ has 7 DOF: nine entries minus global scale and the rank-2 constraint. $E$ has 5 DOF because its two non-zero singular values must additionally be equal.",
+          "tags": [
+            "Epipole",
+            "Fundamental matrix",
+            "Degrees of freedom"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 3"
+          ],
+          "q": "Prove that every rank-2 matrix $F\\in\\mathbb R^{3\\times3}$ is the fundamental matrix of some camera pair by choosing $P=[I\\mid0]$ and $P'=[\\hat e'F\\mid e']$, where $e'^\\top F=0$. Why does $F$ not uniquely determine the cameras?",
+          "answer": "A 3D point whose first image is $x$ can be written $X=(x^\\top,\\lambda)^\\top$. Its second image is\n$$x'=P'X=\\hat e'Fx+\\lambda e'.$$\nWriting $y=Fx$,\n$$x'^\\top Fx=(e'\\times y)^\\top y+\\lambda e'^\\top y=0,$$\nbecause $e'\\times y$ is orthogonal to $y$ and $e'^\\top F=0$. Hence all corresponding projections satisfy the epipolar constraint of $F$.\nThe cameras remain projectively ambiguous. For any invertible $H\\in\\mathbb R^{4\\times4}$, the cameras $(PH^{-1},P'H^{-1})$ together with points $HX$ produce exactly the same images. Calibration is needed to upgrade this projective reconstruction to a metric one (still up to global scale).",
+          "tags": [
+            "Fundamental matrix",
+            "Canonical cameras",
+            "Projective ambiguity"
           ]
         }
       ]
@@ -946,6 +1030,34 @@
             "Planar scene",
             "Scale ambiguity"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 4"
+          ],
+          "q": "For normalized points $x_1=(x_1,y_1,1)^\\top$ and $x_2=(x_2,y_2,1)^\\top$: (a) write the epipolar constraint as one row of a homogeneous linear system in the nine row-major entries of $E$; (b) explain why at least eight correspondences are needed; (c) state how the SVD estimate is projected onto the essential space.",
+          "answer": "**(a)** If $e=\\operatorname{vec}(E)$ in row-major order, one correspondence gives\n$$\\big(x_2x_1,\\ x_2y_1,\\ x_2,\\ y_2x_1,\\ y_2y_1,\\ y_2,\\ x_1,\\ y_1,\\ 1\\big)e=0.$$\nStacking these rows gives $Xe=0$.\n**(b)** $E$ has nine entries but the homogeneous scale is irrelevant, leaving eight effective linear unknowns. Eight generic rows leave a one-dimensional null space.\n**(c)** The last right singular vector of $X$ gives $\\hat E$. If $\\hat E=U\\operatorname{diag}(\\sigma_1,\\sigma_2,\\sigma_3)V^\\top$, project to\n$$E^*=U\\operatorname{diag}(\\bar\\sigma,\\bar\\sigma,0)V^\\top,\\qquad \\bar\\sigma=\\frac{\\sigma_1+\\sigma_2}{2}.$$\nA mere rank-2 projection is insufficient for an essential matrix because its two non-zero singular values must be equal.",
+          "tags": [
+            "Eight-point algorithm",
+            "Essential matrix",
+            "SVD"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX05 5"
+          ],
+          "q": "With seven correspondences, the linear system has a two-dimensional null space spanned by matrices $E_a,E_b$. (a) Derive the additional cubic constraint for $E(\\alpha)=\\alpha E_a+E_b$ and state the number of real solutions. (b) Why can the seven-point algorithm return three solutions while the eight-point method is unique? (c) Why does this constraint finish an $F$ estimate but not an $E$ estimate?",
+          "answer": "**(a)** The rank-2 condition is\n$$\\det(E(\\alpha))=\\det(\\alpha E_a+E_b)=0.$$\nA $3\\times3$ determinant is cubic in its entries and the entries are linear in $\\alpha$, so this is a polynomial of degree at most three, with one or three real roots.\n**(b)** Eight generic correspondences leave a one-dimensional homogeneous null space and therefore one matrix up to scale. Seven leave a one-parameter family; intersecting it with the cubic rank constraint can produce three matrices.\n**(c)** Rank 2 is the only intrinsic algebraic constraint on a fundamental matrix, so each cubic root is a valid $F$. An essential matrix must also have equal non-zero singular values, so a rank-2 root must still be projected onto $\\operatorname{diag}(\\sigma,\\sigma,0)$.",
+          "tags": [
+            "Seven-point algorithm",
+            "Fundamental matrix",
+            "Essential matrix"
+          ]
         }
       ]
     },
@@ -1043,6 +1155,62 @@
           "tags": [
             "Midpoint triangulation",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX06 1"
+          ],
+          "q": "A homogeneous 3D point $X$ is observed as $x_i\\sim\\Pi_iX$ in $N$ views. Define $W=(\\hat x_1\\Pi_1;\\ldots;\\hat x_N\\Pi_N)\\in\\mathbb R^{3N\\times4}$. (a) Show that $WX=0$ and $\\operatorname{rank}W\\le3$, with a geometric interpretation. (b) Why does each $3\\times4$ block contribute only two independent equations, and how many views are minimally required?",
+          "answer": "Since $\\Pi_iX=\\lambda_ix_i$,\n$$\\hat x_i\\Pi_iX=\\lambda_i(x_i\\times x_i)=0.$$\nThus the non-zero vector $X$ is in the null space of every block and of $W$, so $\\operatorname{rank}W\\le3$. Geometrically, the rank deficiency encodes that all viewing rays are consistent with one common 3D point.\nThe skew matrix $\\hat x_i$ has rank 2 and null space $\\operatorname{span}(x_i)$, so $\\hat x_i\\Pi_i$ contributes at most two independent equations. A homogeneous 3D point has three effective DOF; therefore $2N\\ge3$ and at least two views are required in the generic case.",
+          "tags": [
+            "Multi-view geometry",
+            "Rank constraint",
+            "Triangulation"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX06 2"
+          ],
+          "q": "For $x_i=(u_i,v_i,1)^\\top$ and camera rows $\\pi_{i1}^\\top,\\pi_{i2}^\\top,\\pi_{i3}^\\top$: (a) expand $x_i\\times(\\Pi_iX)=0$, show that one row is dependent, and assemble the two DLT rows; (b) explain the SVD solution and why it is only algebraically optimal.",
+          "answer": "Let $a=\\pi_{i1}^\\top X$, $b=\\pi_{i2}^\\top X$, and $c=\\pi_{i3}^\\top X$. The cross product yields\n$$(R1)\\ v_ic-b=0,\\qquad(R2)\\ a-u_ic=0,\\qquad(R3)\\ u_ib-v_ia=0.$$\nBut $(R3)=-u_i(R1)-v_i(R2)$, so retain\n$$A_i=\\begin{pmatrix}u_i\\pi_{i3}^\\top-\\pi_{i1}^\\top\\\\v_i\\pi_{i3}^\\top-\\pi_{i2}^\\top\\end{pmatrix},\\qquad A\\in\\mathbb R^{2N\\times4}.$$\nThe homogeneous point $X$ is the right singular vector of $A$ with the smallest singular value and is then dehomogenized. This minimizes $\\|AX\\|$ subject to $\\|X\\|=1$, an algebraic residual that depends on representation and has no pixel metric. The geometric optimum instead minimizes nonlinear image reprojection error; DLT is valuable as its fast initializer.",
+          "tags": [
+            "DLT",
+            "Triangulation",
+            "Reprojection error"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX06 3"
+          ],
+          "q": "Two noisy viewing rays are $r_1(t)=C_1+td_1$ and $r_2(s)=C_2+sd_2$. (a) Derive the $2\\times2$ system for the closest points and give the midpoint estimate. (b) Is this equivalent to minimizing reprojection error, and what qualitative bias does midpoint triangulation have for a short baseline?",
+          "answer": "Let $w=C_1-C_2$ and minimize $\\|w+td_1-sd_2\\|^2$. Setting both derivatives to zero gives\n$$\\begin{pmatrix}d_1^\\top d_1&-d_1^\\top d_2\\\\-d_1^\\top d_2&d_2^\\top d_2\\end{pmatrix}\\begin{pmatrix}t^*\\\\s^*\\end{pmatrix}=\\begin{pmatrix}-d_1^\\top w\\\\d_2^\\top w\\end{pmatrix}.$$\nThe estimate is\n$$X=\\frac12\\big(r_1(t^*)+r_2(s^*)\\big).$$\nThis minimizes a distance in 3D world coordinates, not 2D pixel reprojection error; perspective projection is nonlinear, so the objectives differ. With a short baseline and nearly parallel rays, midpoint triangulation is depth-insensitive and is biased toward points that are too close to the cameras.",
+          "tags": [
+            "Midpoint triangulation",
+            "Viewing rays",
+            "Bias"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX06 5"
+          ],
+          "q": "Given cameras $\\Pi_i$ and points $X_j$, let $\\tilde\\Pi_i=\\Pi_iH^{-1}$ and $\\tilde X_j=HX_j$ for any invertible $H\\in\\mathbb R^{4\\times4}$. Verify that all images are unchanged. What extra information reduces the 15-DOF projective ambiguity to a 7-DOF similarity, and then to a 6-DOF Euclidean reconstruction?",
+          "answer": "Direct substitution gives\n$$\\tilde\\Pi_i\\tilde X_j=\\Pi_iH^{-1}HX_j=\\Pi_iX_j,$$\nso image measurements cannot distinguish reconstructions related by an arbitrary projective transformation $H$ (15 DOF after removing its scale).\nKnown camera intrinsics calibrate the views, replacing fundamental geometry by essential geometry and reducing the ambiguity to a global similarity: rotation, translation, and scale (7 DOF). One known scene distance or baseline fixes the remaining global scale, leaving a Euclidean reconstruction with only the 6-DOF global rigid-frame ambiguity.",
+          "tags": [
+            "Projective ambiguity",
+            "Calibration",
+            "Metric reconstruction"
           ]
         }
       ]
@@ -1229,6 +1397,20 @@
           "tags": [
             "Pure rotation",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX06 4"
+          ],
+          "q": "For pure camera rotation $T=0$: (a) state the essential matrix, whether structure is recoverable, and the image relation; (b) derive the linear matrix approach to estimate $R$ and its minimum correspondence count; (c) derive the quaternion linear system and compare its minimum count.",
+          "answer": "**(a)** $E=\\hat0R=0$, so the epipolar constraint contains no information. Without a baseline, depth cannot be triangulated; normalized directions satisfy $x_2\\sim Rx_1$, a rotation homography.\n**(b)** The equation $\\hat x_2Rx_1=0$ is linear in the nine entries of $R$. Up to homogeneous scale there are eight unknowns, and each correspondence gives two independent equations, so four generic pairs are needed. If $\\hat R=U\\Sigma V^\\top$, project with\n$$R=U\\operatorname{diag}(1,1,\\det(UV^\\top))V^\\top.$$\n**(c)** Embed directions as pure quaternions. From $p_2=qp_1q^*$, right-multiply by $q$ to get $p_2q=qp_1$, hence\n$$(L_{p_2}-R_{p_1})q=0.$$\nOne pair leaves rotation around that direction free; two non-collinear pairs generically leave a one-dimensional null space. Normalize the recovered $q$. This uses two correspondences and four unknowns instead of four correspondences and nine matrix entries.",
+          "tags": [
+            "Pure rotation",
+            "Quaternion",
+            "SO(3) projection"
           ]
         }
       ]
