@@ -27,7 +27,11 @@ const question = z
   .object({
     type: z.enum(["open", "mc", "ai"]),
     freq: z.number().int().nonnegative(),
+    id: z.string().regex(/^q[0-9a-f]{9}$/).optional(),
     sources: z.array(z.string()).min(1),
+    // Machine-only, sub-question-level coverage. Kept separate from `sources`
+    // so the card shows a clean problem label such as "EX02 6".
+    coverage: z.array(z.string()).optional(),
     q: z.string().min(1),
     answer: z.string().min(1),
     extend: z.string().optional(),

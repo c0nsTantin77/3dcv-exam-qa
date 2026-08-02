@@ -81,7 +81,11 @@
           "tags": [
             "Vector space",
             "Group"
-          ]
+          ],
+          "coverage": [
+            "EX01 6"
+          ],
+          "id": "q861365d89"
         },
         {
           "type": "open",
@@ -96,7 +100,11 @@
             "Linear independence",
             "Span",
             "Basis"
-          ]
+          ],
+          "coverage": [
+            "EX01 7"
+          ],
+          "id": "q2eb5c6597"
         },
         {
           "type": "open",
@@ -111,7 +119,11 @@
             "Linear independence",
             "Span",
             "Basis"
-          ]
+          ],
+          "coverage": [
+            "EX01 8"
+          ],
+          "id": "q17c1e7926"
         },
         {
           "type": "open",
@@ -302,14 +314,17 @@
           "tags": [
             "Inner product",
             "Hilbert space"
-          ]
+          ],
+          "coverage": [
+            "EX01 9"
+          ],
+          "id": "q0b838187f"
         },
         {
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 10a",
-            "EX01 10b"
+            "EX01 10"
           ],
           "q": "Do the following form Hilbert spaces with the given inner product? (a) $\\mathbb{R}^n$ with $\\langle x,y\\rangle=x^\\top y$. (b) $\\mathbb{R}^{n\\times m}$ with $\\langle A,B\\rangle=\\operatorname{trace}(A^\\top B)$.",
           "answer": "**(a) Yes.** Symmetry: $x^\\top y=\\sum_i x_iy_i=y^\\top x$. Linearity is immediate. Positive definiteness: $x^\\top x=\\sum_i x_i^2>0$ for $x\\neq0$.\n**(b) Yes.** Writing $A=[a_1,\\dots,a_m]$ column-wise, $\\operatorname{trace}(A^\\top B)=\\sum_{k=1}^{m}a_k^\\top b_k$ — a sum of standard inner products, so all three properties follow from (a).",
@@ -318,7 +333,12 @@
             "Inner product",
             "Hilbert space",
             "Frobenius norm"
-          ]
+          ],
+          "coverage": [
+            "EX01 10a",
+            "EX01 10b"
+          ],
+          "id": "q2f88e7ac8"
         },
         {
           "type": "open",
@@ -333,7 +353,11 @@
             "Frobenius norm",
             "Inner product",
             "Trace"
-          ]
+          ],
+          "coverage": [
+            "EX01 11"
+          ],
+          "id": "q3242b9aca"
         },
         {
           "type": "ai",
@@ -431,7 +455,11 @@
           "tags": [
             "Group",
             "Definition"
-          ]
+          ],
+          "coverage": [
+            "EX01 1"
+          ],
+          "id": "qa45d4747c"
         },
         {
           "type": "mc",
@@ -729,7 +757,11 @@
           "tags": [
             "Group",
             "Proof"
-          ]
+          ],
+          "coverage": [
+            "EX01 2"
+          ],
+          "id": "qb0d45cca2"
         },
         {
           "type": "open",
@@ -743,15 +775,17 @@
           "tags": [
             "Group",
             "Proof"
-          ]
+          ],
+          "coverage": [
+            "EX01 3"
+          ],
+          "id": "qbf86d10d1"
         },
         {
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 4a",
-            "EX01 4b",
-            "EX01 4c"
+            "EX01 4"
           ],
           "q": "Which of the following sets forms a group under matrix multiplication? Prove or disprove. (a) $G_1=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)\\neq0,\\ A^\\top=A\\}$ (b) $G_2=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)=-1\\}$ (c) $G_3=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)>0\\}$",
           "answer": "**(a) Not a group.** Closure fails: for $A,B\\in G_1$, $(AB)^\\top=B^\\top A^\\top=BA\\neq AB$ in general, so the product need not be symmetric.\n**(b) Not a group.** No identity: $\\det(I)=1\\neq-1$. Closure also fails, since $\\det(AB)=(-1)(-1)=1\\notin G_2$.\n**(c) Yes, a group** (a subgroup of $GL(n)$). Identity: $\\det(I)=1>0$. Closure: $\\det(AB)=\\det(A)\\det(B)>0$. Inverse: $\\det(A^{-1})=1/\\det(A)>0$. Associativity is inherited from matrix multiplication.",
@@ -760,7 +794,13 @@
             "Group",
             "Determinant",
             "Symmetric matrix"
-          ]
+          ],
+          "coverage": [
+            "EX01 4a",
+            "EX01 4b",
+            "EX01 4c"
+          ],
+          "id": "q84354eafe"
         },
         {
           "type": "open",
@@ -773,7 +813,11 @@
           "extend": "$SO(n)$ sits in *both* $O(n)$ and $SL(n)$ — in fact $SO(n)=O(n)\\cap SL(n)$.",
           "tags": [
             "Matrix groups"
-          ]
+          ],
+          "coverage": [
+            "EX01 5"
+          ],
+          "id": "q4d92f2a0f"
         },
         {
           "type": "mc",
@@ -1142,22 +1186,24 @@
           "sources": [
             "EX01 13"
           ],
-          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$. Prove that $\\ker(A)=\\ker(A^\\top A)$.",
+          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$. Prove that $\\ker(A)=\\ker(A^\\top A)$. **Hint:** Show both directions: (a) $x\\in\\ker(A)\\Rightarrow x\\in\\ker(A^\\top A)$ and (b) $x\\in\\ker(A^\\top A)\\Rightarrow x\\in\\ker(A)$.",
           "answer": "**($\\subseteq$)** If $Ax=0$ then $A^\\top Ax=A^\\top0=0$, so $x\\in\\ker(A^\\top A)$.\n**($\\supseteq$)** If $A^\\top Ax=0$ then $x^\\top A^\\top Ax=0$, i.e. $\\|Ax\\|^2=(Ax)^\\top(Ax)=0$, hence $Ax=0$.\n**Therefore** the two kernels coincide.",
           "extend": "You may **not** \"cancel $A^\\top$\" in the second direction — $A^\\top$ need not be invertible (or even square). The trick is to turn it into a squared norm.",
           "tags": [
             "Kernel",
             "Proof",
             "SVD"
-          ]
+          ],
+          "coverage": [
+            "EX01 13"
+          ],
+          "id": "q78c837d4c"
         },
         {
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 15a",
-            "EX01 15b",
-            "EX01 15c"
+            "EX01 15"
           ],
           "q": "Let $A\\in\\mathbb{R}^{m\\times n}$ have SVD $A=U\\Sigma V^\\top$ with $r$ non-zero singular values. (a) Show that $\\operatorname{rank}(A)=r$ and that the null space is spanned by the last $n-r$ columns of $V$. (b) Conclude the rank–nullity theorem. (c) Compute the SVD of $A=\\begin{pmatrix}1&2\\\\2&4\\\\3&6\\end{pmatrix}$ and verify rank–nullity.",
           "answer": "**(a)** $Av_i=\\sigma_iu_i$ for $i=1,\\dots,r$ and $Av_i=0$ for $i=r+1,\\dots,n$. Thus $\\operatorname{range}(A)=\\operatorname{span}\\{u_1,\\dots,u_r\\}$, so $\\operatorname{rank}(A)=r$, while $\\ker(A)=\\operatorname{span}\\{v_{r+1},\\dots,v_n\\}$ has dimension $n-r$.\n**(b)** Therefore $\\operatorname{rank}(A)+\\dim\\ker(A)=r+(n-r)=n$.\n**(c)** Factor $A=ab^\\top$ with $a=(1,2,3)^\\top$ and $b=(1,2)^\\top$. Since $\\|a\\|=\\sqrt{14}$ and $\\|b\\|=\\sqrt5$, its compact SVD is\n$$A=\\underbrace{\\frac1{\\sqrt{14}}\\begin{pmatrix}1\\\\2\\\\3\\end{pmatrix}}_{u_1}\\underbrace{\\sqrt{70}}_{\\sigma_1}\\underbrace{\\frac1{\\sqrt5}\\begin{pmatrix}1&2\\end{pmatrix}}_{v_1^\\top}.$$\nThere is one non-zero singular value, hence $\\operatorname{rank}(A)=1$. The remaining right singular vector may be chosen as $v_2=(-2,1)^\\top/\\sqrt5$, which spans $\\ker(A)$. Thus $\\operatorname{rank}(A)+\\dim\\ker(A)=1+1=2=n$.",
@@ -1166,7 +1212,13 @@
             "Rank",
             "Kernel",
             "SVD"
-          ]
+          ],
+          "coverage": [
+            "EX01 15a",
+            "EX01 15b",
+            "EX01 15c"
+          ],
+          "id": "qb1744d37a"
         },
         {
           "type": "ai",
@@ -1341,17 +1393,21 @@
           "type": "open",
           "freq": 2,
           "sources": [
-            "EX01 12",
-            "24EDC 1.2"
+            "24EDC 1.2",
+            "EX01 12"
           ],
-          "q": "Let $A$ be a real symmetric matrix with eigenvalues $\\lambda_a,\\lambda_b$ and eigenvectors $v_a,v_b$. Prove: if $v_a$ and $v_b$ are **not** orthogonal, then $\\lambda_a=\\lambda_b$.",
+          "q": "Let $A$ be a real symmetric matrix with eigenvalues $\\lambda_a,\\lambda_b$ and eigenvectors $v_a,v_b$. Prove: if $v_a$ and $v_b$ are **not** orthogonal, then $\\lambda_a=\\lambda_b$. **Hint:** Consider $\\langle Av_a,v_b\\rangle$.",
           "answer": "$\\langle Av_a,v_b\\rangle=\\langle\\lambda_av_a,v_b\\rangle=\\lambda_a\\langle v_a,v_b\\rangle$.\n**Using $A=A^\\top$:**\n$$\\langle Av_a,v_b\\rangle=v_b^\\top Av_a=(A^\\top v_b)^\\top v_a=\\langle v_b,Av_a\\rangle=\\lambda_b\\langle v_b,v_a\\rangle=\\lambda_b\\langle v_a,v_b\\rangle.$$\n**Hence** $(\\lambda_a-\\lambda_b)\\langle v_a,v_b\\rangle=0$. If $\\langle v_a,v_b\\rangle\\neq0$ then $\\lambda_a=\\lambda_b$.",
           "extend": "This is the contrapositive of \"distinct eigenvalues ⇒ orthogonal eigenvectors\". The symmetry $A=A^\\top$ is what lets you move $A$ across the inner product.",
           "tags": [
             "Symmetric matrix",
             "Eigenvalues",
             "Proof"
-          ]
+          ],
+          "coverage": [
+            "EX01 12"
+          ],
+          "id": "qc964ca788"
         },
         {
           "type": "ai",
@@ -1801,10 +1857,7 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 14a",
-            "EX01 14b",
-            "EX01 14c",
-            "EX01 14d"
+            "EX01 14"
           ],
           "q": "Let $A=U\\Sigma V^\\top$ be the SVD of $A\\in\\mathbb{R}^{m\\times n}$. (a) Write down the dimensions of $U,\\Sigma,V$. (b) Name similarities and differences between SVD and eigenvalue decomposition. (c) Relate $U,\\Sigma,V$ to the eigen-decompositions of $A^\\top A$ and $AA^\\top$. (d) Interpret the singular values.",
           "answer": "**(a)** Full SVD: $U\\in\\mathbb{R}^{m\\times m}$, $\\Sigma\\in\\mathbb{R}^{m\\times n}$ (diagonal, not necessarily square), $V\\in\\mathbb{R}^{n\\times n}$. Thin SVD with rank $r$: $U_r\\in\\mathbb{R}^{m\\times r}$, $\\Sigma_r\\in\\mathbb{R}^{r\\times r}$, $V_r\\in\\mathbb{R}^{n\\times r}$. The dimensions must chain: $(m\\times m)(m\\times n)(n\\times n)=m\\times n$.\n**(b)** Both read as \"rotation × scaling × rotation\". The eigenvalue decomposition $A=PDP^{-1}$ needs $A$ square and diagonalisable and uses **one** basis; the SVD exists for **any** matrix and uses **two** orthonormal bases $U$ and $V$.\n**(c)** Columns of $V$ are eigenvectors of $A^\\top A$; columns of $U$ are eigenvectors of $AA^\\top$; the $\\sigma_i^2$ are the eigenvalues of both.\n**(d)** $\\sigma_1\\ge\\sigma_2\\ge\\dots\\ge0$. The number of non-zero $\\sigma_i$ is $\\operatorname{rank}(A)$; $\\sigma_1=\\|A\\|_2$ (operator norm); $\\sum_i\\sigma_i^2=\\|A\\|_F^2$.",
@@ -1814,24 +1867,35 @@
             "Eigenvalues",
             "Rank",
             "Frobenius norm"
-          ]
+          ],
+          "coverage": [
+            "EX01 14a",
+            "EX01 14b",
+            "EX01 14c",
+            "EX01 14d"
+          ],
+          "id": "q27a4917c9"
         },
         {
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 16a",
-            "EX01 16b",
-            "EX01 16c"
+            "EX01 16"
           ],
-          "q": "The Eckart–Young theorem states that the best rank-$k$ approximation of $A$ in the Frobenius norm is $A_k=\\sum_{i=1}^{k}\\sigma_iu_iv_i^\\top$. (a) Show $\\|A-A_k\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2$. (b) Compare the storage of the full matrix and of the rank-$k$ approximation. (c) When does the rank-$k$ approximation save storage?",
+          "q": "The Eckart–Young theorem states that the best rank-$k$ approximation of $A$ in the Frobenius norm is $A_k=\\sum_{i=1}^{k}\\sigma_iu_iv_i^\\top$. (a) Show $\\|A-A_k\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2$. **Hint:** Use the unitary invariance $\\|UBV^\\top\\|_F=\\|B\\|_F$. (b) Compare the storage of the full matrix and of the rank-$k$ approximation. (c) When does the rank-$k$ approximation save storage?",
           "answer": "**(a)** $A-A_k=U(\\Sigma-\\Sigma_k)V^\\top$, where $\\Sigma_k$ keeps the first $k$ singular values and zeroes the rest. The Frobenius norm is invariant under multiplication by orthogonal matrices, so\n$$\\|A-A_k\\|_F^2=\\|\\Sigma-\\Sigma_k\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2.$$\n**(b)** Full matrix: $mn$ entries. Rank-$k$: $U_k\\in\\mathbb{R}^{m\\times k}$, the $k$ diagonal entries of $\\Sigma_k$, and $V_k\\in\\mathbb{R}^{n\\times k}$, i.e. $mk+k+nk=k(m+n+1)\\approx k(m+n)$.\n**(c)** Whenever $k(m+n)<mn$, i.e. $k<\\dfrac{mn}{m+n}$; for a square $n\\times n$ matrix that is roughly $k<n/2$.",
           "extend": "The error is the sum of the **squares** of the discarded singular values — so truncating is cheap exactly when the tail of the spectrum decays fast.",
           "tags": [
             "SVD",
             "Low-rank approximation",
             "Frobenius norm"
-          ]
+          ],
+          "coverage": [
+            "EX01 16a",
+            "EX01 16b",
+            "EX01 16c"
+          ],
+          "id": "q5b15c7b5e"
         },
         {
           "type": "ai",

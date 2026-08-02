@@ -62,7 +62,7 @@ export async function buildSearchIndex(): Promise<SearchEntry[]> {
           c: ch.data.id,
           ct: ch.data.title,
           kp: kp.title,
-          a: qid(kp.id, q.q),
+          a: q.id ?? qid(kp.id, q.q),
           t: q.type,
           src: q.sources[0],
           srcs: q.sources,

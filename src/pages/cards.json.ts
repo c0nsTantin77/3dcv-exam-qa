@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
     for (const kp of ch.data.knowledge_points) {
       for (const q of sortedQuestions(kp.questions)) {
         cards.push({
-          a: qid(kp.id, q.q),
+          a: q.id ?? qid(kp.id, q.q),
           q: renderQuestion(q.q),
           ans: renderAnswer(q.answer),
           ext: q.extend ? renderAnswer(q.extend) : "",

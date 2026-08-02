@@ -25,7 +25,11 @@ export interface FigureData {
 export interface QuestionData {
   type: "open" | "mc" | "ai";
   freq: number;
+  /** stable persistence key; set when wording changes must not orphan notes */
+  id?: string;
   sources: string[];
+  /** exact exercise sub-questions covered; deliberately not displayed */
+  coverage?: string[];
   q: string;
   answer: string;
   extend?: string;

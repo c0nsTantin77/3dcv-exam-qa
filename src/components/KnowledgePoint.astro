@@ -24,7 +24,7 @@ const questions = sortedQuestions(kp.questions);
       questions.map((q, j) => (
         <QuestionCard
           q={q}
-          anchor={qid(kp.id, q.q)}
+          anchor={q.id ?? qid(kp.id, q.q)}
           qnum={kpnum ? `${kpnum}.${j + 1}` : ""}
         />
       ))

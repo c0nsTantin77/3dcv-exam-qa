@@ -45,9 +45,7 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX04 1a",
-            "EX04 1b",
-            "EX04 1c"
+            "EX04 1"
           ],
           "q": "From $I(x+v,t{+}1)=I(x,t)$: (a) apply a first-order Taylor expansion and derive the optical flow constraint $I_{x_1}v_1+I_{x_2}v_2+I_t=0$. (b) How many solutions does this one equation in two unknowns have? Which component of the flow can be determined and which stays unknown? (c) Name three real-world situations where brightness constancy fails.",
           "answer": "**(a)** $I(x+v,t{+}1)\\approx I(x,t)+I_{x_1}v_1+I_{x_2}v_2+I_t$. Setting this equal to $I(x,t)$ and cancelling gives\n$$I_{x_1}v_1+I_{x_2}v_2+I_t=0.$$\n**(b)** **Infinitely many** solutions — a one-parameter family (a line in $v$-space). Writing the constraint as $\\nabla I^\\top v=-I_t$ shows it fixes the component of $v$ **in the direction of $\\nabla I$**, namely $v_{\\text{normal}}=-I_t/\\|\\nabla I\\|$. The component **perpendicular to $\\nabla I$** — along the image edge — is completely unconstrained. This is the **aperture problem**.\n**(c)** (1) **Illumination changes** — moving light sources or auto-exposure. (2) **Specular reflections** — highlights shift with the viewpoint rather than with the surface. (3) **Occlusion** — surfaces appear or disappear, so no correspondence exists at all.",
@@ -56,7 +54,13 @@
             "Brightness constancy",
             "Optical flow",
             "Aperture problem"
-          ]
+          ],
+          "coverage": [
+            "EX04 1a",
+            "EX04 1b",
+            "EX04 1c"
+          ],
+          "id": "q50836ef3a"
         },
         {
           "type": "open",
@@ -181,10 +185,7 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX04 2a",
-            "EX04 2b",
-            "EX04 2c",
-            "EX04 2d"
+            "EX04 2"
           ],
           "q": "For $E(v)=\\int_{W(x)}G(x-x')\\big(\\nabla I(x',t)^\\top v+I_t(x',t)\\big)^2dx'$: (a) expand the square and write $E(v)=v^\\top Mv+2q^\\top v+c$, identifying $M$ and $q$; (b) derive the optimal flow $\\hat v$; (c) show that a constant gradient direction makes $M$ rank 1; (d) write out $\\hat v_1,\\hat v_2$ explicitly.",
           "answer": "**(a)** $(\\nabla I^\\top v+I_t)^2=v^\\top(\\nabla I\\nabla I^\\top)v+2I_t(\\nabla I^\\top v)+I_t^2$, so integrating with weight $G$:\n$$M=G*(\\nabla I\\nabla I^\\top)=\\begin{pmatrix}G*I_{x_1}^2&G*(I_{x_1}I_{x_2})\\\\G*(I_{x_1}I_{x_2})&G*I_{x_2}^2\\end{pmatrix},\\qquad q=G*(I_t\\nabla I)=\\begin{pmatrix}G*(I_{x_1}I_t)\\\\G*(I_{x_2}I_t)\\end{pmatrix},\\qquad c=G*I_t^2.$$\n**(b)** $\\frac{\\partial E}{\\partial v}=2Mv+2q=0\\ \\Rightarrow\\ \\hat v=-M^{-1}q$.\n**(c)** If $\\nabla I(x')=\\alpha(x')u$ for all $x'\\in W$ then $M=G*(\\alpha^2uu^\\top)=(G*\\alpha^2)uu^\\top$ — an outer product, hence **rank 1**, with eigenvalues $\\lambda_1=(G*\\alpha^2)\\|u\\|^2$ and $\\lambda_2=0$. $M$ is singular: a straight edge gives a constant gradient direction and Lucas–Kanade cannot determine the flow along the edge.\n**(d)** With $M^{-1}=\\frac{1}{m_{11}m_{22}-m_{12}^2}\\begin{pmatrix}m_{22}&-m_{12}\\\\-m_{12}&m_{11}\\end{pmatrix}$,\n$$\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2},\\qquad \\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}.$$",
@@ -193,7 +194,14 @@
             "Lucas-Kanade",
             "Structure tensor",
             "Least squares"
-          ]
+          ],
+          "coverage": [
+            "EX04 2a",
+            "EX04 2b",
+            "EX04 2c",
+            "EX04 2d"
+          ],
+          "id": "qbeadf26c0"
         },
         {
           "type": "mc",
@@ -383,10 +391,10 @@
           "freq": 3,
           "sources": [
             "25EDC 5.5",
-            "EX04 4a",
-            "24EDC 4.7"
+            "24EDC 4.7",
+            "EX04 4"
           ],
-          "q": "Consider the eigenvalues $\\lambda_1$ and $\\lambda_2$ of the structure tensor $M$. What can we say about the image gradients in the neighbourhood of a pixel in each of the three cases: (1) $\\lambda_1\\approx\\lambda_2\\approx0$; (2) $\\lambda_1\\gg0,\\lambda_2\\approx0$; (3) $\\lambda_1\\gg0,\\lambda_2\\gg0$? Relate each case to whether $M$ is invertible and whether Lucas–Kanade can estimate the flow.",
+          "q": "Eigenvalues of the Structure Tensor. The $2\\times2$ matrix $M$ from Lucas-Kanade is symmetric and positive semi-definite, with eigenvalues $\\lambda_1\\ge\\lambda_2\\ge0$. (a) For each case - a flat region, a straight edge, and a corner - describe qualitatively what $\\lambda_1$ and $\\lambda_2$ look like. Relate your answer to whether $M$ is invertible and whether Lucas-Kanade can estimate the flow reliably.",
           "answer": "**(1) $\\lambda_1\\approx\\lambda_2\\approx0$** — the neighbourhood has **no dominant gradient direction**, i.e. it is a **flat / untextured** region ($\\nabla I\\approx0$, so $M\\approx0$). $M$ is not invertible and Lucas–Kanade fails: there is no texture to track.\n**(2) $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$** — **one dominant gradient direction**, i.e. an **edge**. Here $\\nabla I=\\alpha u$ so $M=(G*\\alpha^2)uu^\\top$ is rank 1 and singular; only the flow component along $u$ (perpendicular to the edge) can be determined — the aperture problem.\n**(3) $\\lambda_1\\gg0,\\ \\lambda_2\\gg0$** — **more than one dominant gradient direction**, i.e. a **corner** (or well-textured patch). $M$ is well conditioned, $\\hat v=-M^{-1}q$ is reliable, and this is exactly what a corner detector selects.",
           "extend": "The eigenvector of the *large* eigenvalue is the gradient direction, so it is **perpendicular** to the edge: $v_1\\approx(0,1)^\\top$ means a horizontal edge.",
           "tags": [
@@ -394,7 +402,11 @@
             "Eigenvalues",
             "Corner detection",
             "Aperture problem"
-          ]
+          ],
+          "coverage": [
+            "EX04 4a"
+          ],
+          "id": "q863ec39f6"
         },
         {
           "type": "open",
@@ -530,25 +542,28 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX04 4b",
-            "EX04 4c",
-            "EX04 4d"
+            "EX04 4"
           ],
-          "q": "Harris proposed the score $C=\\det(M)-\\kappa\\operatorname{trace}(M)^2$. (a) Express $\\det(M)$ and $\\operatorname{trace}(M)$ in terms of $\\lambda_1,\\lambda_2$ and explain why $C$ can be computed without eigenvalues. (b) Determine the sign of $C$ for flat, edge and corner, and the condition on $\\kappa$ for a corner to give $C>0$. (c) How does $\\kappa$ trade off corners against strong edges — what happens as $\\kappa\\to0$ and as $\\kappa\\to\\tfrac14$?",
+          "q": "Eigenvalues of the Structure Tensor. (b) Harris proposed $C=\\det(M)-\\kappa\\,\\operatorname{tr}(M)^2$. Express $\\det(M)$ and $\\operatorname{tr}(M)$ in terms of $\\lambda_1,\\lambda_2$. Why can $C$ be computed without eigenvalues? (c) For a flat region, edge, and corner, determine the sign of $C$. For a corner, what condition on $\\kappa$ ensures $C>0$? (d) How does $\\kappa$ control the trade-off between detecting corners and strong edges? What happens as $\\kappa\\to0$ and as $\\kappa\\to1/4$?",
           "answer": "**(a)** $\\det(M)=\\lambda_1\\lambda_2$ and $\\operatorname{trace}(M)=\\lambda_1+\\lambda_2$, so $C=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2$. But neither quantity needs an eigen-decomposition: $\\det(M)=m_{11}m_{22}-m_{12}^2$ and $\\operatorname{trace}(M)=m_{11}+m_{22}$ come straight from the entries — no square root required.\n**(b)** Flat: $\\lambda_1\\approx\\lambda_2\\approx0\\Rightarrow C\\approx0$. Edge: $\\lambda_1\\gg0$, $\\lambda_2\\approx0\\Rightarrow C\\approx0-\\kappa\\lambda_1^2<0$. Corner with $\\lambda_1\\approx\\lambda_2\\approx\\lambda$: $C\\approx\\lambda^2-\\kappa(2\\lambda)^2=\\lambda^2(1-4\\kappa)$, so $C>0$ requires $\\kappa<\\tfrac14$. In general $C>0\\iff\\frac{\\lambda_1\\lambda_2}{(\\lambda_1+\\lambda_2)^2}>\\kappa$, so a smaller $\\kappa$ accepts corners with more unequal eigenvalues.\n**(c)** As $\\kappa\\to0$: $C\\to\\det(M)=\\lambda_1\\lambda_2$, positive whenever both eigenvalues are non-zero — even strong edges (large $\\lambda_1$, small but non-zero $\\lambda_2$) score positively, so the detector becomes **less selective**. As $\\kappa\\to\\tfrac14$: even $\\lambda_1=10,\\lambda_2=8$ gives $C=80-0.25\\cdot324=-1<0$; only $\\lambda_1=\\lambda_2$ survives, so the detector rejects everything but perfectly symmetric corners.",
           "extend": "$\\kappa$ is a knob on \"how square must a corner be\": small $\\kappa$ = permissive (edges leak in), large $\\kappa$ = strict.",
           "tags": [
             "Harris corner detector",
             "Structure tensor",
             "Eigenvalues"
-          ]
+          ],
+          "coverage": [
+            "EX04 4b",
+            "EX04 4c",
+            "EX04 4d"
+          ],
+          "id": "q5cc7e8fc9"
         },
         {
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX04 5a",
-            "EX04 5b"
+            "EX04 5"
           ],
           "q": "(a) An image is rotated by $R\\in SO(2)$. How do $\\nabla I$ and $M$ transform, and is the Harris score $C$ unchanged? (b) The image is uniformly scaled (zoomed in or out). Is $C$ unchanged? Why or why not?",
           "answer": "**(a)** The gradient rotates, $\\nabla I\\to R\\nabla I$, hence $\\nabla I\\nabla I^\\top\\to R(\\nabla I\\nabla I^\\top)R^\\top$ and $M\\to RMR^\\top$. Since $\\det(RMR^\\top)=\\det(R)\\det(M)\\det(R^\\top)=\\det(M)$ and $\\operatorname{trace}(RMR^\\top)=\\operatorname{trace}(M)$ (cyclic invariance), the score $C=\\det M-\\kappa\\operatorname{trace}(M)^2$ is **unchanged**: Harris is **rotation invariant**.\n**(b)** **No — Harris is not scale invariant.** $M$ is computed within a **fixed-size window**, so when the image is scaled the same window covers a different amount of the scene. A corner at one scale may look like an edge (zoomed in so far that the window sees only one side) or like texture (zoomed out so far that the corner is sub-pixel). The eigenvalues of $M$ change, and so does $C$.",
@@ -557,7 +572,12 @@
             "Harris corner detector",
             "Invariance",
             "Structure tensor"
-          ]
+          ],
+          "coverage": [
+            "EX04 5a",
+            "EX04 5b"
+          ],
+          "id": "qf46344837"
         },
         {
           "type": "ai",
@@ -703,9 +723,7 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX04 3a",
-            "EX04 3b",
-            "EX04 3c"
+            "EX04 3"
           ],
           "q": "(a) If an image is downscaled by a factor 2 at each pyramid level, what displacement does a motion of $(dx,dy)$ pixels at the original resolution correspond to at level $L$? (b) Describe the complete coarse-to-fine algorithm and how a coarse estimate initialises the next finer level. (c) If Lucas–Kanade can handle at most $d_{\\max}$ pixels at a single level, what is the maximum total displacement with an $L$-level pyramid?",
           "answer": "**(a)** $\\big(dx/2^L,\\ dy/2^L\\big)$.\n**(b)** 1. Build a Gaussian pyramid $I^{(0)},\\dots,I^{(L)}$ by repeated smoothing and downsampling. 2. At the coarsest level $L$, run Lucas–Kanade initialised at $v=0$. 3. For $l=L{-}1,\\dots,0$: upsample $\\hat v_{l+1}$ by a factor 2, **warp** the second frame by this flow so that the already-estimated motion is removed, run Lucas–Kanade on the warped pair to get a residual correction $\\Delta v_l$, and combine:\n$$\\hat v_l=2\\hat v_{l+1}+\\Delta v_l.$$\n**(c)** $d_{\\max}\\cdot2^L+d_{\\max}\\cdot2^{L-1}+\\dots+d_{\\max}=d_{\\max}(2^{L+1}-1)\\approx2^{L+1}d_{\\max}$.",
@@ -714,7 +732,13 @@
             "Optical flow",
             "Image pyramid",
             "Lucas-Kanade"
-          ]
+          ],
+          "coverage": [
+            "EX04 3a",
+            "EX04 3b",
+            "EX04 3c"
+          ],
+          "id": "q810206831"
         },
         {
           "type": "ai",
@@ -798,7 +822,11 @@
             "Patch matching",
             "SSD",
             "Feature matching"
-          ]
+          ],
+          "coverage": [
+            "EX04 6"
+          ],
+          "id": "q6fb0ed750"
         },
         {
           "type": "ai",
