@@ -141,7 +141,7 @@
     {
       "id": "lucas-kanade",
       "title": "The Lucas–Kanade Method and the Structure Tensor",
-      "recap": "**Energy.** Assuming constant flow in a window $W(x)$ (optionally Gaussian-weighted by $G$),\n$$E(v)=\\int_{W(x)}\\big|\\nabla I(x',t)^\\top v+I_t(x',t)\\big|^2dx'.$$\n**Normal equations.** Expanding the square gives $E(v)=v^\\top Mv+2q^\\top v+c$ and $\\frac{dE}{dv}=2Mv+2q=0$, with\n$$M=\\int_{W(x)}\\nabla I\\,\\nabla I^\\top dx'=\\int_{W(x)}\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}dx',\\qquad q=\\int_{W(x)}I_t\\,\\nabla I\\,dx'=\\int_{W(x)}I_t\\begin{pmatrix}I_x\\\\I_y\\end{pmatrix}dx'.$$\n$M$ is the **structure tensor**. Keep the integral — dropping it costs marks.\n**Solution.** $\\hat v=-M^{-1}q$, explicitly $\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2}$, $\\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}$.\n**$M$ is symmetric positive semi-definite** — it is a sum/integral of outer products $\\nabla I\\nabla I^\\top$, so $u^\\top Mu=\\int(\\nabla I^\\top u)^2\\ge0$. Hence $\\lambda_1\\ge\\lambda_2\\ge0$. Note $M\\neq\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int I_x$: $\\int I_x^2\\neq(\\int I_x)^2$ — a favourite MC trap.\n**Rank deficiency.** Ignoring the integral, $M\\nabla I^\\perp=\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}\\begin{pmatrix}-I_y\\\\I_x\\end{pmatrix}=0$, so $\\nabla I^\\perp\\in\\ker(M)$ — a single gradient direction makes $M$ singular. More generally, if $\\nabla I(x')=\\alpha(x')u$ throughout the window then $M=(G*\\alpha^2)uu^\\top$ is rank 1.\n**True local motion vs the translational model.** For a pure translation $X_2=X_1+T$, in normalised coordinates $\\lambda_2x_2=\\lambda_1x_1+T$, so the exact motion is $x_2=\\frac{\\lambda_1}{\\lambda_2}x_1+\\frac{1}{\\lambda_2}T$. The translational model $x_2=x_1+v$ is therefore **exact** only if (i) $\\lambda_1=\\lambda_2=\\text{const}$ over the window — all 3D points on a plane parallel to the image plane — and (ii) $T_3=0$ — the translation is parallel to the image plane.\n**2023 paper focus.** KLT solves $Mv=b$ and is reliable only when both eigenvalues of $M$ are large. It is typically faster and denser than SIFT matching, but its small-motion and brightness-constancy assumptions make it less robust to large displacement and lighting changes.",
+      "recap": "**Energy.** Assuming constant flow in a window $W(x)$ (optionally Gaussian-weighted by $G$),\n$$E(v)=\\int_{W(x)}\\big|\\nabla I(x',t)^\\top v+I_t(x',t)\\big|^2dx'.$$\n**Normal equations.** Expanding the square gives $E(v)=v^\\top Mv+2q^\\top v+c$ and $\\frac{dE}{dv}=2Mv+2q=0$, with\n$$M=\\int_{W(x)}\\nabla I\\,\\nabla I^\\top dx'=\\int_{W(x)}\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}dx',\\qquad q=\\int_{W(x)}I_t\\,\\nabla I\\,dx'=\\int_{W(x)}I_t\\begin{pmatrix}I_x\\\\I_y\\end{pmatrix}dx'.$$\n$M$ is the **structure tensor**. Keep the integral — dropping it costs marks.\n**Solution.** $\\hat v=-M^{-1}q$, explicitly $\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2}$, $\\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}$.\n**$M$ is symmetric positive semi-definite** — it is a sum/integral of outer products $\\nabla I\\nabla I^\\top$, so $u^\\top Mu=\\int(\\nabla I^\\top u)^2\\ge0$. Hence $\\lambda_1\\ge\\lambda_2\\ge0$. Note $M\\neq\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int I_x$: $\\int I_x^2\\neq(\\int I_x)^2$ — a favourite MC trap.\n**Rank deficiency.** Ignoring the integral, $M\\nabla I^\\perp=\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}\\begin{pmatrix}-I_y\\\\I_x\\end{pmatrix}=0$, so $\\nabla I^\\perp\\in\\ker(M)$ — a single gradient direction makes $M$ singular. More generally, if $\\nabla I(x')=\\alpha(x')u$ throughout the window then $M=(G*\\alpha^2)uu^\\top$ is rank 1.\n**True local motion vs the translational model.** For a pure translation $X_2=X_1+T$, in normalised coordinates $\\lambda_2x_2=\\lambda_1x_1+T$, so the exact motion is $x_2=\\frac{\\lambda_1}{\\lambda_2}x_1+\\frac{1}{\\lambda_2}T$. The translational model $x_2=x_1+v$ is therefore **exact** only if (i) $\\lambda_1=\\lambda_2=\\text{const}$ over the window — all 3D points on a plane parallel to the image plane — and (ii) $T_3=0$ — the translation is parallel to the image plane.\n**2023 paper focus.** KLT solves $Mv=b$ and is reliable only when both eigenvalues of $M$ are large. It is typically faster and denser than SIFT matching, but its small-motion and brightness-constancy assumptions make it less robust to large displacement and lighting changes.\n**Window-level failure audit.** Before solving Lucas–Kanade, test three independent conditions: photometric constancy (fails on reflections/specularities), one motion per window (fails across depth or object boundaries), and a well-conditioned structure tensor (fails on flat patches and is one-dimensional on edges). Both eigenvalues large indicate a corner; one large indicates an edge; both small indicate a flat patch.",
       "questions": [
         {
           "type": "open",
@@ -326,6 +326,45 @@
             "SIFT",
             "Feature tracking"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 8a",
+            "20EFB 8b",
+            "20EFB 8c",
+            "20EFB 8d",
+            "20EFB 8e",
+            "20EFB 8f",
+            "20EFB 8g"
+          ],
+          "q": "For the four annotated regions in 20EFB Problem 8, state whether Lucas–Kanade's assumptions hold, and then classify pixels from the two eigenvalues of the structure tensor.",
+          "answer": "**(a) Region A:** assumptions hold: brightness constancy and constant motion in the window are plausible, and the patch has enough 2D structure. **(b) Region B:** fails constant motion because foreground and background move differently. **(c) Region C:** fails brightness constancy because the glass bottle is non-Lambertian and its reflection changes. **(d) Region D:** a uniform wall causes the aperture/conditioning problem. **(e)** $\\lambda_1,\\lambda_2\\gg0$: corner / textured 2D structure. **(f)** both near zero: untextured region. **(g)** one large and one near zero: edge.",
+          "tags": [
+            "Lucas-Kanade",
+            "Brightness constancy",
+            "Aperture problem",
+            "Structure tensor"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20MFB 5a",
+            "20MFB 5b",
+            "20MFB 5c",
+            "20MFB 5d"
+          ],
+          "q": "In the annotated 20MFB Lucas–Kanade image, explain whether regions A–D yield reliable optical flow: A contains a falling ball against a static background, B is a textured rigid patch, C is a white wall, and D is a specular carafe.",
+          "answer": "**A:** unreliable; the ball and background have different motions, violating constant motion within the window. **B:** reliable; brightness constancy and constant motion hold and there is sufficient structure to avoid the aperture problem. **C:** unreliable; the uniform wall provides no usable gradient information. **D:** unreliable; view-dependent specular reflection violates brightness constancy.",
+          "tags": [
+            "Lucas-Kanade",
+            "Brightness constancy",
+            "Constant motion",
+            "Aperture problem"
+          ]
         }
       ]
     },
@@ -360,7 +399,13 @@
             "21EFB 7b",
             "20RFB 8a",
             "20RFB 8b",
-            "22EDC 4a"
+            "22EDC 4a",
+            "21EFB 7c",
+            "21EFB 7d",
+            "21EFB 7e",
+            "20RFB 8c",
+            "20RFB 8d",
+            "20RFB 8e"
           ],
           "q": "Five structure tensors are computed over five image patches. Given the eigenvalues and eigenvectors, explain how to assign each tensor to the correct patch — e.g. $M^{(1)}$ with $\\lambda_1=5.54,\\lambda_2=3.10$, $v_1=(0.14,0.99)^\\top$; and $M^{(2)}$ with $\\lambda_1=2.07,\\lambda_2=0.07$, $v_1=(0.00,1.00)^\\top$.",
           "answer": "**$M^{(1)}$ — a corner / richly textured patch.** Both eigenvalues are large, so the patch must have sufficient structure in **both** the $x$- and the $y$-direction, which is the case neither for an edge nor for a plain wall.\n**$M^{(2)}$ — an edge, and specifically a horizontal one.** The larger eigenvalue is large while the smaller is close to zero, so the patch contains an **edge**. The eigenvector of the large eigenvalue points approximately along the **$y$-axis**, and since that eigenvector is the **gradient** direction (perpendicular to the edge), the edge itself must be **horizontal**.\n**General recipe.** (i) Both $\\lambda$ small ⇒ untextured region. (ii) $\\lambda_1\\gg\\lambda_2\\approx0$ ⇒ edge; then read $v_1$: $\\approx(0,1)^\\top$ horizontal edge, $\\approx(1,0)^\\top$ vertical edge, diagonal $v_1$ tilted edge. (iii) Both $\\lambda$ large ⇒ corner.",

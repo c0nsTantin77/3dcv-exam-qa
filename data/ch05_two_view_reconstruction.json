@@ -7,7 +7,7 @@
     {
       "id": "epipolar-constraint",
       "title": "The Epipolar Constraint and Epipolar Lines",
-      "recap": "**Derivation (four steps, each worth a mark).** From $\\lambda_1x_1=X$ and $\\lambda_2x_2=RX+T$:\n1. Eliminate $X$: $\\lambda_2x_2=R(\\lambda_1x_1)+T$.\n2. Eliminate $T$ by taking the cross product with $T$ (i.e. multiplying by $\\hat T$): $\\lambda_2\\hat Tx_2=\\lambda_1\\hat TRx_1$, because $\\hat TT=T\\times T=0$.\n3. Project onto $x_2$: $x_2^\\top\\hat Tx_2=0$ since $\\hat T$ is skew-symmetric, so the left-hand side vanishes.\n4. Divide by $\\lambda_1\\neq0$:\n$$\\boxed{x_2^\\top\\hat TRx_1=0.}$$\n**Geometric meaning.** $x_1$, $x_2$, and the baseline are **coplanar** — the constraint is the triple product $\\langle x_2,T\\times Rx_1\\rangle=0$.\n**Epipolar line.** For a fixed $x_1$, the set of admissible $x_2$ is the line $l_2\\sim Ex_1$ (calibrated) or $l_2\\sim Fx_1'$ (pixel coordinates). Writing $l_2=(l_1,l_2,l_3)^\\top$, the line in the image is $y=-\\tfrac{l_1}{l_2}x-\\tfrac{l_3}{l_2}$.\n**Practical use.** It reduces correspondence search from a 2D image search to a **1D search along a line**: for any pixel in the first image, its match in the second must lie on the corresponding epipolar line. This is what makes stereo matching tractable and what lets RANSAC reject outliers.\n**Epipoles.** $e_1$ and $e_2$ are the projections of the other camera centre, i.e. the points where all epipolar lines meet. They satisfy $Ee_1=0$ and $e_2^\\top E=0$ (likewise for $F$) — so the epipoles span the left/right null spaces.\n**Worked example.** Pure translation $T=(5,4,1)^\\top$, $K_1=K_2=I$, $R=I$. Then $E=\\hat T=\\begin{pmatrix}0&-1&4\\\\1&0&-5\\\\-4&5&0\\end{pmatrix}$ and for $x_1=(40,30,1)^\\top$: $l_2=\\hat Tx_1=(-26,35,-10)^\\top$, i.e. $-26x+35y-10=0$, or $y=\\tfrac{26}{35}x+\\tfrac27$.\n**Uncalibrated case.** With intrinsics the constraint is $x_2'^\\top K_2^{-\\top}\\hat TRK_1^{-1}x_1'=0$, i.e. $x_2'^\\top Fx_1'=0$. If you are given a **normalised** point in image 1 but want the epipolar line in **pixel** coordinates of image 2, only $K_2$ enters: $l'\\sim K_2^{-\\top}\\hat TRx_1$.\n**2023 paper focus.** Planar correspondences obey $H=K(R-tn^\\top/d)K^{-1}$ (sign depends on the plane convention). A homography has eight projective degrees of freedom and needs four non-degenerate point pairs.",
+      "recap": "**Derivation (four steps, each worth a mark).** From $\\lambda_1x_1=X$ and $\\lambda_2x_2=RX+T$:\n1. Eliminate $X$: $\\lambda_2x_2=R(\\lambda_1x_1)+T$.\n2. Eliminate $T$ by taking the cross product with $T$ (i.e. multiplying by $\\hat T$): $\\lambda_2\\hat Tx_2=\\lambda_1\\hat TRx_1$, because $\\hat TT=T\\times T=0$.\n3. Project onto $x_2$: $x_2^\\top\\hat Tx_2=0$ since $\\hat T$ is skew-symmetric, so the left-hand side vanishes.\n4. Divide by $\\lambda_1\\neq0$:\n$$\\boxed{x_2^\\top\\hat TRx_1=0.}$$\n**Geometric meaning.** $x_1$, $x_2$, and the baseline are **coplanar** — the constraint is the triple product $\\langle x_2,T\\times Rx_1\\rangle=0$.\n**Epipolar line.** For a fixed $x_1$, the set of admissible $x_2$ is the line $l_2\\sim Ex_1$ (calibrated) or $l_2\\sim Fx_1'$ (pixel coordinates). Writing $l_2=(l_1,l_2,l_3)^\\top$, the line in the image is $y=-\\tfrac{l_1}{l_2}x-\\tfrac{l_3}{l_2}$.\n**Practical use.** It reduces correspondence search from a 2D image search to a **1D search along a line**: for any pixel in the first image, its match in the second must lie on the corresponding epipolar line. This is what makes stereo matching tractable and what lets RANSAC reject outliers.\n**Epipoles.** $e_1$ and $e_2$ are the projections of the other camera centre, i.e. the points where all epipolar lines meet. They satisfy $Ee_1=0$ and $e_2^\\top E=0$ (likewise for $F$) — so the epipoles span the left/right null spaces.\n**Worked example.** Pure translation $T=(5,4,1)^\\top$, $K_1=K_2=I$, $R=I$. Then $E=\\hat T=\\begin{pmatrix}0&-1&4\\\\1&0&-5\\\\-4&5&0\\end{pmatrix}$ and for $x_1=(40,30,1)^\\top$: $l_2=\\hat Tx_1=(-26,35,-10)^\\top$, i.e. $-26x+35y-10=0$, or $y=\\tfrac{26}{35}x+\\tfrac27$.\n**Uncalibrated case.** With intrinsics the constraint is $x_2'^\\top K_2^{-\\top}\\hat TRK_1^{-1}x_1'=0$, i.e. $x_2'^\\top Fx_1'=0$. If you are given a **normalised** point in image 1 but want the epipolar line in **pixel** coordinates of image 2, only $K_2$ enters: $l'\\sim K_2^{-\\top}\\hat TRx_1$.\n**2023 paper focus.** Planar correspondences obey $H=K(R-tn^\\top/d)K^{-1}$ (sign depends on the plane convention). A homography has eight projective degrees of freedom and needs four non-degenerate point pairs.\n**Line coimages and calibration.** A homogeneous line $l$ satisfies $l^\\top x=0$. Under $x'=Kx$, it transforms contravariantly as $l'=K^{-\\top}l$. In the opposite image, $l_1\\sim E^\\top x_2$ and $l_2\\sim Ex_1$; geometrically the correct plotted line passes through the relevant epipole.",
       "questions": [
         {
           "type": "open",
@@ -361,6 +361,63 @@
             "Homography",
             "DLT",
             "Planar scene"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 2,
+          "sources": [
+            "22RDC 4b",
+            "20EFB 9b"
+          ],
+          "q": "In the official two-camera bunny diagram, which labelled line in Image 2 is the epipolar line associated with the marked pixel $p$ in Image 1?",
+          "options": [
+            {
+              "text": "Line (A)",
+              "correct": true
+            },
+            {
+              "text": "Line (B)",
+              "correct": false
+            },
+            {
+              "text": "Line (C)",
+              "correct": false
+            },
+            {
+              "text": "Line (D)",
+              "correct": false
+            }
+          ],
+          "answer": "**Line (A).** The epipolar plane through the two camera centres and the 3D ray corresponding to $p$ intersects the second image plane in line (A). Equivalently, it must pass through the second epipole and the possible correspondence of $p$.",
+          "figure": {
+          "src": "epipolar-bunny-lines.png",
+            "alt": "Two-camera bunny scene and four candidate epipolar lines A through D",
+            "caption": "Official 20EFB / 22RDC epipolar-line diagram."
+          },
+          "tags": [
+            "Epipolar geometry",
+            "Epipolar line",
+            "Correspondence search"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21RFB 3a",
+            "21RFB 3b",
+            "21RFB 3c",
+            "21RFB 3d",
+            "21RFB 3e"
+          ],
+          "q": "Reproduce the 21RFB derivation of the coimage vector $l_1$ of the epipolar line in image 1 from a point $x_2$ in image 2, for $X_2=RX_1+T$, and state how $l_1$ transforms from normalised to pixel coordinates.",
+          "answer": "**(a)** In image 1, $l_1\\sim e_1\\times x_1$ because the line coimage is orthogonal to both homogeneous points. **(b)** Choose points on the two rays to write $l_1\\sim(-R^\\top T)\\times(R^\\top(\\lambda x_2)-R^\\top T)$. **(c)** Since $(R^\\top T)\\times(R^\\top T)=0$, absorb sign and depth into scale: $l_1\\sim(R^\\top T)\\times(R^\\top x_2)=R^\\top(T\\times x_2)$. **(d)** Thus $l_1\\sim R^\\top\\hat T x_2\\sim E^\\top x_2$ (sign is irrelevant in homogeneous line coordinates), where $E=\\hat TR$. **(e)** If $x'=Kx$, then $l_1^\\top K^{-1}x'=0$, so the pixel-coordinate line is $l'_1\\sim K^{-\\top}l_1$.",
+          "tags": [
+            "Epipolar line",
+            "Coimage",
+            "Essential matrix",
+            "Intrinsics"
           ]
         }
       ]
@@ -717,13 +774,17 @@
     {
       "id": "fundamental-matrix",
       "title": "The Fundamental Matrix and Epipoles",
-      "recap": "**Definition.** For uncalibrated cameras the epipolar constraint in **pixel** coordinates is\n$$x_2'^\\top Fx_1'=0,\\qquad F=K_2^{-\\top}\\hat TRK_1^{-1}=K_2^{-\\top}EK_1^{-1}.$$\n**$E$ vs $F$.** Both have rank 2 and a zero smallest singular value. But $E$ has the extra structure $\\sigma_1=\\sigma_2$ (5 DOF); $F$ does **not** ($\\mu_1\\neq\\mu_2$ in general) and has **7 DOF** (9 entries − 1 scale − 1 rank constraint). $E$ requires known intrinsics; $F$ does not.\n**Epipoles.** $e_2$ is the image of camera centre 1 in image 2, $e_1$ the image of centre 2 in image 1. They are the null vectors:\n$$Fe_1=0,\\qquad e_2^\\top F=0,$$\nand every epipolar line in image 2 passes through $e_2$.\n**Proof that $e_2^\\top F=0$** (a full exam question):\n(a) The position of camera $C_1$ in the frame of $C_2$ is $T$, so with depth $\\lambda_1$ the epipole is $e_2=\\tfrac1{\\lambda_1}KT$, and $F=K^{-\\top}\\hat TRK^{-1}$ by definition. Hence $e_2^\\top F=\\big(\\tfrac1{\\lambda_1}KT\\big)^\\top\\big(K^{-\\top}\\hat TRK^{-1}\\big)$.\n(b) $(KT)^\\top=T^\\top K^\\top$ — the transpose of a product reverses the order.\n(c) $K^\\top K^{-\\top}=I$ cancels.\n(d) $T^\\top\\hat T=-(\\hat TT)^\\top$, using $\\hat T^\\top=-\\hat T$.\n(e) $\\hat TT=T\\times T=0$, so the whole expression is $0$.\n**2023 paper focus.** $F$ is estimated directly from uncalibrated pixel correspondences. The epipole is the projection of the other camera centre, and all epipolar lines pass through it—not generally through the principal point.",
+      "recap": "**Definition.** For uncalibrated cameras the epipolar constraint in **pixel** coordinates is\n$$x_2'^\\top Fx_1'=0,\\qquad F=K_2^{-\\top}\\hat TRK_1^{-1}=K_2^{-\\top}EK_1^{-1}.$$\n**$E$ vs $F$.** Both have rank 2 and a zero smallest singular value. But $E$ has the extra structure $\\sigma_1=\\sigma_2$ (5 DOF); $F$ does **not** ($\\mu_1\\neq\\mu_2$ in general) and has **7 DOF** (9 entries − 1 scale − 1 rank constraint). $E$ requires known intrinsics; $F$ does not.\n**Epipoles.** $e_2$ is the image of camera centre 1 in image 2, $e_1$ the image of centre 2 in image 1. They are the null vectors:\n$$Fe_1=0,\\qquad e_2^\\top F=0,$$\nand every epipolar line in image 2 passes through $e_2$.\n**Proof that $e_2^\\top F=0$** (a full exam question):\n(a) The position of camera $C_1$ in the frame of $C_2$ is $T$, so with depth $\\lambda_1$ the epipole is $e_2=\\tfrac1{\\lambda_1}KT$, and $F=K^{-\\top}\\hat TRK^{-1}$ by definition. Hence $e_2^\\top F=\\big(\\tfrac1{\\lambda_1}KT\\big)^\\top\\big(K^{-\\top}\\hat TRK^{-1}\\big)$.\n(b) $(KT)^\\top=T^\\top K^\\top$ — the transpose of a product reverses the order.\n(c) $K^\\top K^{-\\top}=I$ cancels.\n(d) $T^\\top\\hat T=-(\\hat TT)^\\top$, using $\\hat T^\\top=-\\hat T$.\n(e) $\\hat TT=T\\times T=0$, so the whole expression is $0$.\n**2023 paper focus.** $F$ is estimated directly from uncalibrated pixel correspondences. The epipole is the projection of the other camera centre, and all epipolar lines pass through it—not generally through the principal point.\n**Depth-compatible correspondences.** The epipolar constraint is necessary but not sufficient: after a candidate lies on $l_2=Fx_1$, solve $z_2K_2^{-1}x_2=z_1RK_1^{-1}x_1+T$ and require positive depths (cheirality). A candidate on the line can still be physically invalid.",
       "questions": [
         {
           "type": "open",
           "freq": 1,
           "sources": [
-            "20MFB 6"
+            "20MFB 6a",
+            "20MFB 6b",
+            "20MFB 6c",
+            "20MFB 6d",
+            "20MFB 6e"
           ],
           "q": "Let $F$ be the fundamental matrix for cameras $C_1,C_2$ with common intrinsics $K$, let $T$ be the translation between the camera centres as seen in the frame of $C_2$, and let $e_2$ be the epipole in the second image. Prove that $e_2^\\top F=0$, justifying each step.",
           "answer": "**(a)** $e_2^\\top F=\\Big(\\tfrac{1}{\\lambda_1}KT\\Big)^\\top\\big(K^{-\\top}\\hat TRK^{-1}\\big)$.\n*Why:* the position of camera $C_1$ in the coordinate system of $C_2$ is $T$; with $\\lambda_1$ its depth, the pixel coordinates of the epipole are $e_2=\\tfrac{1}{\\lambda_1}KT$. The second factor is the definition of the fundamental matrix.\n**(b)** $=\\tfrac{1}{\\lambda_1}T^\\top K^\\top K^{-\\top}\\hat TRK^{-1}$.\n*Why:* the transpose of a product is the product of the transposes in reverse order.\n**(c)** $=\\tfrac{1}{\\lambda_1}T^\\top\\hat TRK^{-1}$.\n*Why:* $K^\\top K^{-\\top}=I$, and the identity can be dropped from a product.\n**(d)** $=-\\tfrac{1}{\\lambda_1}(\\hat TT)^\\top RK^{-1}$.\n*Why:* $(\\hat TT)^\\top=T^\\top\\hat T^\\top=-T^\\top\\hat T$, by skew-symmetry of $\\hat T$.\n**(e)** $=0$.\n*Why:* $\\hat TT=T\\times T=0$.",
@@ -890,6 +951,24 @@
             "Fundamental matrix",
             "Epipole",
             "Epipolar plane"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 11a",
+            "20RFB 11b",
+            "20RFB 11c",
+            "20RFB 11d"
+          ],
+          "q": "For two cameras related by pure translation $T=(-1,3,3)^\\top$, complete 20RFB Problem 11: form the second-image epipolar line using $F=K_2^{-\\top}\\hat TK_1^{-1}$, justify the depth relation, and test the listed candidate correspondences.",
+          "answer": "**(a)** For the stated $K_1,K_2$ and normalised $x_1=(2,2,1)^\\top$, the official line is $y=\\tfrac{15}{14}x+\\tfrac{40}{7}$. **(b)** In pixel coordinates $p_1=K_1x_1$, the line coefficients are $l_2=Fp_1=K_2^{-\\top}\\hat T x_1$. **(c)** Since $X_2=X_1+T$ and $X_i=z_iK_i^{-1}x_i$, one obtains $z_2K_2^{-1}x_2=z_1K_1^{-1}x_1+T$. **(d)** Substituting every candidate on $y=105$ into this vector equation yields no pair with positive depth in both cameras; therefore **None** is correct.",
+          "tags": [
+            "Fundamental matrix",
+            "Epipolar line",
+            "Depth",
+            "Cheirality"
           ]
         }
       ]

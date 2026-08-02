@@ -8,6 +8,7 @@ import { manifest } from "../lib/manifest";
 import { EXAM_NAMES, examOf, isPrimary } from "../lib/exams";
 import { url } from "../lib/paths";
 import updates from "../../data/updates.json";
+import examQuestionManifest from "../../data/exam-question-manifest.json";
 
 const chapters = await getOrderedChapters();
 const index = await buildSearchIndex();
@@ -49,6 +50,7 @@ const examCards = manifest.exams
     code: e,
     name: EXAM_NAMES[e] ?? e,
     n: examCounts.get(e) ?? 0,
+    subquestions: (examQuestionManifest as Record<string, string[]>)[e]?.length,
     primary: isPrimary(e),
   }));
 
@@ -196,7 +198,11 @@ const shareText =
                 <span class="card-prog" data-exam={e.code} />
               </span>
               <span class="examcard-name">{e.name}</span>
-              <span class="examcard-n">{e.n} questions</span>
+              <span class="examcard-n">
+                {e.subquestions && e.subquestions !== e.n
+                  ? `${e.n} cards · ${e.subquestions} sub-questions`
+                  : `${e.n} questions`}
+              </span>
             </a>
           ))
         }

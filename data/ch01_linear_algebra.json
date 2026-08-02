@@ -947,7 +947,8 @@
           "freq": 2,
           "sources": [
             "25EDC 1.7",
-            "21EFB 2c"
+            "21EFB 2c",
+            "21EFB 2f"
           ],
           "q": "What is the rank of the matrix $C=\\begin{pmatrix}2&0&0&2\\\\0&1&0&0\\\\0&0&-1&0\\end{pmatrix}$? Write down a matrix $Q$ such that $\\operatorname{range}(Q)=\\ker(C)$.",
           "answer": "**Rank.** $\\operatorname{rank}(C)=3$ — the three rows are linearly independent and $\\operatorname{rank}\\le\\min(3,4)=3$.\n**Kernel dimension.** $4-3=1$, so a single column suffices.\n**Solution.** $Q=[1,0,0,-1]^\\top$ is one valid answer: $CQ=0$ and $\\operatorname{range}(Q)=\\operatorname{span}\\{(1,0,0,-1)^\\top\\}=\\ker(C)$.",
@@ -1974,7 +1975,14 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "20EFB 5"
+            "20EFB 5a",
+            "20EFB 5b",
+            "20EFB 5c",
+            "20EFB 5d",
+            "20EFB 5e",
+            "20EFB 5f",
+            "20EFB 5g",
+            "20EFB 5h"
           ],
           "q": "The Euclidean projection of $A\\in\\mathbb{R}^{n\\times n}$ onto $O(n)$ is $R^\\star=\\arg\\min_{R\\in O(n)}\\|A-R\\|_f$, and it equals $UV^\\top$ for $A=U\\Sigma V^\\top$. Explain the individual steps of the derivation. (Hint: $\\langle X,Y\\rangle=\\operatorname{trace}(X^\\top Y)$; the trace is invariant under cyclic permutations.)",
           "answer": "**(a) Square the norm.** $\\arg\\min\\|A-R\\|_f=\\arg\\min\\|A-R\\|_f^2$ — squaring is monotone on non-negative reals, so the minimiser is unchanged.\n**(b) Expand.** $\\|A-R\\|_f^2=\\langle A,A\\rangle-\\langle A,R\\rangle-\\langle R,A\\rangle+\\langle R,R\\rangle=\\langle A,A\\rangle-2\\langle A,R\\rangle+\\langle R,R\\rangle$, using $\\langle A,R\\rangle=\\operatorname{trace}(A^\\top R)=\\operatorname{trace}\\big((A^\\top R)^\\top\\big)=\\langle R,A\\rangle$.\n**(c) Drop constants.** $\\langle A,A\\rangle$ does not depend on $R$; and $\\langle R,R\\rangle=\\operatorname{trace}(R^\\top R)=\\operatorname{trace}(I)=n$ is constant **on $O(n)$**. Left with $\\arg\\min-2\\langle A,R\\rangle$.\n**(d) Flip to a maximisation.** The factor $2$ is irrelevant; removing the minus turns $\\arg\\min$ into $\\arg\\max\\langle A,R\\rangle$.\n**(e) Insert the SVD.** $\\arg\\max_R\\langle U\\Sigma V^\\top,R\\rangle$.\n**(f) Move the orthogonal factors.** $\\langle U\\Sigma V^\\top,R\\rangle=\\operatorname{trace}(V\\Sigma^\\top U^\\top R)=\\operatorname{trace}(\\Sigma^\\top U^\\top RV)=\\langle\\Sigma,U^\\top RV\\rangle$ by cyclic invariance.\n**(g) Maximise.** $\\Sigma$ is **diagonal** and **non-negative**, and $U^\\top RV$ is **orthogonal** (product of orthogonal matrices). An orthogonal matrix has entries in $[-1,1]$, so the diagonal pairing is maximised by $U^\\top RV=I$, which is itself orthogonal and hence attainable.\n**(h) Solve for $R$.** $U^\\top RV=I\\Rightarrow U(U^\\top RV)V^\\top=UIV^\\top\\Rightarrow R^\\star=UV^\\top$.",
@@ -2076,6 +2084,184 @@
           "tags": [
             "Singular value decomposition and pseudoinverse",
             "Cremers-style practice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "matlab-vectorisation",
+      "title": "MATLAB Matrix Algebra, Kronecker Products and Vectorisation",
+      "recap": "**Column-major vectorisation.** MATLAB stores $A(:)=\\operatorname{vec}(A)$ by stacking columns, so for $A\\in\\mathbb{R}^{p\\times q}$ the linear index $A(s)$ means the $s$-th entry of this column stack. **Kronecker sizes.** If $A\\in\\mathbb{R}^{m\\times n}$ and $B\\in\\mathbb{R}^{r\\times s}$, then $A\\otimes B\\in\\mathbb{R}^{mr\\times ns}$ and its $(i,j)$ block is $a_{ij}B$. **Vectorisation identities.** $\\operatorname{vec}(AXB)=(B^\\top\\otimes A)\\operatorname{vec}(X)$, $b^\\top Ac=(c\\otimes b)^\\top\\operatorname{vec}(A)$, and $u^\\top Au=(u\\otimes u)^\\top\\operatorname{vec}(A)$. **MATLAB operations.** `.*` is elementwise and requires compatible array sizes; `*` is matrix multiplication; `kron` forms a Kronecker product. Prefer `A\\b` to explicitly forming an inverse; for a full-column-rank tall matrix, the normal-equation expression is $(A^\\top A)^{-1}A^\\top b$, although it is less stable. **SVD group checks.** $UV^\\top\\in O(n)$; multiply by a determinant correction to force $SO(n)$. Membership in $SE(3)$ additionally requires a $4\\times4$ homogeneous matrix with last row $(0,0,0,1)$. **Vectorise large batches.** A row-wise computation $y_i=w\\times Rx_i$ can be written in one matrix expression as $Y=X(\\hat wR)^\\top$, avoiding interpreted loops.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21EFB 1a",
+            "21EFB 1b",
+            "21EFB 1c",
+            "21EFB 1d",
+            "21EFB 1e",
+            "21EFB 1f",
+            "21EFB 1g",
+            "21EFB 1h",
+            "21EFB 1i"
+          ],
+          "q": "For real MATLAB matrices `A` and `B` of size `[p,q]`, answer the nine short matrix-algebra checks from Problem 1: selected entries of `kron(A,B)` and `kron(B,A)`, constructing members of $SO(3)$, $SE(3)$ and $\\mathfrak{so}(3)$ from an SVD, and a vectorised formula for $\\|Au\\|^2$.",
+          "answer": "**(a)** For `C=kron(A,B)`, `C(1,1)=A(1)*B(1)`. **(b)** `C(p,1)=A(1)*B(p)`. **(c)** `C(1,p)` is not determined by any listed scalar option. **(d)** For `C=kron(B,A)`, `C(p,1)=A(p)*B(1)`. **(e)** If $p=q=3$, `U*diag([1,1,det(U*V')])*V'` is in $SO(3)$. **(f)** None of the proposed $4\\times4$ SVD expressions is guaranteed to have the homogeneous last row required by $SE(3)$. **(g)** `A-A'` is skew-symmetric, hence in $\\mathfrak{so}(3)$. **(h)** For a $4\\times3$ matrix, `U*U'` is $I_4\\in SE(3)$. **(i)** With $B=A^\\top A$, $\\|Au\\|^2=u^\\top Bu=(u\\otimes u)^\\top\\operatorname{vec}(B)$, implemented as `kron(u,u)'*B(:)`.",
+          "extend": "The official solutions use block indexing for `kron`, determinant correction for $SO(3)$, and the identity $\\operatorname{vec}$ / Kronecker pairing for quadratic forms.",
+          "tags": [
+            "MATLAB",
+            "Kronecker product",
+            "Vectorisation",
+            "SO(3)",
+            "SE(3)"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21RFB 1a",
+            "21RFB 1b",
+            "21RFB 1c",
+            "21RFB 1d",
+            "21RFB 1e",
+            "21RFB 1f",
+            "21RFB 1g",
+            "21RFB 1h",
+            "21RFB 1i"
+          ],
+          "q": "Work through the nine MATLAB/SVD checks of 21RFB Problem 1: vectorising $u^\\top Au$, extracting entries of Kronecker products involving transposes and a diagonal matrix, and identifying guaranteed elements of $SO(3)$, $SE(3)$ and $\\mathfrak{so}(3)$.",
+          "answer": "**(a)** $u^\\top Au=(u\\otimes u)^\\top A^s$, so use `kron(u,u)'*A(:)`. **(b)** For `C=kron(A',B)`, `C(1,1)=A(1)*B(1)`. **(c)** For `C=kron(A,B')`, `C(p,1)=A(1)B(1,p)`, absent from the listed options. **(d)** For `C=kron(B',A')`, `C(p,1)=A(1,p)B(1,1)`, also absent. **(e)** If full-rank $A\\in\\mathbb{R}^{3\\times3}$, `A\\A=I_3\\in SO(3)`. **(f)** For a $4\\times3$ matrix, `U*U'=I_4\\in SE(3)`. **(g)** With $p=q=3$, none of the listed $3\\times3$ matrices can belong to $SE(3)$ because $SE(3)$ uses $4\\times4$ homogeneous matrices. **(h)** If $D=\\operatorname{diag}(\\operatorname{diag}B)$, then the queried off-diagonal Kronecker entry is zero; the official matching option is `A(1)*D(p)`. **(i)** None of the proposed SVD products is guaranteed skew-symmetric.",
+          "extend": "Check dimensions before algebra: several distractors fail solely because an $SE(3)$ element must be $4\\times4$.",
+          "tags": [
+            "MATLAB",
+            "Kronecker product",
+            "Vectorisation",
+            "SVD"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 2a",
+            "20EFB 2b",
+            "20EFB 2c",
+            "20EFB 2d",
+            "20EFB 2e"
+          ],
+          "q": "Let `size(B)=size(C)=[m,n]`. Determine the sizes and scalar multiplication counts for `kron(B,C')`, `B*C'`, `B.*C`, and `B(:)*C(:)'`; then give a fast one-line expression for `trace(B(:)*C(:)')`.",
+          "answer": "**(a)** `kron(B,C')` has size $[mn,mn]$. **(b)** `B*C'` has size $[m,m]$. **(c)** `B.*C` needs $mn$ scalar multiplications. **(d)** The outer product `B(:)*C(:)'` needs $(mn)^2=m^2n^2$ scalar multiplications. **(e)** Avoid constructing it: `B(:)'*C(:)` or `sum(sum(B.*C))` computes the trace directly.",
+          "tags": [
+            "MATLAB",
+            "Kronecker product",
+            "Complexity",
+            "Frobenius inner product"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 3a",
+            "20EFB 3b",
+            "20EFB 3c",
+            "20EFB 3d"
+          ],
+          "q": "For the matrices in 20EFB Problem 3, state the official MATLAB/SVD answers: reproduce `A\\b` from an SVD, vectorise $b^\\top Ac$, classify $UV^\\top$, and derive the eigendecomposition of $A^\\top A$ from $A=USV^\\top$.",
+          "answer": "**(a)** `[U,S,V]=svd(A); x=V*pinv(S)*U'*b`. **(b)** $b^\\top Ac=(c\\otimes b)^\\top A^s$, so `kron(c,b)'*A(:)`. **(c)** $UV^\\top\\in O(3)$ (not necessarily $SO(3)$). **(d)** $A^\\top A=VS^\\top SV^\\top$, hence the eigenvector matrix is $X=V$ and the eigenvalue matrix is $L=S^\\top S$.",
+          "tags": [
+            "MATLAB",
+            "SVD",
+            "Vectorisation",
+            "Eigenvalue decomposition"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 2a",
+            "20RFB 2b",
+            "20RFB 2c",
+            "20RFB 2d",
+            "20RFB 2e",
+            "20RFB 2f",
+            "20RFB 2g"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$ and $B\\in\\mathbb{R}^{n\\times p}$ with distinct dimensions. Give the seven official results for the norm/trace, Kronecker dimensions, multiplication counts and vectorised trace expressions in 20RFB Problem 2.",
+          "answer": "**(a)** `norm(A(:))^2=trace(A'*A)`. **(b)** A matrix of size $[mp,n^2]$ is `kron(A',B)'`. **(c)** `kron(A(:),B(:)')` has size $[mn,np]$. **(d)** `kron(A(:),B(:))` has size $[mn^2p,1]$. **(e)** `A(:)*B(:)'` needs $mn^2p$ multiplications. **(f)** `A.*B` is a dimension error because $m\\times n$ and $n\\times p$ are incompatible under the stated distinct dimensions. **(g)** With $P=\\operatorname{kron}(I_n,I_m)$, `kron(A(:),A(:))'*P(:)=trace(A*A')=\\|A\\|_F^2`.",
+          "tags": [
+            "MATLAB",
+            "Kronecker product",
+            "Trace",
+            "Complexity"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 3a",
+            "20RFB 3b",
+            "20RFB 3c",
+            "20RFB 3d",
+            "20RFB 3e",
+            "20RFB 3f"
+          ],
+          "q": "Answer the six matrix-algebra checks of 20RFB Problem 3: construct symmetric orthogonal examples, classify SVD products, state when `pinv(A)*b` is the unique solution, and assess `eig(rand(3))`.",
+          "answer": "**(a)** One example is $Q=I_2$ (also any diagonal matrix with entries $\\pm1$). **(b)** $Q=\\operatorname{diag}(-1,1)$ is symmetric, orthogonal and has determinant $-1$. **(c)** None of the proposed general-$n$ SVD expressions is guaranteed to be in $SO(n)$ or $SE(n)$. **(d)** If $\\det A\\ne0$, `pinv(A)*b` is the unique solution of `A*x=b`. **(e)** For $3\\times3$ matrices, $UV^\\top\\det(UV^\\top)\\in SO(3)$. **(f)** No listed property of `[x,y]=eig(rand(3))` holds for every random seed: eigenvalues/eigenvectors may be complex and are not generally symmetric or orthogonal.",
+          "tags": [
+            "MATLAB",
+            "Orthogonal matrices",
+            "SVD",
+            "Pseudo-inverse"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20MFB 3a",
+            "20MFB 3b"
+          ],
+          "q": "For 20MFB Problem 3, give (a) a one-line expression equivalent to `A\\b` for the stated full-column-rank matrix, and (b) the vectorised expression for all row-wise values $y_i=w\\times Rx_i$.",
+          "answer": "**(a)** `x=inv(A'*A)*A'*b`. It is the full-column-rank pseudo-inverse formula; in real code prefer `A\\b` for speed and numerical stability. **(b)** The loop and first vectorised program both compute rows $y_i=w\\times Rx_i$. The vectorised version is faster, and the fastest supplied one-line form is `Y=X*(w_hat*R)'` (equivalently, but slower, `(X*R')*w_hat'`).",
+          "tags": [
+            "MATLAB",
+            "Pseudo-inverse",
+            "Vectorisation",
+            "Hat operator"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI-generated Q51-A"
+          ],
+          "q": "Let $A\\in\\mathbb{R}^{2\\times3}$, $B\\in\\mathbb{R}^{4\\times2}$ and $C=A\\otimes B$. What is the size of $C$, and which block contains $a_{23}B$?",
+          "answer": "$C$ has size $(2\\cdot4)\\times(3\\cdot2)=8\\times6$. The $(2,3)$ block is $a_{23}B$, occupying rows $5{:}8$ and columns $5{:}6$ in one-based indexing.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Kronecker product",
+            "Dimensions"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI-generated Q51-B"
+          ],
+          "q": "Without forming a large matrix, express $b^\\top AXc$ as a dot product with $\\operatorname{vec}(X)$, where dimensions are compatible.",
+          "answer": "First group it as $(A^\\top b)^\\top Xc$. Using $u^\\top Xv=(v\\otimes u)^\\top\\operatorname{vec}(X)$ gives $b^\\top AXc=\big(c\\otimes A^\\top b\big)^\\top\\operatorname{vec}(X)$.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Vectorisation",
+            "Kronecker product"
           ]
         }
       ]

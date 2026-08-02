@@ -370,13 +370,38 @@
             "Tsai method",
             "DLT"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20EFB 6a",
+            "20EFB 6b"
+          ],
+          "q": "A camera-frame point is $P=(1,2,4)^\\top$ and $K=\\begin{pmatrix}400&0&250\\\\0&400&200\\\\0&0&1\\end{pmatrix}$. Compute its pixel coordinates.",
+          "answer": "Normalise first: $(x/z,y/z)=(1/4,1/2)$. Hence $u=400(1/4)+250=350$ and $v=400(1/2)+200=400$.",
+          "tags": [
+            "Intrinsics",
+            "Perspective projection",
+            "Pixel coordinates"
+          ],
+          "calc": [
+            {
+              "label": "u",
+              "value": 350
+            },
+            {
+              "label": "v",
+              "value": 400
+            }
+          ]
         }
       ]
     },
     {
       "id": "extrinsics-projection",
       "title": "Extrinsics and Computing Pixel Coordinates",
-      "recap": "**Full projection equation.**\n$$\\lambda\\begin{pmatrix}u\\\\v\\\\1\\end{pmatrix}=K\\,\\Pi_0\\,g\\begin{pmatrix}X_w\\\\1\\end{pmatrix},\\qquad g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix},\\qquad \\lambda=Z_{\\text{cam}}.$$\n**Hand-computation recipe.** (1) Convert to camera coordinates: $\\tilde X=RX_w+T$; when the camera has optical centre $C$ and $R=I$, that is simply $\\tilde X=X_w-C$. (2) Check $Z>0$ — if the point is behind the camera it is **not observed**, no matter what $K$ says. (3) Apply $u=f_x\\tfrac{X}{Z}+o_x$, $v=f_y\\tfrac{Y}{Z}+o_y$. (4) Check the pixel lies inside $[0,2o_x]\\times[0,2o_y]$.\n**Camera centre vs translation.** For $g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$ taking world (= frame-1) points into frame 2, the **position of camera 2 expressed in frame 1** is $g^{-1}(0,0,0,1)^\\top$, i.e. the translation is $-R^\\top T$, **not** $T$ and **not** $R^\\top T$. This sign/transpose pattern is examined repeatedly.\n**Moving the camera along the optical axis.** Moving *away* by $d$ increases the depth: $Z\\to Z+d$, so $u\\to f_x\\tfrac{X}{Z+d}+o_x$ — the image point moves **towards the principal point** and the object shrinks.\n**Occlusion.** Two opaque objects whose centres lie on the same ray project to the same pixel; only the closer one is visible. A projection computation alone is not enough — check the depth ordering.\n**Inverse problem.** Given a pixel, a depth and the intrinsics, the translation that put the point there follows from $\\lambda(u,v,1)^\\top=K(X_w+T)$: with $K=I$ this is three scalar equations for $t_x,t_y,t_z$.",
+      "recap": "**Full projection equation.**\n$$\\lambda\\begin{pmatrix}u\\\\v\\\\1\\end{pmatrix}=K\\,\\Pi_0\\,g\\begin{pmatrix}X_w\\\\1\\end{pmatrix},\\qquad g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix},\\qquad \\lambda=Z_{\\text{cam}}.$$\n**Hand-computation recipe.** (1) Convert to camera coordinates: $\\tilde X=RX_w+T$; when the camera has optical centre $C$ and $R=I$, that is simply $\\tilde X=X_w-C$. (2) Check $Z>0$ — if the point is behind the camera it is **not observed**, no matter what $K$ says. (3) Apply $u=f_x\\tfrac{X}{Z}+o_x$, $v=f_y\\tfrac{Y}{Z}+o_y$. (4) Check the pixel lies inside $[0,2o_x]\\times[0,2o_y]$.\n**Camera centre vs translation.** For $g=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$ taking world (= frame-1) points into frame 2, the **position of camera 2 expressed in frame 1** is $g^{-1}(0,0,0,1)^\\top$, i.e. the translation is $-R^\\top T$, **not** $T$ and **not** $R^\\top T$. This sign/transpose pattern is examined repeatedly.\n**Moving the camera along the optical axis.** Moving *away* by $d$ increases the depth: $Z\\to Z+d$, so $u\\to f_x\\tfrac{X}{Z+d}+o_x$ — the image point moves **towards the principal point** and the object shrinks.\n**Occlusion.** Two opaque objects whose centres lie on the same ray project to the same pixel; only the closer one is visible. A projection computation alone is not enough — check the depth ordering.\n**Inverse problem.** Given a pixel, a depth and the intrinsics, the translation that put the point there follows from $\\lambda(u,v,1)^\\top=K(X_w+T)$: with $K=I$ this is three scalar equations for $t_x,t_y,t_z$.\n**Camera-to-world warning.** If a homogeneous pose maps camera coordinates to world coordinates, invert it before projection: $X_c=g_{cw}^{-1}X_w$. Only then normalise by depth and apply $K$.",
       "questions": [
         {
           "type": "open",
@@ -724,6 +749,25 @@
           "tags": [
             "Pinhole projection, intrinsics, and extrinsics",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "20RFB 7a",
+            "20RFB 7b",
+            "20RFB 7c",
+            "20RFB 7d",
+            "20RFB 7e"
+          ],
+          "q": "Complete 20RFB Problem 7. First project $P=(-1,1,8)^\\top$ with $K=\\begin{pmatrix}640&0&320\\\\0&480&240\\\\0&0&1\\end{pmatrix}$. Then use the given camera-to-world pose $g_{cw}=\\begin{pmatrix}0&0&1&4\\\\-1&0&0&2\\\\0&-1&0&3\\\\0&0&0&1\\end{pmatrix}$ to project the world point $P_w=(8,-1,1)^\\top$.",
+          "answer": "**(a,b)** For the camera-frame point, $u=640(-1/8)+320=240$ and $v=480(1/8)+240=300$. **(c)** Invert the pose: $P_c=g_{cw}^{-1}P_w$; then for $P_c=(x,y,z)^\\top$, use $u=f_xx/z+o_x$, $v=f_yy/z+o_y$. **(d,e)** The official numeric result is $(u,v)=(800,480)$.",
+          "extend": "The common bug is applying a camera-to-world pose directly to a world point; projection needs world-to-camera coordinates.",
+          "tags": [
+            "Extrinsics",
+            "Camera pose",
+            "Pixel coordinates"
           ]
         }
       ]

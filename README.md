@@ -90,6 +90,7 @@ GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`, `withastro/acti
 
 ## Recent updates
 
+- **2026-08-02** — Completed seven legacy papers against exact academic sub-question manifests (all now 100%), corrected OCR false positives, and added MATLAB/vectorisation and variational-calculus coverage.
 - **2026-08-02** — Added a context-aware “Back to exam” button for questions opened from Browse by exam, including refresh and invalid-link safeguards.
 - **2026-08-02** — Completed the 2023 Endterm and Retake papers (25/25 and 27/27 sub-questions), updated all 20 affected knowledge-point recaps, and added exact paper-coverage checks.
 - **2026-08-02** — Added all 8 EX05 and 5 EX06 problems with official solutions, and fixed notes being lost on an immediate refresh.
