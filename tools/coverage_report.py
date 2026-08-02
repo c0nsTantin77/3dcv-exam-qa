@@ -108,19 +108,19 @@ def main():
     ]
     for ex, d, c, pct in rows:
         lines.append(f"| {ex} | {d} | {c} | {pct:.0f}% |")
-    lines.append(f"| **Total** | **{tot_det}** | **{tot_cov}** | **{overall:.0f}%** |")
+    lines.append(f"| **Total** | **{tot_det}** | **{tot_cov}** | **{overall:.1f}%** |")
     lines += ["", "## Not yet cited (per paper)", ""]
     for ex, missed in detail:
         lines.append(f"- **{ex}**: {', '.join(missed)}")
     (ROOT / "COVERAGE.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     summary = {
-        "overall_pct": round(overall), "cited": tot_cov, "detected": tot_det,
+        "overall_pct": round(overall, 1), "cited": tot_cov, "detected": tot_det,
         "per_exam": [{"exam": ex, "det": d, "cit": c, "pct": round(p)} for ex, d, c, p in rows],
     }
     (ROOT / "data" / "coverage-summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"wrote COVERAGE.md + data/coverage-summary.json — overall {tot_cov}/{tot_det} ({overall:.0f}%)")
+    print(f"wrote COVERAGE.md + data/coverage-summary.json — overall {tot_cov}/{tot_det} ({overall:.1f}%)")
 
 
 if __name__ == "__main__":

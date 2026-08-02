@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-08-02",
+    "text": "Completed 24EDC, 22RDC, 21EFB, 21RFB, 20EFB, 20RFB and 20MFB against exact academic sub-question manifests; all seven now show 100% coverage, with updated recaps and new MATLAB/variational topics."
+  },
+  {
+    "date": "2026-08-02",
     "text": "Added a context-aware Back to exam button on questions opened from Browse by exam, with refresh-safe URLs and validation against incorrect exam codes."
   },
   {

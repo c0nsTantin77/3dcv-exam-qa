@@ -347,6 +347,59 @@
           ]
         }
       ]
+    },
+    {
+      "id": "variational-image-denoising",
+      "title": "Variational Image Denoising and Euler–Lagrange Equations",
+      "recap": "**Regularisers.** $\\int_\\Omega\\|\\nabla u\\|^2dx$ is quadratic (Tikhonov) smoothing: it strongly penalises gradients and therefore blurs edges. $\\int_\\Omega\\|\\nabla u\\|dx$ is total variation (TV): it is non-quadratic and preserves sharp discontinuities better. A denoising model adds a data term, e.g. $\\int(u-I)^2dx+\\lambda R(u)$; without the data term, minimising either gradient-only energy to convergence yields a constant image. As the regularisation weight tends to zero, the data term dominates and the solution approaches the input. **Euler–Lagrange.** For $E[x]=\\int L(x,\\dot x,t)dt$, stationary curves satisfy $\\partial L/\\partial x-d/dt(\\partial L/\\partial\\dot x)=0$. For $L=\\tfrac a2\\dot x^2+b\\cos x$, this gives $a\\ddot x+b\\sin x=0$.",
+      "questions": [
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "21RFB 6a",
+            "21RFB 6b",
+            "21RFB 6c",
+            "21RFB 6d"
+          ],
+          "q": "Consider $E_1=\\int\\|\\nabla u\\|^2$, $E_2=\\int\\|\\nabla u\\|$, $E_3=\\int(u-I)^2+\\lambda\\int\\|\\nabla u\\|$, and $E_4=\\int(u-I)^2+\\tau\\int\\|\\nabla u\\|^2$. Match blurred and edge-preserving denoising results to the energies, identify the false statement, and derive the Euler–Lagrange equation for $\\int_{t_1}^{t_2}(\\tfrac a2\\dot x^2+b\\cos x)dt$.",
+          "answer": "**(a)** The smoothly blurred result is the minimiser of $E_4$ (quadratic regularisation). **(b)** The discontinuity-preserving result is the minimiser of $E_3$ (TV regularisation). The gradient-only energies $E_1,E_2$ converge to constant images. **(c)** The false statement is that early stopping of $E_1$ produces the edge-preserving $E_3$ result; early $E_1$ resembles quadratic blur instead. As $\\lambda,\\tau\\to0$, the data term makes the result approach the input. **(d)** With $L=\\tfrac a2\\dot x^2+b\\cos x$, $\\partial L/\\partial x=-b\\sin x$ and $d/dt(\\partial L/\\partial\\dot x)=a\\ddot x$, so $a\\ddot x+b\\sin x=0$, i.e. $\\ddot x+(b/a)\\sin x=0$.",
+          "tags": [
+            "Variational calculus",
+            "Total variation",
+            "Image denoising",
+            "Euler-Lagrange"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI-generated Q52-A"
+          ],
+          "q": "A denoising model $E_\\alpha(u)=\\|u-I\\|_2^2+\\alpha\\|\\nabla u\\|_1$ is solved for increasing $\\alpha$. Predict the qualitative change and explain why staircasing may appear.",
+          "answer": "Increasing $\\alpha$ gives TV regularisation more weight: small oscillations and noise are removed more aggressively while major jumps are preserved. Because the $L^1$ gradient penalty favours sparse gradients, the solution tends toward piecewise-constant regions, which can produce staircasing.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Total variation",
+            "Regularisation"
+          ]
+        },
+        {
+          "type": "ai",
+          "freq": 0,
+          "sources": [
+            "AI-generated Q52-B"
+          ],
+          "q": "Apply Euler–Lagrange to $E[x]=\\int_0^T(\\tfrac12\\dot x^2+\\tfrac{\\omega^2}{2}x^2)dt$. What ODE must a stationary curve satisfy?",
+          "answer": "$L=\\tfrac12\\dot x^2+\\tfrac{\\omega^2}{2}x^2$ gives $\\partial L/\\partial x=\\omega^2x$ and $d/dt(\\partial L/\\partial\\dot x)=\\ddot x$. Hence $\\omega^2x-\\ddot x=0$, or $\\ddot x-\\omega^2x=0$ for this plus-sign potential convention.",
+          "extend": "Cremers-style coverage question; not a past-paper citation.",
+          "tags": [
+            "Euler-Lagrange",
+            "Variational calculus"
+          ]
+        }
+      ]
     }
   ]
 }

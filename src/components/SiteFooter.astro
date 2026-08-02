@@ -24,9 +24,9 @@ const rows = [...coverage.per_exam].sort((a, b) => b.pct - a.pct);
           <p>
             <b>{coverage.overall_pct}%</b> of past-exam sub-questions are cited directly ({
               coverage.cited
-            }/{coverage.detected}), and <b>89–98%</b> of every Cremers paper; the rest are folded
-            into merged cards or covered by the recaps. The 2022 endterm is a scan with no text
-            layer — it is covered, but cannot be measured automatically.
+            }/{coverage.detected}). Audited papers use exact sub-question manifests; the remaining
+            percentages use OCR label detection. The 2022 endterm is a scan with no text layer — it
+            is covered, but cannot be measured automatically.
           </p>
           <div class="cov-chips">
             {rows.map((r) => <span class="cov-chip">{r.exam} {r.pct}%</span>)}
