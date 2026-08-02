@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-08-02",
+    "text": "Restored exercise source badges to problem-level labels such as EX02 6, while keeping all 151 sub-questions in hidden coverage checks; expanded shortened exercise prompts to include every original subpart and required equation."
+  },
+  {
+    "date": "2026-08-02",
     "text": "Audited EX01–EX08 against all original exercise and official-solution PDFs, added missing EX02 Problems 7–8 and EX07 Problem 3, restored EX01 Problem 15(c) and EX07 Problem 4(a), and added exact 151-sub-question coverage checks."
   },
   {
