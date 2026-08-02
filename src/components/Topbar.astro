@@ -17,6 +17,8 @@ interface Props {
   toc?: TocItem[];
   /** Render an empty contents pill that the client fills (tags/exams pages). */
   contentsPlaceholder?: boolean;
+  /** Hidden link populated on chapter pages entered from the exam browser. */
+  examReturnPlaceholder?: boolean;
 }
 
 const {
@@ -25,6 +27,7 @@ const {
   backFull = " chapters",
   toc,
   contentsPlaceholder = false,
+  examReturnPlaceholder = false,
 } = Astro.props;
 
 const showContents = Boolean(toc?.length) || contentsPlaceholder;
@@ -35,6 +38,20 @@ const showContents = Boolean(toc?.length) || contentsPlaceholder;
     <TumLogo />
     <span class="brand-back">{backLabel}<span class="brand-full">{backFull}</span></span>
   </a>
+  {
+    examReturnPlaceholder && (
+      <a
+        id="examReturn"
+        class="exam-return"
+        data-exams-base={url("/exams")}
+        hidden
+      >
+        <span aria-hidden="true">←</span>
+        <span class="exam-return-label">Back to</span>
+        <span class="exam-return-code">exam</span>
+      </a>
+    )
+  }
   {
     showContents && (
       <div class="nowat-wrap" hidden={!toc?.length}>

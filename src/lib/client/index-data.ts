@@ -1,4 +1,5 @@
 import type { SearchEntry } from "../types";
+import { contextualQuestionHref } from "./exam-return";
 
 // Fetch the generated search index once and cache the promise, so every island
 // that needs it (search, tags, exams, review, progress) shares one request.
@@ -18,10 +19,10 @@ export function loadIndex(): Promise<SearchEntry[]> {
   return cache;
 }
 
-/** Map a search entry to the URL of its question, relative to the current page. */
-export function questionHref(e: SearchEntry): string {
+/** Map a search entry to its question; optionally preserve an exam-browser context. */
+export function questionHref(e: SearchEntry, examCode?: string | null): string {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-  return `${base}/chapters/${e.c}/#${e.a}`;
+  return contextualQuestionHref(base, e.c, e.a, examCode);
 }
 
 export const TYPE_LABEL: Record<string, string> = { mc: "MC", open: "Open", ai: "AI" };

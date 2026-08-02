@@ -138,7 +138,7 @@ onUnmounted(() => unsub());
       <h2 class="tp-ch" :id="g.id">{{ g.title }}</h2>
       <div class="tp-list">
         <a v-for="e in g.entries" :key="e.a" class="ghit"
-          :class="{ 'is-reviewed': isReviewed(e.a) }" :href="questionHref(e)">
+          :class="{ 'is-reviewed': isReviewed(e.a) }" :href="questionHref(e, activeExam)">
           <span class="ghit-tag">{{ tagFor(e) }}</span>
           <span class="ghit-q" v-html="highlightHtml(e.q, fWords)"></span>
           <span class="ghit-meta">{{ e.kp }}<span v-if="isReviewed(e.a)" class="ghit-rev">reviewed</span></span>

@@ -40,6 +40,7 @@
   .layout{padding:16px 13px 70px}
   .topbar{padding:9px 13px;gap:10px}
   .brand-full{display:none}                     /* small screens: show "← All", drop "chapters" */
+  .exam-return-label{display:none}              /* compact: "← 23ELI" */
   #search{min-width:0;font-size:16px}           /* 16px stops iOS zoom-on-focus */
   .filters{gap:9px}
   .filters label{font-size:.9rem}

@@ -9,6 +9,12 @@
 .brand:hover{border-color:var(--tum);background:#f0f6ff;text-decoration:none}
 .brand .tum-logo{height:18px}
 .brand-back{font-size:.9rem;font-weight:600;color:var(--tum)}
+.exam-return{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;color:var(--tum);
+  border:1px solid #b8d3f0;border-radius:999px;padding:6px 12px;background:#eef6ff;
+  font-size:.86rem;font-weight:700;transition:border-color .12s,background .12s}
+.exam-return:hover{border-color:var(--tum);background:#dcecff;text-decoration:none}
+.exam-return[hidden]{display:none}
+.exam-return-code{font-weight:800;font-variant-numeric:tabular-nums}
 .filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-left:auto}
 .filters label{font-size:.86rem;color:var(--muted);display:flex;align-items:center;gap:4px}
 #search{border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:.9rem;min-width:200px;background:#fff}

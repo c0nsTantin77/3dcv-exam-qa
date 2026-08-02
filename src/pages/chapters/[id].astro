@@ -30,7 +30,7 @@ const toc: TocItem[] = data.knowledge_points.map((kp, i) => ({
 ---
 
 <Layout title={`${data.roman}. ${data.title} · 3DCV Exam Q&A`}>
-  <Topbar backHref={url("/")} backFull=" chapters" toc={toc}>
+  <Topbar backHref={url("/")} backFull=" chapters" toc={toc} examReturnPlaceholder>
     <div class="filters" slot="filters">
       <div class="mode-toggle" role="group" aria-label="Study mode">
         <button type="button" class="mode-btn" data-set-mode="review" title="Show answers">📖 Review</button>
