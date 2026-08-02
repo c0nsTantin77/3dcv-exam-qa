@@ -13,7 +13,8 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX08 5"
+            "EX08 5a",
+            "EX08 5b"
           ],
           "q": "(a) In direct methods the unknowns are camera poses (and optionally depth maps); what are they in feature-based methods? (b) Direct methods assume brightness constancy — name two advantages and two disadvantages.",
           "answer": "**(a)** In feature-based (indirect) methods the unknowns are the camera **poses together with the 3D coordinates of the matched landmarks**. Only the extracted keypoints enter the cost; the rest of the image is discarded. Direct methods instead keep every pixel (or a semi-dense subset) and parameterise geometry by per-pixel **depth**.\n**(b) Advantages.** (1) They exploit **all** the image information, so they can operate on edges and faint gradients where no corner detector fires, and they yield a **dense or semi-dense** reconstruction. (2) There is no feature-matching stage, hence no matching outliers to reject, and the sub-pixel accuracy is typically higher.\n**Disadvantages.** (1) Brightness constancy is fragile: illumination change, auto-exposure, vignetting, specular highlights and rolling shutter all violate it, so a photometric camera model must be calibrated and estimated. (2) The photometric cost is strongly **non-convex** with a small basin of convergence, so a good initialisation and coarse-to-fine optimisation are mandatory, and the per-frame cost is higher.",
@@ -111,7 +112,8 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX08 1"
+            "EX08 1a",
+            "EX08 1b"
           ],
           "q": "For the photometric residual $r_i(\\xi)=I_2(\\tau(\\xi,x_i))-I_1(x_i)$: (a) what is $\\tau(0,x)$ and what is $r_i(0)$? (b) Why can't we optimise directly over the elements of $SE(3)$?",
           "answer": "**(a)** $\\tau(0,x)=x$ — warping with zero motion is the identity, since $T(0)=\\exp(\\hat0)=I$. Hence\n$$r_i(0)=I_2(x_i)-I_1(x_i),$$\nthe plain intensity difference at the same pixel.\n**(b)** $SE(3)$ is a **curved manifold**, not a vector space: its elements are $4\\times4$ matrices subject to $R^\\top R=I$, $\\det R=1$ and the fixed bottom row. A Gauss–Newton step adds an unconstrained increment, which would immediately leave the manifold. Instead one optimises over the **Lie algebra** $\\mathfrak{se}(3)\\cong\\mathbb{R}^6$ — six unconstrained twist coordinates — and applies the update multiplicatively, $T\\leftarrow\\exp(\\widehat{\\Delta\\xi})\\,T$, which stays in $SE(3)$ by construction.",
@@ -126,7 +128,10 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX08 2"
+            "EX08 2a",
+            "EX08 2b",
+            "EX08 2c",
+            "EX08 2d"
           ],
           "q": "(a) Apply the chain rule to decompose the Jacobian $J_i$ of the photometric residual into three factors and identify them. (b) For $\\pi(X,Y,Z)=(f_xX/Z+c_x,\\ f_yY/Z+c_y)$, compute the projection Jacobian. (c) What is the Jacobian of the $SE(3)$ action on a 3D point at $\\xi=0$? (d) Why is coarse-to-fine optimisation needed?",
           "answer": "**(a)** $$J_i=\\frac{\\partial r_i}{\\partial\\xi}=\\underbrace{\\nabla I_2\\big(\\tau(\\xi,x_i)\\big)}_{1\\times2:\\ \\text{image gradient}}\\cdot\\underbrace{\\frac{\\partial\\pi}{\\partial X}}_{2\\times3:\\ \\text{projection}}\\cdot\\underbrace{\\frac{\\partial\\big(T(\\xi)p\\big)}{\\partial\\xi}}_{3\\times6:\\ SE(3)\\ \\text{action}}\\in\\mathbb{R}^{1\\times6}.$$\n**(b)** By the quotient rule,\n$$\\frac{\\partial\\pi}{\\partial(X,Y,Z)}=\\begin{pmatrix}\\dfrac{f_x}{Z}&0&-\\dfrac{f_xX}{Z^2}\\\\[2mm]0&\\dfrac{f_y}{Z}&-\\dfrac{f_yY}{Z^2}\\end{pmatrix}\\in\\mathbb{R}^{2\\times3}.$$\n**(c)** With $T(\\xi)p\\approx p+\\xi_v+\\omega\\times p$ for small $\\xi=(\\xi_v,\\omega)$,\n$$\\frac{\\partial\\big(T(\\xi)p\\big)}{\\partial\\xi}\\bigg|_{\\xi=0}=\\big(I_{3\\times3}\\ \\ \\ -\\hat p\\big)\\in\\mathbb{R}^{3\\times6},$$\nsince $\\omega\\times p=-p\\times\\omega=-\\hat p\\,\\omega$.\n**(d)** The residual is linearised around the current pose, and image intensities vary on the scale of a pixel — so the approximation is valid only for **small** motions. For larger motions one aligns on an **image pyramid**, coarse levels first (where the motion is a fraction of a pixel), passing each estimate down to initialise the next finer level.",
@@ -142,7 +147,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX08 3"
+            "EX08 3a",
+            "EX08 3b",
+            "EX08 3c"
           ],
           "q": "(a) Write the Jacobian of the inverse-compositional residual $r_i(\\Delta\\xi)=I_1(\\tau(\\Delta\\xi,x_i))-I_2(\\tau(\\xi,x_i))$ with respect to $\\Delta\\xi$. (b) Why can this Jacobian be precomputed once before the iteration starts, and what changes each iteration? (c) What is the computational saving compared with the forward formulation?",
           "answer": "**(a)** Only the **first** term depends on $\\Delta\\xi$, so by the same chain rule evaluated at $\\Delta\\xi=0$:\n$$J_i=\\nabla I_1(x_i)\\cdot\\frac{\\partial\\pi}{\\partial X}\\cdot\\big(I_{3\\times3}\\ \\ -\\hat p_i\\big).$$\n**(b)** Every factor depends only on the **reference** image $I_1$ and the reference geometry (the back-projected point $p_i$ at its known depth) — none of them depends on the current pose estimate $\\xi$. They are therefore constant throughout the optimisation and can be computed **once**, together with $J^\\top J$ and its factorisation. What changes each iteration is only the **residual**: the second image must be re-warped with the current $\\xi$ and subtracted.\n**(c)** The expensive per-pixel work — image-gradient lookup, the two Jacobian multiplications and the accumulation of the $6\\times6$ matrix $J^\\top J=\\sum_iJ_i^\\top J_i$ (plus its Cholesky factorisation) — moves **out of the loop**. Each iteration then costs one warp, one image lookup per pixel and a $6$-vector accumulation for $J^\\top r$, followed by a back-substitution. For a semi-dense pixel set that is a large constant-factor speed-up, which is what makes real-time direct SLAM feasible.",
@@ -157,7 +164,8 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX08 4"
+            "EX08 4a",
+            "EX08 4b"
           ],
           "q": "The Gauss–Newton system for direct image alignment is $(J^\\top J)\\Delta\\xi=-J^\\top r$. (a) What are the dimensions of $J^\\top J$ and $J^\\top r$ for $N$ pixels? (b) Show that $J^\\top J=\\sum_{i=1}^{N}J_i^\\top J_i$ and explain the memory consequence.",
           "answer": "**(a)** Each pixel contributes one scalar residual and a $1\\times6$ Jacobian row, so $J\\in\\mathbb{R}^{N\\times6}$ and $r\\in\\mathbb{R}^N$. Therefore\n$$J^\\top J\\in\\mathbb{R}^{6\\times6},\\qquad J^\\top r\\in\\mathbb{R}^{6}$$\n— **independent of the number of pixels $N$**.\n**(b)** Writing $J$ row-wise as $J=(J_1^\\top,\\dots,J_N^\\top)^\\top$ with $J_i\\in\\mathbb{R}^{1\\times6}$,\n$$J^\\top J=\\sum_{i=1}^{N}J_i^\\top J_i,\\qquad J^\\top r=\\sum_{i=1}^{N}J_i^\\top r_i.$$\n**Memory consequence.** The full $N\\times6$ Jacobian never has to be stored: one iterates over pixels, accumulating a $6\\times6$ matrix and a $6$-vector. Memory is $O(1)$ in the number of pixels (and the accumulation parallelises trivially over pixels), which is exactly why a direct method can use hundreds of thousands of pixels in real time.",
@@ -289,7 +297,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX08 6"
+            "EX08 6a",
+            "EX08 6b",
+            "EX08 6c"
           ],
           "q": "(a) What does the pose-graph residual $r_{ij}=\\log\\big(\\hat T_{ij}^{-1}T_i^{-1}T_j\\big)$ measure? (b) What is the dimension of the optimisation problem, and how does a loop-closure constraint change the graph? (c) For a chain of $N$ frames plus one loop-closure edge, describe the sparsity of the Hessian.",
           "answer": "**(a)** $T_i^{-1}T_j$ is the **predicted** relative pose from the current estimates, and $\\hat T_{ij}$ is the **measured** one (from tracking or loop closure). Their composition $\\hat T_{ij}^{-1}T_i^{-1}T_j$ is the residual *transformation*, which equals the identity when the estimate agrees with the measurement. Taking $\\log$ maps it into $\\mathfrak{se}(3)\\cong\\mathbb{R}^6$, giving a vector-valued residual that can be squared in a least-squares cost.\n**(b)** With $N$ keyframes there are $6N$ unknowns — six twist coordinates per pose (one pose is fixed to remove the gauge freedom, leaving $6(N-1)$ effective). A loop closure adds **one extra edge** between two temporally distant nodes; it does not add unknowns, but it turns the open chain into a **cycle**, which is what allows the accumulated drift to be redistributed.\n**(c)** Each edge couples exactly two poses, so the Hessian has a $6\\times6$ block per pose pair that shares an edge. A chain of $N$ frames has $N-1$ consecutive edges, giving a **block-tridiagonal** Hessian. The single loop-closure edge adds **one** symmetric pair of off-diagonal blocks linking the first and last nodes — a \"corner\" entry that makes the matrix cyclic rather than banded. The overall density remains $O(N)$ non-zero blocks.",

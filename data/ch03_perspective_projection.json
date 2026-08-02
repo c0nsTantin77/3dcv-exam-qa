@@ -69,7 +69,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX03 2"
+            "EX03 2a",
+            "EX03 2b",
+            "EX03 2c"
           ],
           "q": "Working in camera coordinates with $K=\\begin{pmatrix}f&0&o_x\\\\0&f&o_y\\\\0&0&1\\end{pmatrix}$: (a) starting from $\\lambda(u,v,1)^\\top=K\\tilde X$, compute $\\lambda$ and show this is equivalent to $u=\\tfrac{fX}{Z}+o_x$, $v=\\tfrac{fY}{Z}+o_y$. (b) Explain the classic ambiguity that an object cannot be distinguished from one twice as big and twice as far away. (c) For $f=540$, $o_x=320$, $o_y=240$, compute the pixel coordinates of $\\tilde X=(60,100,180)^\\top$ and decide whether it lies inside a $640\\times480$ image.",
           "answer": "**(a)** $\\lambda\\begin{pmatrix}u\\\\v\\\\1\\end{pmatrix}=\\begin{pmatrix}fX+o_xZ\\\\fY+o_yZ\\\\Z\\end{pmatrix}$. The third row gives $\\lambda=Z$, hence $u=\\tfrac{fX+o_xZ}{Z}=\\tfrac{fX}{Z}+o_x$ and likewise $v=\\tfrac{fY}{Z}+o_y$.\n**(b)** Scaling $\\tilde X\\to2\\tilde X$ gives $u=\\tfrac{f\\cdot2X}{2Z}+o_x=\\tfrac{fX}{Z}+o_x$ — identical pixel coordinates. Perspective projection maps every point on a ray through the origin to the same pixel, so a single image cannot recover depth.\n**(c)** $u=\\tfrac{540\\cdot60}{180}+320=180+320=500$, $v=\\tfrac{540\\cdot100}{180}+240=300+240=540$. Since $v=540>480$, the point lies **outside** the image.",
@@ -781,7 +783,8 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX03 1"
+            "EX03 1a",
+            "EX03 1b"
           ],
           "q": "With a 2D line written as $l=(a,b,c)^\\top$ and a point in homogeneous coordinates $x=(x_1,x_2,1)^\\top$ so that the line equation is $l^\\top x=0$: (a) show that the line through two points $x_1,x_2$ is $l=x_1\\times x_2$ and that the intersection of two lines $l_1,l_2$ is $x=l_1\\times l_2$; (b) where do two parallel Euclidean lines, e.g. $l_1=(1,0,-1)^\\top$ and $l_2=(1,0,-2)^\\top$, meet in projective space?",
           "answer": "**(a)** Take $l=x_1\\times x_2$. Then $l^\\top x_1=(x_1\\times x_2)^\\top x_1=0$ and $l^\\top x_2=0$ — both are scalar triple products with a repeated vector. So both points lie on $l$.\nDually, $x=l_1\\times l_2$ satisfies $l_1^\\top x=0$ and $l_2^\\top x=0$, so it lies on both lines.\n**(b)**\n$$l_1\\times l_2=(1,0,-1)^\\top\\times(1,0,-2)^\\top=(0,1,0)^\\top.$$\nThe third coordinate is $0$, so this is a **point at infinity** — it represents the common direction (here along the $y$-axis). Parallel lines meet at a point at infinity.",
@@ -796,7 +799,8 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX03 3"
+            "EX03 3a",
+            "EX03 3b"
           ],
           "q": "(a) Given a pixel $x=(u,v,1)^\\top$ and the intrinsics $K$, what geometric object in 3D is described by all points that project to this pixel? (b) An image line is $l^\\top x=0$; what is the backprojection of this line, and what is its equation?",
           "answer": "**(a)** From $\\lambda x=K\\tilde X$ we get $\\tilde X=\\lambda K^{-1}x$ for $\\lambda>0$ — a **ray** from the optical centre (the origin) in direction $K^{-1}x$. This is the *preimage* of the point; the depth $\\lambda$ is unrecoverable from one image.\n**(b)** Every pixel on the line backprojects to a ray through the origin, so together they form a **plane through the origin**. Its normal $n$ must satisfy $n^\\top\\tilde X=0$ for all such points, i.e. $n^\\top K^{-1}x=0$ whenever $l^\\top x=0$. Hence $K^{-\\top}n\\sim l$, giving\n$$n=K^\\top l,\\qquad (K^\\top l)^\\top\\tilde X=0\\ \\iff\\ l^\\top K\\tilde X=0.$$",
@@ -1168,7 +1172,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX03 4"
+            "EX03 4a",
+            "EX03 4b",
+            "EX03 4c"
           ],
           "q": "(a) Can a radial distortion model applied in the normalised image plane represent lenses with a field of view greater than $180^\\circ$? Why or why not? (b) For the FOV/ATAN model $r_d=\\tfrac1\\omega\\arctan\\!\\big(2r_u\\tan\\tfrac\\omega2\\big)$: show it approaches the identity as $\\omega\\to0$ and derive the closed-form undistortion. (c) How could the pipeline be modified to handle FOV $>180^\\circ$?",
           "answer": "**(a) No.** The generic projection $\\pi(\\tilde X)=(X/Z,Y/Z)^\\top$ is undefined at $Z=0$ (the $90^\\circ$ plane) and maps points with $Z<0$ incorrectly. Since $r=\\|\\pi(\\tilde X)\\|=\\tan\\theta$ with $\\theta$ the angle from the optical axis, $r\\to\\infty$ as $\\theta\\to90^\\circ$. No finite $g(r)$ can fix this — the problem is in $\\pi$ itself, not in $g$.\n**(b) Sanity check.** For small $\\omega$: $2r_u\\tan(\\omega/2)\\approx r_u\\omega$ and $\\arctan(r_u\\omega)\\approx r_u\\omega$, so $r_d\\approx\\tfrac1\\omega r_u\\omega=r_u$ ✓.\n**Undistortion.** From $\\omega r_d=\\arctan\\!\\big(2r_u\\tan\\tfrac\\omega2\\big)$ we get $\\tan(\\omega r_d)=2r_u\\tan\\tfrac\\omega2$, hence\n$$r_u=\\frac{\\tan(\\omega r_d)}{2\\tan(\\omega/2)},\\qquad \\pi(\\tilde X)=\\frac{r_u}{r_d}\\pi_d=\\frac{\\tan(\\omega r_d)}{2r_d\\tan(\\omega/2)}\\,\\pi_d.$$\n**(c)** Replace the planar parameterisation by one based on the **incidence angle** $\\theta=\\arccos\\big(Z/\\|\\tilde X\\|\\big)\\in[0,\\pi]$. The simplest is the **equidistant (fisheye)** model $r_u=\\theta$, so with azimuth $\\phi=\\operatorname{atan2}(Y,X)$ the normalised coordinates are $\\pi(\\tilde X)=\\theta(\\cos\\phi,\\sin\\phi)^\\top$, well defined for the whole forward and back hemisphere. The distortion stage becomes $r_d=h(\\theta)$ (e.g. the polynomial Kannala–Brandt model) — the standard pipeline for fisheye and catadioptric cameras.",
@@ -1183,7 +1189,11 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX03 5"
+            "EX03 5a",
+            "EX03 5b",
+            "EX03 5c",
+            "EX03 5d",
+            "EX03 5e"
           ],
           "q": "Using the division model $x_u=\\frac{x_d}{1+kr_d^2}$, $y_u=\\frac{y_d}{1+kr_d^2}$, $r_d^2=x_d^2+y_d^2$: derive the collinearity constraint for three points, show it is linear in $k$, set up the least-squares estimate, and state the minimum number of lines and points per line.",
           "answer": "**Collinearity.** Three undistorted points are collinear iff $\\det\\begin{pmatrix}x_{u1}&y_{u1}&1\\\\x_{u2}&y_{u2}&1\\\\x_{u3}&y_{u3}&1\\end{pmatrix}=0$. Row $i$ equals $\\tfrac{1}{1+kr_{di}^2}(x_{di},y_{di},1+kr_{di}^2)$, and multiplying row $i$ by $(1+kr_{di}^2)\\neq0$ only scales the determinant by $\\prod_i(1+kr_{di}^2)$, preserving the zero condition:\n$$\\det\\begin{pmatrix}x_{d1}&y_{d1}&1+kr_{d1}^2\\\\x_{d2}&y_{d2}&1+kr_{d2}^2\\\\x_{d3}&y_{d3}&1+kr_{d3}^2\\end{pmatrix}=0.$$\n**Linear in $k$.** Splitting the third column by multilinearity gives $A+kB=0$ with\n$$A=\\det\\begin{pmatrix}x_{d1}&y_{d1}&1\\\\x_{d2}&y_{d2}&1\\\\x_{d3}&y_{d3}&1\\end{pmatrix},\\qquad B=\\det\\begin{pmatrix}x_{d1}&y_{d1}&r_{d1}^2\\\\x_{d2}&y_{d2}&r_{d2}^2\\\\x_{d3}&y_{d3}&r_{d3}^2\\end{pmatrix}.$$\n$A$ is the collinearity residual of the distorted points (non-zero because the line looks curved).\n**Least squares.** Each triplet gives $A_m+kB_m=0$; stacking and solving,\n$$\\hat k=-\\frac{\\sum_mA_mB_m}{\\sum_mB_m^2}.$$\n**Minimum data.** One unknown, so $M\\ge1$ triplet suffices: **one line with at least three points**. (From a line with $N$ points one can form $\\binom{N}{3}$ triplets.) With a higher-order model $1+k_1r_d^2+k_2r_d^4$ the constraint stays linear, $A+k_1B_1+k_2B_2=0$, and $n$ coefficients need at least $n$ triplets.",
