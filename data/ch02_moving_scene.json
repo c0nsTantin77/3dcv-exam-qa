@@ -365,7 +365,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX02 4"
+            "EX02 4a",
+            "EX02 4b",
+            "EX02 4c"
           ],
           "q": "Consider $\\omega\\in\\mathbb{R}^3$ with $\\|\\omega\\|=1$ and its skew-symmetric matrix $\\hat\\omega$. (a) Show $\\hat\\omega^2=\\omega\\omega^\\top-I$ and $\\hat\\omega^3=-\\hat\\omega$. (b) Find simple rules for $\\hat\\omega^n$ for all $n\\ge1$, distinguishing odd and even $n$. (c) Using $e^A=\\sum_{k\\ge0}\\frac{A^k}{k!}$, derive Rodrigues' formula for arbitrary $\\omega$.",
           "answer": "**(a)** Using $\\hat\\omega v=\\omega\\times v$ and the BAC–CAB rule,\n$$\\hat\\omega^2v=\\omega\\times(\\omega\\times v)=\\omega(\\omega^\\top v)-v(\\omega^\\top\\omega)=(\\omega\\omega^\\top-I)v.$$\nThen $\\hat\\omega^3=\\hat\\omega(\\omega\\omega^\\top-I)=(\\hat\\omega\\omega)\\omega^\\top-\\hat\\omega=0-\\hat\\omega=-\\hat\\omega$, since $\\hat\\omega\\omega=\\omega\\times\\omega=0$.\n**(b)** Odd powers: $\\hat\\omega^{2k+1}=(-1)^k\\hat\\omega$. Even powers: $\\hat\\omega^{2k}=(-1)^{k-1}\\hat\\omega^2$ for $k\\ge1$.\n**(c)** For $\\|\\omega\\|=1$, split the series into odd and even powers:\n$$e^{\\hat\\omega}=I+\\sum_{k\\ge0}\\frac{\\hat\\omega^{2k+1}}{(2k+1)!}+\\sum_{k\\ge1}\\frac{\\hat\\omega^{2k}}{(2k)!}=I+\\hat\\omega\\sum_{k\\ge0}\\frac{(-1)^k}{(2k+1)!}+\\hat\\omega^2\\sum_{k\\ge1}\\frac{(-1)^{k-1}}{(2k)!}=I+\\hat\\omega\\sin1+\\hat\\omega^2(1-\\cos1).$$\nFor general $\\omega$ write $\\omega=\\theta u$ with $\\|u\\|=1$, $\\theta=\\|\\omega\\|$:\n$$e^{\\hat\\omega}=e^{\\theta\\hat u}=I+\\hat u\\sin\\theta+\\hat u^2(1-\\cos\\theta)=I+\\frac{\\hat\\omega}{\\|\\omega\\|}\\sin\\|\\omega\\|+\\frac{\\hat\\omega^2}{\\|\\omega\\|^2}\\big(1-\\cos\\|\\omega\\|\\big).$$",
@@ -449,7 +451,10 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX02 2"
+            "EX02 2a",
+            "EX02 2b",
+            "EX02 2c",
+            "EX02 2d"
           ],
           "q": "Write down the $4\\times4$ matrices $M\\in SE(3)$ (for point transformation in homogeneous coordinates) for: (a) translation by $T$; (b) rotation by $R$; (c) rotation by $R$ followed by translation $T$; (d) translation by $T$ followed by rotation $R$.",
           "answer": "**(a)** $\\begin{pmatrix}I&T\\\\0&1\\end{pmatrix}$\n**(b)** $\\begin{pmatrix}R&0\\\\0&1\\end{pmatrix}$\n**(c)** First rotate, then translate: $\\begin{pmatrix}I&T\\\\0&1\\end{pmatrix}\\begin{pmatrix}R&0\\\\0&1\\end{pmatrix}=\\begin{pmatrix}R&T\\\\0&1\\end{pmatrix}$ — the standard $SE(3)$ form.\n**(d)** First translate, then rotate: $\\begin{pmatrix}R&0\\\\0&1\\end{pmatrix}\\begin{pmatrix}I&T\\\\0&1\\end{pmatrix}=\\begin{pmatrix}R&RT\\\\0&1\\end{pmatrix}$.",
@@ -577,13 +582,15 @@
     {
       "id": "euler-quaternions",
       "title": "Alternative Representations: Euler Angles and Quaternions",
-      "recap": "**Why alternatives at all.** A rotation matrix has $9$ numbers with $6$ constraints — redundant and awkward to optimise over. The alternatives trade redundancy for singularities.\n**Comparison table (worth memorising).**\n$\\bullet$ **Rotation matrix** — $9$ parameters, $6$ constraints ($R^\\top R=I$, $\\det R=1$), **no** singularities.\n$\\bullet$ **Axis-angle / exponential coordinates** — $3$ parameters, $0$ constraints, singular at $\\theta=0$ and $\\theta=2\\pi$.\n$\\bullet$ **Euler angles** — $3$ parameters, $0$ constraints, singular at **gimbal lock**.\n$\\bullet$ **Unit quaternion** — $4$ parameters, $1$ constraint ($\\|q\\|=1$), **no** singularities.\n**Euler angles.** Many conventions; the ZYX one is $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$. **Gimbal lock:** at $\\theta=\\pi/2$ the matrix depends only on $(\\psi-\\phi)$, so one degree of freedom is lost — two of the three axes align and the parameterisation degenerates.\n**Quaternions.** $q=w+xi+yj+zk$ with $i^2=j^2=k^2=ijk=-1$, giving the cyclic rules $ij=k,\\ jk=i,\\ ki=j$ and the anti-cyclic $ji=-k,\\ kj=-i,\\ ik=-j$. Multiplication is **associative but not commutative**. Conjugate $q^*=w-xi-yj-zk$, norm $\\|q\\|=\\sqrt{w^2+x^2+y^2+z^2}$, and $\\|q_1q_2\\|=\\|q_1\\|\\|q_2\\|$ — hence the unit quaternions form a group with $q^{-1}=q^*$.\n**Rotating with quaternions.** Embed $v\\in\\mathbb{R}^3$ as a pure quaternion $p=v_xi+v_yj+v_zk$ and use the **sandwich product** $p\\mapsto qpq^*$. Left-multiplication alone does not work: it rotates the $(w,z)$-plane too and the result stops being pure. In $qpq^*$ the $(w,z)$ rotations of $L_q$ and $R_{q^*}$ cancel while the $(x,y)$ rotations add, so the imaginary part is rotated by $2\\alpha$ — which is exactly why the **half-angle** appears: $q=\\cos\\tfrac{\\theta}{2}+\\sin\\tfrac{\\theta}{2}(u_xi+u_yj+u_zk)$ for a rotation by $\\theta$ about the unit axis $u$.\n**Double cover.** $q$ and $-q$ give the same rotation, $(-q)p(-q)^*=qpq^*$: $S^3\\to SO(3)$ is a $2{:}1$ cover.\n**Why SLAM systems prefer quaternions.** Compact ($4$ vs $9$ numbers), singularity-free, trivially renormalised ($q/\\|q\\|$ instead of Gram–Schmidt), smooth interpolation via SLERP, and cheap composition.\n**2023 paper focus.** Extrinsic Euler rotations use fixed/world axes; intrinsic Euler rotations use body-attached axes. Quaternions contain one real and three imaginary components and avoid Euler-angle gimbal lock.",
+      "recap": "**Why alternatives at all.** A rotation matrix has $9$ numbers with $6$ constraints — redundant and awkward to optimise over. The alternatives trade redundancy for singularities.\n**Comparison table (worth memorising).**\n$\\bullet$ **Rotation matrix** — $9$ parameters, $6$ constraints ($R^\\top R=I$, $\\det R=1$), **no** singularities.\n$\\bullet$ **Axis-angle / exponential coordinates** — $3$ parameters, $0$ constraints, singular at $\\theta=0$ and $\\theta=2\\pi$.\n$\\bullet$ **Euler angles** — $3$ parameters, $0$ constraints, singular at **gimbal lock**.\n$\\bullet$ **Unit quaternion** — $4$ parameters, $1$ constraint ($\\|q\\|=1$), **no** singularities.\n**Euler angles.** Many conventions; the ZYX one is $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$. **Gimbal lock:** at $\\theta=\\pi/2$ the matrix depends only on $(\\psi-\\phi)$, so one degree of freedom is lost — two of the three axes align and the parameterisation degenerates.\n**Quaternions.** $q=w+xi+yj+zk$ with $i^2=j^2=k^2=ijk=-1$, giving the cyclic rules $ij=k,\\ jk=i,\\ ki=j$ and the anti-cyclic $ji=-k,\\ kj=-i,\\ ik=-j$. Multiplication is **associative but not commutative**. Conjugate $q^*=w-xi-yj-zk$, norm $\\|q\\|=\\sqrt{w^2+x^2+y^2+z^2}$, and $\\|q_1q_2\\|=\\|q_1\\|\\|q_2\\|$ — hence the unit quaternions form a group with $q^{-1}=q^*$.\n**Rotating with quaternions.** Embed $v\\in\\mathbb{R}^3$ as a pure quaternion $p=v_xi+v_yj+v_zk$ and use the **sandwich product** $p\\mapsto qpq^*$. Left-multiplication alone does not work: it rotates the $(w,z)$-plane too and the result stops being pure. In $qpq^*$ the $(w,z)$ rotations of $L_q$ and $R_{q^*}$ cancel while the $(x,y)$ rotations add, so the imaginary part is rotated by $2\\alpha$ — which is exactly why the **half-angle** appears: $q=\\cos\\tfrac{\\theta}{2}+\\sin\\tfrac{\\theta}{2}(u_xi+u_yj+u_zk)$ for a rotation by $\\theta$ about the unit axis $u$.\n**Double cover.** $q$ and $-q$ give the same rotation, $(-q)p(-q)^*=qpq^*$: $S^3\\to SO(3)$ is a $2{:}1$ cover.\n**Why SLAM systems prefer quaternions.** Compact ($4$ vs $9$ numbers), singularity-free, trivially renormalised ($q/\\|q\\|$ instead of Gram–Schmidt), smooth interpolation via SLERP, and cheap composition.\n**2023 paper focus.** Extrinsic Euler rotations use fixed/world axes; intrinsic Euler rotations use body-attached axes. Quaternions contain one real and three imaginary components and avoid Euler-angle gimbal lock.\n**Left and right multiplication in $\\mathbb{R}^4$.** For $q=a+bi+cj+dk$, left multiplication is represented by $L_q=\\begin{psmallmatrix}a&-b&-c&-d\\\\b&a&-d&c\\\\c&d&a&-b\\\\d&-c&b&a\\end{psmallmatrix}$. A unit quaternion gives $L_q^\\top L_q=I$ and $\\det L_q=1$, hence $L_q\\in SO(4)$. For $q=\\cos\\alpha+\\sin\\alpha k$, $L_q$ rotates both the $(x,y)$ and $(w,z)$ planes by $+\\alpha$; right multiplication by $q^*$ keeps $+\\alpha$ on $(x,y)$ but reverses $(w,z)$ to $-\\alpha$.",
       "questions": [
         {
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX02 11"
+            "EX02 11a",
+            "EX02 11b",
+            "EX02 11c"
           ],
           "q": "(a) For the ZYX convention, write the rotation matrix $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$. (b) Show that for $\\theta=\\tfrac\\pi2$ the matrix depends only on $(\\psi-\\phi)$ — gimbal lock. (c) Why don't quaternions suffer from gimbal lock?",
           "answer": "**(a)** With $c_\\alpha=\\cos\\alpha$, $s_\\alpha=\\sin\\alpha$:\n$$R=\\begin{pmatrix}c_\\psi c_\\theta&c_\\psi s_\\theta s_\\phi-s_\\psi c_\\phi&c_\\psi s_\\theta c_\\phi+s_\\psi s_\\phi\\\\s_\\psi c_\\theta&s_\\psi s_\\theta s_\\phi+c_\\psi c_\\phi&s_\\psi s_\\theta c_\\phi-c_\\psi s_\\phi\\\\-s_\\theta&c_\\theta s_\\phi&c_\\theta c_\\phi\\end{pmatrix}.$$\n**(b)** At $\\theta=\\pi/2$, $c_\\theta=0$ and $s_\\theta=1$, so\n$$R=\\begin{pmatrix}0&c_\\psi s_\\phi-s_\\psi c_\\phi&c_\\psi c_\\phi+s_\\psi s_\\phi\\\\0&s_\\psi s_\\phi+c_\\psi c_\\phi&s_\\psi c_\\phi-c_\\psi s_\\phi\\\\-1&0&0\\end{pmatrix}=\\begin{pmatrix}0&-\\sin(\\psi-\\phi)&\\cos(\\psi-\\phi)\\\\0&\\cos(\\psi-\\phi)&\\sin(\\psi-\\phi)\\\\-1&0&0\\end{pmatrix}.$$\nOnly the difference $(\\psi-\\phi)$ appears: one degree of freedom is lost.\n**(c)** Quaternions parameterise $SO(3)$ as $S^3/\\{\\pm1\\}$, and the map $S^3\\to SO(3)$ is smooth everywhere with no coordinate singularity. This is possible because they use $4$ parameters with $1$ constraint, avoiding the topological obstruction that forces a singularity in **any** $3$-parameter representation of $SO(3)$.",
@@ -613,7 +620,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX02 5"
+            "EX02 5a",
+            "EX02 5b",
+            "EX02 5c"
           ],
           "q": "Using only $i^2=j^2=k^2=ijk=-1$, associativity and distributivity: (a) derive the products $ij,ji,jk,kj,ki,ik$; (b) derive the general multiplication formula $q_1q_2=w'+x'i+y'j+z'k$; (c) find $q_1,q_2$ with $q_1q_2\\neq q_2q_1$.",
           "answer": "**(a)** From $ijk=-1$, right-multiplying by $k$ gives $ij(-1)=-k$, so $ij=k$. Left-multiplying $ijk=-1$ by $-i$ gives $jk=i$. From $ij=k$, left-multiplying by $-i$ gives $ik=-j$; right-multiplying by $-j$ gives $kj=-i$. From $jk=i$, left-multiplying by $-j$ gives $ji=-k$, and similarly $ki=j$.\n**Summary:** cyclic $ij=k$, $jk=i$, $ki=j$; anti-cyclic $ji=-k$, $kj=-i$, $ik=-j$.\n**(b)** Expanding $(w_1+x_1i+y_1j+z_1k)(w_2+x_2i+y_2j+z_2k)$:\n$$w'=w_1w_2-x_1x_2-y_1y_2-z_1z_2$$\n$$x'=w_1x_2+x_1w_2+y_1z_2-z_1y_2$$\n$$y'=w_1y_2-x_1z_2+y_1w_2+z_1x_2$$\n$$z'=w_1z_2+x_1y_2-y_1x_2+z_1w_2$$\n**(c)** $q_1=i$, $q_2=j$: $q_1q_2=ij=k$ but $q_2q_1=ji=-k\\neq k$.",
@@ -627,7 +636,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX02 6"
+            "EX02 6a",
+            "EX02 6b",
+            "EX02 6c"
           ],
           "q": "(a) Verify associativity for $q_1=i,q_2=j,q_3=k$. (b) For a unit quaternion $q$, show $qq^*=1$. (c) Show $\\|q_1q_2\\|=\\|q_1\\|\\|q_2\\|$ and conclude that the unit quaternions form a group under multiplication.",
           "answer": "**(a)** $(ij)k=k\\cdot k=k^2=-1$ and $i(jk)=i\\cdot i=i^2=-1$. Equal ✓.\n**(b)** $qq^*=(w+xi+yj+zk)(w-xi-yj-zk)$. Using the multiplication formula with $q_2=(w,-x,-y,-z)$: $w'=w^2+x^2+y^2+z^2=1$ and $x'=y'=z'=0$. Hence $qq^*=1$.\n**(c)** $\\|q_1q_2\\|^2=(q_1q_2)(q_1q_2)^*=q_1q_2q_2^*q_1^*=q_1\\|q_2\\|^2q_1^*=\\|q_2\\|^2q_1q_1^*=\\|q_1\\|^2\\|q_2\\|^2$.\n**Group.** Closure: $\\|q_1q_2\\|=1\\cdot1=1$. Associativity: inherited from quaternion multiplication. Identity: $q=1$. Inverse: $q^{-1}=q^*$ since $qq^*=1$.",
@@ -642,7 +653,44 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX02 9"
+            "EX02 7a",
+            "EX02 7b"
+          ],
+          "q": "Represent $q=a+bi+cj+dk$ and $p=w+xi+yj+zk$ as vectors in $\\mathbb{R}^4$. (a) Derive the $4\\times4$ matrix $L_q$ whose action is left-multiplication, $L_qp=qp$. (b) Show that $L_q\\in SO(4)$ when $q$ is a unit quaternion.",
+          "answer": "**(a)** Expanding $qp$ and collecting the real, $i$, $j$, and $k$ components gives\n$$L_q=\\begin{pmatrix}a&-b&-c&-d\\\\b&a&-d&c\\\\c&d&a&-b\\\\d&-c&b&a\\end{pmatrix}.$$\n**(b)** Direct multiplication yields\n$$L_q^\\top L_q=(a^2+b^2+c^2+d^2)I_4=I_4$$\nfor $\\|q\\|=1$. Moreover,\n$$\\det L_q=(a^2+b^2+c^2+d^2)^2=1>0.$$\nThus $L_q$ is orthogonal and orientation-preserving, so $L_q\\in SO(4)$.",
+          "extend": "Quaternion norm multiplicativity is the same statement geometrically: $\\|L_qp\\|=\\|q\\|\\,\\|p\\|$, so unit-quaternion multiplication preserves lengths in $\\mathbb{R}^4$.",
+          "tags": [
+            "Quaternion",
+            "SO(4)",
+            "Left multiplication"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 8a",
+            "EX02 8b",
+            "EX02 8c",
+            "EX02 8d"
+          ],
+          "q": "Let $q=\\cos\\alpha+\\sin\\alpha\\,k$. (a) Write $L_q$ explicitly. (b) Identify its two invariant orthogonal planes and the rotation angle on each. (c) Derive the matrix $R_{q^*}$ for right-multiplication $p\\mapsto pq^*$. (d) Compare its two plane rotations with those of $L_q$.",
+          "answer": "Write $c=\\cos\\alpha$ and $s=\\sin\\alpha$. Then\n$$L_q=\\begin{pmatrix}c&0&0&-s\\\\0&c&-s&0\\\\0&s&c&0\\\\s&0&0&c\\end{pmatrix}.$$\nIt rotates both mutually orthogonal planes $\\operatorname{span}(w,z)$ and $\\operatorname{span}(x,y)$ by $+\\alpha$. For $q^*=c-sk$, expanding $pq^*$ gives\n$$R_{q^*}=\\begin{pmatrix}c&0&0&s\\\\0&c&-s&0\\\\0&s&c&0\\\\-s&0&0&c\\end{pmatrix}.$$\nThus $R_{q^*}$ rotates the $(x,y)$-plane by $+\\alpha$, the same as $L_q$, but rotates the $(w,z)$-plane by $-\\alpha$, the opposite direction. Consequently, $L_qR_{q^*}$ adds the first pair of rotations and cancels the second.",
+          "extend": "This pair of commuting plane rotations is the exact 4D mechanism behind $p\\mapsto qpq^*$: the 3D rotation doubles to $2\\alpha$ while the real component does not mix with the rotation axis.",
+          "tags": [
+            "Quaternion",
+            "4D rotation",
+            "Sandwich product"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "EX02 9a",
+            "EX02 9b",
+            "EX02 9c",
+            "EX02 9d"
           ],
           "q": "Explain why quaternion rotation uses the sandwich product $p\\mapsto qpq^*$ rather than plain left-multiplication, and why the half-angle $\\alpha=\\theta/2$ appears.",
           "answer": "**Why not left-multiplication.** Take $q=\\cos\\alpha+\\sin\\alpha\\,k$ and the pure quaternion $p=k$ representing $e_3$. Then $L_qp=(-\\sin\\alpha,0,0,\\cos\\alpha)^\\top$, whose real part $-\\sin\\alpha\\neq0$ — the result has \"leaked\" out of the pure (3D) subspace, so it no longer represents a 3D vector.\n**What the sandwich does.** $L_q$ rotates the $(x,y)$-plane by $+\\alpha$ and the $(w,z)$-plane by $+\\alpha$; right-multiplication $R_{q^*}$ rotates $(x,y)$ by $+\\alpha$ and $(w,z)$ by $-\\alpha$. Composing them, the $(w,z)$ rotations **cancel** (so pure quaternions stay pure) while the $(x,y)$ rotations **add** to $2\\alpha$.\n**Half angle.** To realise a rotation by $\\theta$ we need $2\\alpha=\\theta$, i.e. $\\alpha=\\theta/2$:\n$$q=\\cos\\tfrac{\\theta}{2}+\\sin\\tfrac{\\theta}{2}\\,(u_xi+u_yj+u_zk)$$\nfor a rotation by $\\theta$ about the unit axis $u$.",
@@ -657,7 +705,8 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX02 10"
+            "EX02 10a",
+            "EX02 10b"
           ],
           "q": "(a) Show that $q$ and $-q$ give the same rotation. (b) State the $3\\times3$ rotation matrix $R(q)$ for $q=(w,x,y,z)$.",
           "answer": "**(a)** $(-q)p(-q)^*=(-1)q\\cdot p\\cdot(-1)q^*=(-1)^2qpq^*=qpq^*$. So each rotation in $SO(3)$ corresponds to **two** unit quaternions $\\pm q$ — the double cover $S^3\\to SO(3)$.\n**(b)** Computing $qpq^*$ for $p=i,j,k$ and reading off the columns:\n$$R=\\begin{pmatrix}1-2(y^2+z^2)&2(xy-wz)&2(xz+wy)\\\\2(xy+wz)&1-2(x^2+z^2)&2(yz-wx)\\\\2(xz-wy)&2(yz+wx)&1-2(x^2+y^2)\\end{pmatrix}.$$\n**Structure.** The diagonal is $1-2(\\text{sum of the other two squares})$; the off-diagonal pairs differ only in the sign of the $w$-term, which encodes the skew (rotation-angle) part.",

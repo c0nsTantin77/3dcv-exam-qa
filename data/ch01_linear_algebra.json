@@ -308,7 +308,8 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 10"
+            "EX01 10a",
+            "EX01 10b"
           ],
           "q": "Do the following form Hilbert spaces with the given inner product? (a) $\\mathbb{R}^n$ with $\\langle x,y\\rangle=x^\\top y$. (b) $\\mathbb{R}^{n\\times m}$ with $\\langle A,B\\rangle=\\operatorname{trace}(A^\\top B)$.",
           "answer": "**(a) Yes.** Symmetry: $x^\\top y=\\sum_i x_iy_i=y^\\top x$. Linearity is immediate. Positive definiteness: $x^\\top x=\\sum_i x_i^2>0$ for $x\\neq0$.\n**(b) Yes.** Writing $A=[a_1,\\dots,a_m]$ column-wise, $\\operatorname{trace}(A^\\top B)=\\sum_{k=1}^{m}a_k^\\top b_k$ — a sum of standard inner products, so all three properties follow from (a).",
@@ -748,7 +749,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 4"
+            "EX01 4a",
+            "EX01 4b",
+            "EX01 4c"
           ],
           "q": "Which of the following sets forms a group under matrix multiplication? Prove or disprove. (a) $G_1=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)\\neq0,\\ A^\\top=A\\}$ (b) $G_2=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)=-1\\}$ (c) $G_3=\\{A\\in\\mathbb{R}^{n\\times n}\\mid\\det(A)>0\\}$",
           "answer": "**(a) Not a group.** Closure fails: for $A,B\\in G_1$, $(AB)^\\top=B^\\top A^\\top=BA\\neq AB$ in general, so the product need not be symmetric.\n**(b) Not a group.** No identity: $\\det(I)=1\\neq-1$. Closure also fails, since $\\det(AB)=(-1)(-1)=1\\notin G_2$.\n**(c) Yes, a group** (a subgroup of $GL(n)$). Identity: $\\det(I)=1>0$. Closure: $\\det(AB)=\\det(A)\\det(B)>0$. Inverse: $\\det(A^{-1})=1/\\det(A)>0$. Associativity is inherited from matrix multiplication.",
@@ -1152,10 +1155,12 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 15"
+            "EX01 15a",
+            "EX01 15b",
+            "EX01 15c"
           ],
-          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$ have SVD $A=U\\Sigma V^\\top$ with $r$ non-zero singular values. Show that $\\operatorname{rank}(A)=r$, that the null space of $A$ is spanned by the last $n-r$ columns of $V$, and conclude the rank–nullity theorem.",
-          "answer": "**Action on the basis.** $Av_i=\\sigma_iu_i$ for $i=1,\\dots,r$ and $Av_i=0$ for $i=r+1,\\dots,n$.\n**Range.** $\\operatorname{range}(A)=\\operatorname{span}\\{u_1,\\dots,u_r\\}$, so $\\operatorname{rank}(A)=r$.\n**Null space.** $\\ker(A)=\\operatorname{span}\\{v_{r+1},\\dots,v_n\\}$, of dimension $n-r$.\n**Rank–nullity.** $\\operatorname{rank}(A)+\\dim\\ker(A)=r+(n-r)=n$.",
+          "q": "Let $A\\in\\mathbb{R}^{m\\times n}$ have SVD $A=U\\Sigma V^\\top$ with $r$ non-zero singular values. (a) Show that $\\operatorname{rank}(A)=r$ and that the null space is spanned by the last $n-r$ columns of $V$. (b) Conclude the rank–nullity theorem. (c) Compute the SVD of $A=\\begin{pmatrix}1&2\\\\2&4\\\\3&6\\end{pmatrix}$ and verify rank–nullity.",
+          "answer": "**(a)** $Av_i=\\sigma_iu_i$ for $i=1,\\dots,r$ and $Av_i=0$ for $i=r+1,\\dots,n$. Thus $\\operatorname{range}(A)=\\operatorname{span}\\{u_1,\\dots,u_r\\}$, so $\\operatorname{rank}(A)=r$, while $\\ker(A)=\\operatorname{span}\\{v_{r+1},\\dots,v_n\\}$ has dimension $n-r$.\n**(b)** Therefore $\\operatorname{rank}(A)+\\dim\\ker(A)=r+(n-r)=n$.\n**(c)** Factor $A=ab^\\top$ with $a=(1,2,3)^\\top$ and $b=(1,2)^\\top$. Since $\\|a\\|=\\sqrt{14}$ and $\\|b\\|=\\sqrt5$, its compact SVD is\n$$A=\\underbrace{\\frac1{\\sqrt{14}}\\begin{pmatrix}1\\\\2\\\\3\\end{pmatrix}}_{u_1}\\underbrace{\\sqrt{70}}_{\\sigma_1}\\underbrace{\\frac1{\\sqrt5}\\begin{pmatrix}1&2\\end{pmatrix}}_{v_1^\\top}.$$\nThere is one non-zero singular value, hence $\\operatorname{rank}(A)=1$. The remaining right singular vector may be chosen as $v_2=(-2,1)^\\top/\\sqrt5$, which spans $\\ker(A)$. Thus $\\operatorname{rank}(A)+\\dim\\ker(A)=1+1=2=n$.",
           "extend": "$V$ lives in the input space $\\mathbb{R}^n$ (⇒ kernel), $U$ in the output space $\\mathbb{R}^m$ (⇒ range). Mixing them up is the classic error.",
           "tags": [
             "Rank",
@@ -1796,7 +1801,10 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 14"
+            "EX01 14a",
+            "EX01 14b",
+            "EX01 14c",
+            "EX01 14d"
           ],
           "q": "Let $A=U\\Sigma V^\\top$ be the SVD of $A\\in\\mathbb{R}^{m\\times n}$. (a) Write down the dimensions of $U,\\Sigma,V$. (b) Name similarities and differences between SVD and eigenvalue decomposition. (c) Relate $U,\\Sigma,V$ to the eigen-decompositions of $A^\\top A$ and $AA^\\top$. (d) Interpret the singular values.",
           "answer": "**(a)** Full SVD: $U\\in\\mathbb{R}^{m\\times m}$, $\\Sigma\\in\\mathbb{R}^{m\\times n}$ (diagonal, not necessarily square), $V\\in\\mathbb{R}^{n\\times n}$. Thin SVD with rank $r$: $U_r\\in\\mathbb{R}^{m\\times r}$, $\\Sigma_r\\in\\mathbb{R}^{r\\times r}$, $V_r\\in\\mathbb{R}^{n\\times r}$. The dimensions must chain: $(m\\times m)(m\\times n)(n\\times n)=m\\times n$.\n**(b)** Both read as \"rotation × scaling × rotation\". The eigenvalue decomposition $A=PDP^{-1}$ needs $A$ square and diagonalisable and uses **one** basis; the SVD exists for **any** matrix and uses **two** orthonormal bases $U$ and $V$.\n**(c)** Columns of $V$ are eigenvectors of $A^\\top A$; columns of $U$ are eigenvectors of $AA^\\top$; the $\\sigma_i^2$ are the eigenvalues of both.\n**(d)** $\\sigma_1\\ge\\sigma_2\\ge\\dots\\ge0$. The number of non-zero $\\sigma_i$ is $\\operatorname{rank}(A)$; $\\sigma_1=\\|A\\|_2$ (operator norm); $\\sum_i\\sigma_i^2=\\|A\\|_F^2$.",
@@ -1812,7 +1820,9 @@
           "type": "open",
           "freq": 1,
           "sources": [
-            "EX01 16"
+            "EX01 16a",
+            "EX01 16b",
+            "EX01 16c"
           ],
           "q": "The Eckart–Young theorem states that the best rank-$k$ approximation of $A$ in the Frobenius norm is $A_k=\\sum_{i=1}^{k}\\sigma_iu_iv_i^\\top$. (a) Show $\\|A-A_k\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2$. (b) Compare the storage of the full matrix and of the rank-$k$ approximation. (c) When does the rank-$k$ approximation save storage?",
           "answer": "**(a)** $A-A_k=U(\\Sigma-\\Sigma_k)V^\\top$, where $\\Sigma_k$ keeps the first $k$ singular values and zeroes the rest. The Frobenius norm is invariant under multiplication by orthogonal matrices, so\n$$\\|A-A_k\\|_F^2=\\|\\Sigma-\\Sigma_k\\|_F^2=\\sum_{i=k+1}^{r}\\sigma_i^2.$$\n**(b)** Full matrix: $mn$ entries. Rank-$k$: $U_k\\in\\mathbb{R}^{m\\times k}$, the $k$ diagonal entries of $\\Sigma_k$, and $V_k\\in\\mathbb{R}^{n\\times k}$, i.e. $mk+k+nk=k(m+n+1)\\approx k(m+n)$.\n**(c)** Whenever $k(m+n)<mn$, i.e. $k<\\dfrac{mn}{m+n}$; for a square $n\\times n$ matrix that is roughly $k<n/2$.",

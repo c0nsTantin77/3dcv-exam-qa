@@ -1,6 +1,10 @@
 [
   {
     "date": "2026-08-02",
+    "text": "Audited EX01–EX08 against all original exercise and official-solution PDFs, added missing EX02 Problems 7–8 and EX07 Problem 3, restored EX01 Problem 15(c) and EX07 Problem 4(a), and added exact 151-sub-question coverage checks."
+  },
+  {
+    "date": "2026-08-02",
     "text": "Completed 24EDC, 22RDC, 21EFB, 21RFB, 20EFB, 20RFB and 20MFB against exact academic sub-question manifests; all seven now show 100% coverage, with updated recaps and new MATLAB/variational topics."
   },
   {

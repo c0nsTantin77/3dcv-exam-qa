@@ -14,6 +14,7 @@ const questionManifest = JSON.parse(
 const labels = Object.fromEntries(
   Object.keys(questionManifest).map((code) => [code, new Set()]),
 );
+const exerciseOccurrences = new Map();
 const sourceCode = /^(\d\d[MER][A-Z]{2}|EX\d\d)\b/;
 
 for (const file of fs.readdirSync(dataDir)) {
@@ -29,7 +30,12 @@ for (const file of fs.readdirSync(dataDir)) {
           seen.add(code);
         }
         if (code && code in labels) {
-          labels[code].add(source.slice(code.length).trim());
+          const label = source.slice(code.length).trim();
+          labels[code].add(label);
+          if (code.startsWith("EX")) {
+            const key = `${code} ${label}`;
+            exerciseOccurrences.set(key, (exerciseOccurrences.get(key) ?? 0) + 1);
+          }
         }
       }
     }
@@ -55,7 +61,11 @@ for (const [code, expected] of Object.entries(questionManifest)) {
   }
 }
 
-if (incomplete.length > 0) {
+const duplicateExercises = [...exerciseOccurrences]
+  .filter(([, count]) => count !== 1)
+  .map(([source, count]) => `${source} (${count} cards)`);
+
+if (incomplete.length > 0 || duplicateExercises.length > 0) {
   console.error("Exact exam-question coverage failed:");
   for (const item of incomplete) {
     if (item.missing.length) {
@@ -64,6 +74,9 @@ if (incomplete.length > 0) {
     if (item.unexpected.length) {
       console.error("  " + item.code + " unexpected: " + item.unexpected.join(", "));
     }
+  }
+  if (duplicateExercises.length) {
+    console.error("  duplicate exercise sub-questions: " + duplicateExercises.join(", "));
   }
   process.exit(1);
 }
