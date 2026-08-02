@@ -10,7 +10,9 @@ import { Store } from "./store";
 // re-introduce old ids from another device.
 
 // removed-duplicate qid -> kept-question qid
-const MERGES: Record<string, string> = {};
+const MERGES: Record<string, string> = {
+  q5cc7e8fc9: "q863ec39f6",
+};
 
 const PAIRS = Object.entries(MERGES) as [string, string][];
 
