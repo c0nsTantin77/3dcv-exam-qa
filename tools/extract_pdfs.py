@@ -20,9 +20,9 @@ except Exception:
 import fitz  # pymupdf
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-# Course materials live outside the repo (they are not redistributable).
-SRC = pathlib.Path(r"d:/RCI/SS26课程资料/CV2")
 OUT = ROOT / "AK" / "_txt"
+# Course materials live in the workspace parent and are not redistributable.
+SRC = ROOT.parent
 
 KIND = {"midterm": "M", "endterm": "E", "retake": "R"}
 

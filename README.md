@@ -46,9 +46,10 @@ Cards from a **Cremers** paper carry a ★ badge, an amber source chip and a lef
 - Cloud progress expires after 180 days without a successful sign-in or sync; the login account remains
   available. The monthly cleanup is documented in [docs/progress-retention.md](docs/progress-retention.md).
 
-Coverage of the past papers is tracked in [COVERAGE.md](COVERAGE.md): **98 % of 25EDC, 97 % of 25RDC,
-90 % of 22RDC and 89 % of 24EDC** are cited directly. The 2022 endterm (22EDC) is a scan with no text
-layer, so it was transcribed by hand and cannot appear in the automatic table.
+Coverage of the past papers is tracked in [COVERAGE.md](COVERAGE.md): both **2023 Endterm and Retake
+are complete (25/25 and 27/27 sub-questions)**; 98 % of 25EDC, 97 % of 25RDC, 90 % of 22RDC and
+89 % of 24EDC are cited directly. The 2022 endterm (22EDC) is a scan with no text layer, so it was
+transcribed by hand and cannot appear in the automatic table.
 
 ## Development
 
@@ -58,7 +59,7 @@ npm run dev        # http://localhost:4321/3dcv-exam-qa/
 npm run build      # -> dist/
 npm run check      # astro check (types)
 npm run check:ai   # every knowledge point has at least two AI questions
-npm run check:exam # every listed exam/exercise has at least one question
+npm run check:exam # non-empty exams/exercises + exact 2023 sub-question coverage
 npm run test:notes # notes survive an immediate refresh
 npm run preview
 ```
@@ -88,6 +89,7 @@ GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`, `withastro/acti
 
 ## Recent updates
 
+- **2026-08-02** — Completed the 2023 Endterm and Retake papers (25/25 and 27/27 sub-questions), updated all 20 affected knowledge-point recaps, and added exact paper-coverage checks.
 - **2026-08-02** — Added all 8 EX05 and 5 EX06 problems with official solutions, and fixed notes being lost on an immediate refresh.
 - **2026-07-31** — Expanded the AI practice set to 101 questions, guaranteeing at least two for every knowledge point.
 - **2026-07-30** — Added 18 Cremers-style AI questions, two per chapter, covering previously untested concepts.

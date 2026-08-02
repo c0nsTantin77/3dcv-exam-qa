@@ -7,34 +7,54 @@
     {
       "id": "pnp-3d2d",
       "title": "3D-2D Geometry: Perspective-n-Point and the Reprojection Error",
-      "recap": "**PnP.** Given $n$ known 3D points and their 2D projections in a calibrated image, estimate the camera pose $(R,t)$. Classical algorithms include **P3P** (the minimal three-point solver, up to four solutions disambiguated by a fourth point) and **EPnP** (an $O(n)$ method expressing every 3D point in a basis of four virtual control points). Both compute the coordinates of the 3D points in **both** the world and the camera frame, which is what distinguishes them from purely 2D-2D approaches. In practice PnP is wrapped in RANSAC and refined by minimising the reprojection error.\n**Frame conversions — get the transposes right.** If $R_{C\\to W},t_{C\\to W}$ take a point from the camera frame to the world frame, then\n$$R_{W\\to C}=R_{C\\to W}^\\top,\\qquad t_{W\\to C}=-R_{C\\to W}^\\top t_{C\\to W}.$$\nSame pattern as $g^{-1}$ in Chapter 2: transpose the rotation and rotate the negated translation.\n**Computing a reprojection error by hand (a full exam question).**\n1. Transform to the camera frame: $P_C=R_{W\\to C}P_W+t_{W\\to C}$.\n2. Build $K$ from the given parameters — with the principal point at the image centre, $K=\\begin{pmatrix}f&0&W/2\\\\0&f&H/2\\\\0&0&1\\end{pmatrix}$ (e.g. $640\\times480$, $f=800$ ⇒ $c=(320,240)$).\n3. Project and **divide by the third component**: $p'\\sim KP_C$, then $p'=\\big(\\tfrac{(KP_C)_1}{(KP_C)_3},\\tfrac{(KP_C)_2}{(KP_C)_3}\\big)$.\n4. The reprojection error is the Euclidean distance $d=\\|p-p'\\|$ between the detected point and the projection.\nForgetting step 3 (the perspective division) is the single most common way to lose the marks here.",
+      "recap": "**PnP.** Given $n$ known 3D points and their 2D projections in a calibrated image, estimate the camera pose $(R,t)$. Classical algorithms include **P3P** (the minimal three-point solver, up to four solutions disambiguated by a fourth point) and **EPnP** (an $O(n)$ method expressing every 3D point in a basis of four virtual control points). Both compute the coordinates of the 3D points in **both** the world and the camera frame, which is what distinguishes them from purely 2D-2D approaches. In practice PnP is wrapped in RANSAC and refined by minimising the reprojection error.\n**Frame conversions — get the transposes right.** If $R_{C\\to W},t_{C\\to W}$ take a point from the camera frame to the world frame, then\n$$R_{W\\to C}=R_{C\\to W}^\\top,\\qquad t_{W\\to C}=-R_{C\\to W}^\\top t_{C\\to W}.$$\nSame pattern as $g^{-1}$ in Chapter 2: transpose the rotation and rotate the negated translation.\n**Computing a reprojection error by hand (a full exam question).**\n1. Transform to the camera frame: $P_C=R_{W\\to C}P_W+t_{W\\to C}$.\n2. Build $K$ from the given parameters — with the principal point at the image centre, $K=\\begin{pmatrix}f&0&W/2\\\\0&f&H/2\\\\0&0&1\\end{pmatrix}$ (e.g. $640\\times480$, $f=800$ ⇒ $c=(320,240)$).\n3. Project and **divide by the third component**: $p'\\sim KP_C$, then $p'=\\big(\\tfrac{(KP_C)_1}{(KP_C)_3},\\tfrac{(KP_C)_2}{(KP_C)_3}\\big)$.\n4. The reprojection error is the Euclidean distance $d=\\|p-p'\\|$ between the detected point and the projection.\nForgetting step 3 (the perspective division) is the single most common way to lose the marks here.\n**2023 paper focus.** Standard calibrated PnP estimates six-DoF extrinsics from world-frame 3D points and image points. P3P is the three-correspondence minimal solver; EPnP uses four virtual control points; linear DLT needs at least six correspondences and enforces rotation validity afterwards.",
       "questions": [
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23ELI 4a"],
+          "sources": [
+            "23ELI 4a"
+          ],
           "q": "For the perspective-n-point problem, list two algorithms that involve computing the coordinates of the 3D points in **both** the world and the camera frame.",
           "answer": "**P3P** and **EPnP**.\n**P3P** uses three 3D–2D correspondences: from the known inter-point distances in the world frame and the observed viewing angles it solves for the point **depths** in the camera frame (up to four solutions, disambiguated with a fourth point), then recovers $(R,t)$ by 3D–3D alignment.\n**EPnP** expresses every 3D point as a weighted sum of four virtual control points; it solves for the control points' **camera-frame** coordinates from a linear system, then again aligns the two sets of coordinates. It runs in $O(n)$, which is why it is the default in practice.",
           "extend": "Both reduce PnP (3D–2D) to a 3D–3D alignment once the camera-frame coordinates are known — see the ICP/Kabsch knowledge point.",
-          "tags": ["PnP", "P3P", "EPnP", "Pose estimation"]
+          "tags": [
+            "PnP",
+            "P3P",
+            "EPnP",
+            "Pose estimation"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23ELI 4b"],
+          "sources": [
+            "23ELI 4b"
+          ],
           "q": "Given the rotation $R_{C\\to W}$ and translation $t_{C\\to W}$ from the camera frame $C$ to the world frame $W$, express the rotation $R_{W\\to C}$ and translation $t_{W\\to C}$ from the world frame to the camera frame.",
           "answer": "$$R_{W\\to C}=R_{C\\to W}^\\top,\\qquad t_{W\\to C}=-R_{C\\to W}^\\top\\,t_{C\\to W}.$$\n**Why.** Inverting $\\begin{pmatrix}R&t\\\\0&1\\end{pmatrix}$ gives $\\begin{pmatrix}R^\\top&-R^\\top t\\\\0&1\\end{pmatrix}$: the rotation is transposed (orthogonality) and the translation must be negated **and** rotated by the inverse rotation.",
           "extend": "$-t$ alone is wrong — the translation lives in the *other* frame, so it has to be rotated as well.",
-          "tags": ["Pose estimation", "Coordinate frames", "Special Euclidean group"]
+          "tags": [
+            "Pose estimation",
+            "Coordinate frames",
+            "Special Euclidean group"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23ELI 4c"],
+          "sources": [
+            "23ELI 4c"
+          ],
           "q": "A 3D point has world coordinates $P_W=[-0.5,1,5.7]^\\top$. A calibrated camera produces a $640\\times480$ image with focal length $800$ px and principal point at the image centre (no distortion). The point is detected at $p=[393,167]^\\top$. Given $R_{W\\to C}=\\begin{pmatrix}-0.83&-0.56&0\\\\0.56&-0.83&0\\\\0&0&1\\end{pmatrix}$ and $t_{W\\to C}=\\begin{pmatrix}0.70\\\\0.69\\\\-0.19\\end{pmatrix}$, compute the reprojection error.",
           "answer": "**Step 1 — transform to the camera frame.**\n$$P_C=R_{W\\to C}P_W+t_{W\\to C}=\\begin{pmatrix}0.555\\\\-0.420\\\\5.510\\end{pmatrix}.$$\n**Step 2 — build the intrinsic matrix.** The principal point is the image centre, so $c=(320,240)$:\n$$K=\\begin{pmatrix}800&0&320\\\\0&800&240\\\\0&0&1\\end{pmatrix}.$$\n**Step 3 — project and divide by the third component.**\n$$KP_C=\\begin{pmatrix}800(0.555)+320(5.510)\\\\800(-0.420)+240(5.510)\\\\5.510\\end{pmatrix}\\ \\Longrightarrow\\ p'=\\begin{pmatrix}400.581\\\\179.020\\end{pmatrix}.$$\n**Step 4 — reprojection error.**\n$$d=\\|p-p'\\|=\\big\\|(393-400.581,\\ 167-179.020)\\big\\|=\\sqrt{7.581^2+12.020^2}\\approx14.211\\ \\text{px}.$$",
           "extend": "Four steps, four blocks of marks: transform, build $K$, project **with the division**, take the norm. Skipping the perspective division is the classic error.",
-          "tags": ["Reprojection error", "PnP", "Intrinsics", "Pose estimation"]
+          "tags": [
+            "Reprojection error",
+            "PnP",
+            "Intrinsics",
+            "Pose estimation"
+          ]
         },
         {
           "type": "ai",
@@ -65,6 +85,101 @@
             "EPnP",
             "RANSAC"
           ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23ELI 1g"
+          ],
+          "q": "Which statements about 3D-2D geometry are **wrong**?",
+          "answer": "**All four are wrong.** Standard PnP assumes calibrated intrinsics and estimates the six-DoF extrinsic pose from world-frame 3D points and corresponding image points. The minimal PnP case is P3P, using three point correspondences and returning finitely many pose candidates.",
+          "options": [
+            {
+              "text": "PnP algorithms typically estimate extrinsic and intrinsic parameters at the same time.",
+              "correct": true
+            },
+            {
+              "text": "PnP algorithms take 3D points already expressed in the camera frame and their corresponding 2D points as input.",
+              "correct": true
+            },
+            {
+              "text": "PnP algorithms can determine only five degrees of freedom of camera pose.",
+              "correct": true
+            },
+            {
+              "text": "The minimal PnP case requires five point correspondences.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "PnP",
+            "Camera pose"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23ELI 1h"
+          ],
+          "q": "Which statements about perspective-$n$-point algorithms are **wrong**?",
+          "answer": "**Wrong: 1, 2 and 3.** EPnP uses four virtual control points. P3P is formulated from distances and cosines of angles between bearing rays, not circumference angles determined by the 3D points. PnL uses line correspondences and does not require endpoint-to-endpoint matches. Because P3P has the smaller minimal sample, it is better suited than EPnP to RANSAC's sampling stage.",
+          "options": [
+            {
+              "text": "EPnP introduces three control points to estimate the absolute camera pose.",
+              "correct": true
+            },
+            {
+              "text": "P3P relies on circumference angles computed from the input 3D points.",
+              "correct": true
+            },
+            {
+              "text": "Perspective-$n$-line algorithms require an endpoint of a 2D segment to correspond to an endpoint of a 3D segment.",
+              "correct": true
+            },
+            {
+              "text": "With outliers, P3P is more suitable than EPnP for RANSAC in terms of valid sampling.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "P3P",
+            "EPnP",
+            "RANSAC"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23RLI 1i"
+          ],
+          "q": "Which statements about the DLT-based perspective-$n$-point algorithm are correct?",
+          "answer": "**Correct: 1 and 2.** Each 3D-2D match gives two independent linear equations for the $3\\times4$ camera matrix, and at least six non-degenerate correspondences are needed. The design matrix contains many structural zeros. Rotation orthogonality is not enforced in the initial linear system; metric pose is recovered and projected onto a valid rotation afterwards.",
+          "options": [
+            {
+              "text": "Each 3D-2D correspondence provides two linear constraints on the absolute camera pose.",
+              "correct": true
+            },
+            {
+              "text": "The algorithm needs at least six 3D-2D point correspondences.",
+              "correct": true
+            },
+            {
+              "text": "Every element of the linear-system coefficient matrix is non-zero.",
+              "correct": false
+            },
+            {
+              "text": "The linear system directly enforces the rotation orthogonality constraint.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "PnP",
+            "DLT",
+            "Camera pose"
+          ]
         }
       ]
     },
@@ -76,20 +191,33 @@
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23ELI 5a"],
+          "sources": [
+            "23ELI 5a"
+          ],
           "q": "$N$ static 3D points are observed from two viewpoints with coordinates $\\{P_i\\}$ and $\\{Q_i\\}$ in the first and second camera frame, and the correspondences $\\{(P_i,Q_i)\\}$ are known. Define the objective function with respect to $R_{2\\to1}$ and $t_{2\\to1}$ that aligns the corresponding points.",
           "answer": "$$\\min_{R_{2\\to1},\\,t_{2\\to1}}\\ \\sum_{i=1}^{N}\\big\\|R_{2\\to1}Q_i+t_{2\\to1}-P_i\\big\\|^2,$$\nwhere $\\|\\cdot\\|$ is the $L^2$ norm and $R_{2\\to1}\\in SO(3)$.\n**Reading.** $Q_i$ lives in frame 2, so it is the one being transformed; the residual is the 3D distance to its counterpart $P_i$ in frame 1. Note this is a **geometric 3D** error — no projection is involved.",
           "extend": "Get the direction right: $R_{2\\to1}$ acts on the points of frame **2**. Applying it to $P_i$ instead is a sign-and-direction error that propagates through the whole derivation.",
-          "tags": ["ICP", "3D-3D alignment", "Pose estimation"]
+          "tags": [
+            "ICP",
+            "3D-3D alignment",
+            "Pose estimation"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23ELI 5b"],
+          "sources": [
+            "23ELI 5b"
+          ],
           "q": "Given 3D-3D point correspondences, state the main steps to compute the rotation $R_{2\\to1}$ and translation $t_{2\\to1}$.",
           "answer": "**Step 1 — centroids.**\n$$\\mu_P=\\frac1N\\sum_{i=1}^{N}P_i,\\qquad \\mu_Q=\\frac1N\\sum_{i=1}^{N}Q_i.$$\n**Step 2 — centre both point sets.**\n$$\\hat P_i=P_i-\\mu_P,\\qquad \\hat Q_i=Q_i-\\mu_Q.$$\n**Step 3 — cross-covariance matrix.**\n$$W=\\sum_{i=1}^{N}\\hat P_i\\hat Q_i^\\top\\in\\mathbb{R}^{3\\times3}.$$\n**Step 4 — singular value decomposition.** $W=U\\Sigma V^\\top$.\n**Step 5 — rotation.** $R_{2\\to1}=UV^\\top$; if $\\det(UV^\\top)=-1$ use $R=U\\operatorname{diag}\\big(1,1,\\det(UV^\\top)\\big)V^\\top$ to stay in $SO(3)$.\n**Step 6 — translation.** $t_{2\\to1}=\\mu_P-R_{2\\to1}\\mu_Q$.\n**Why centring first.** It decouples the two unknowns: at the optimum the transformed centroid must equal the target centroid, so $t$ is determined by $R$ and the cost reduces to the pure-rotation Procrustes problem $\\max_R\\operatorname{trace}(R^\\top W)$.",
           "extend": "This is the orthogonal-Procrustes projection of Chapter 1 in disguise — same $UV^\\top$, same determinant fix.",
-          "tags": ["ICP", "SVD", "3D-3D alignment", "Procrustes"]
+          "tags": [
+            "ICP",
+            "SVD",
+            "3D-3D alignment",
+            "Procrustes"
+          ]
         },
         {
           "type": "ai",
@@ -126,43 +254,69 @@
     {
       "id": "ransac-robust",
       "title": "Outlier Removal: Epipolar Distance, RANSAC and EM",
-      "recap": "**Geometric outlier test with a known pose.** With $R_{1\\to2}$, $t_{1\\to2}$ and $K$ known:\n1. $E=[t_{1\\to2}]_\\times R_{1\\to2}$;\n2. $F=K^{-\\top}EK^{-1}$ (needed because the test is run in the **ordinary pixel** image plane, not the normalised one);\n3. epipolar line of $p$ in image 2: $l=[a,b,c]^\\top=Fp$;\n4. **point-to-line distance**\n$$d=\\frac{|a\\,x_q+b\\,y_q+c|}{\\sqrt{a^2+b^2}};$$\n5. if $d>\\delta$ the correspondence $(p,q)$ is an **outlier**, otherwise an inlier.\nThe $\\sqrt{a^2+b^2}$ normalisation matters — $|l^\\top q|$ alone is not a distance in pixels.\n**RANSAC.** Repeat for $N$ iterations: sample a **minimal set** (5 points for $E$ with known calibration, 4 for a homography, 8 for the linear $F$), fit the model, count inliers under the residual above. Choose the model by **inlier-set maximisation** — the candidate explaining the largest number of correspondences. Then **refine**: recompute a least-squares solution using **all** the inliers of the winning model. Both halves are examined: the selection criterion *and* the refit.\n**EM / iteratively re-weighted alternative.** Instead of hard inlier/outlier decisions, alternate:\n$\\bullet$ **E-step** — update the inlier probabilities. Using the fundamental matrix from iteration $i{-}1$, compute each correspondence's point-to-line distance and assign a weight that is **inversely proportional** to it.\n$\\bullet$ **M-step** — update the model. Assemble those weights into a diagonal matrix $W$, build the DLT coefficient matrix $A$ from **all** correspondences, and solve the weighted system $WAx=0$ (again by the smallest right singular vector).\nCompared with RANSAC this uses every correspondence with a soft weight instead of discarding data, but it needs a reasonable initialisation and can converge to a local optimum.\n**Robust losses.** The same idea appears inside bundle adjustment as the **Huber loss** $\\rho_\\delta(r)$ — quadratic for small residuals, linear beyond $\\delta$ — which caps the influence of outliers while keeping the problem smooth.",
+      "recap": "**Geometric outlier test with a known pose.** With $R_{1\\to2}$, $t_{1\\to2}$ and $K$ known:\n1. $E=[t_{1\\to2}]_\\times R_{1\\to2}$;\n2. $F=K^{-\\top}EK^{-1}$ (needed because the test is run in the **ordinary pixel** image plane, not the normalised one);\n3. epipolar line of $p$ in image 2: $l=[a,b,c]^\\top=Fp$;\n4. **point-to-line distance**\n$$d=\\frac{|a\\,x_q+b\\,y_q+c|}{\\sqrt{a^2+b^2}};$$\n5. if $d>\\delta$ the correspondence $(p,q)$ is an **outlier**, otherwise an inlier.\nThe $\\sqrt{a^2+b^2}$ normalisation matters — $|l^\\top q|$ alone is not a distance in pixels.\n**RANSAC.** Repeat for $N$ iterations: sample a **minimal set** (5 points for $E$ with known calibration, 4 for a homography, 8 for the linear $F$), fit the model, count inliers under the residual above. Choose the model by **inlier-set maximisation** — the candidate explaining the largest number of correspondences. Then **refine**: recompute a least-squares solution using **all** the inliers of the winning model. Both halves are examined: the selection criterion *and* the refit.\n**EM / iteratively re-weighted alternative.** Instead of hard inlier/outlier decisions, alternate:\n$\\bullet$ **E-step** — update the inlier probabilities. Using the fundamental matrix from iteration $i{-}1$, compute each correspondence's point-to-line distance and assign a weight that is **inversely proportional** to it.\n$\\bullet$ **M-step** — update the model. Assemble those weights into a diagonal matrix $W$, build the DLT coefficient matrix $A$ from **all** correspondences, and solve the weighted system $WAx=0$ (again by the smallest right singular vector).\nCompared with RANSAC this uses every correspondence with a soft weight instead of discarding data, but it needs a reasonable initialisation and can converge to a local optimum.\n**Robust losses.** The same idea appears inside bundle adjustment as the **Huber loss** $\\rho_\\delta(r)$ — quadratic for small residuals, linear beyond $\\delta$ — which caps the influence of outliers while keeping the problem smooth.\n**2023 paper focus.** Three complementary outlier strategies are RANSAC (hard consensus), EM (soft inlier probabilities), and robust M-estimators such as Huber loss (continuous down-weighting).",
       "questions": [
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23RLI 5a"],
+          "sources": [
+            "23RLI 5a"
+          ],
           "q": "A calibrated monocular camera with intrinsics $K$ gives two images; the relative rotation $R_{1\\to2}$ and translation $t_{1\\to2}$ are known accurately. For a point $p=[x_p,y_p]^\\top$ in $I_1$ and $q=[x_q,y_q]^\\top$ in $I_2$, state how to (1) compute the epipolar line using $\\{K,R_{1\\to2},t_{1\\to2}\\}$ and (2) use the point-to-line distance to classify $(p,q)$ as inlier or outlier with threshold $\\delta$ pixels in the ordinary image plane.",
           "answer": "**1. Essential matrix.** From the known motion,\n$$E=[t_{1\\to2}]_\\times R_{1\\to2}.$$\n**2. Fundamental matrix** (because the test must run in the **ordinary** image plane, not the normalised one):\n$$F=K^{-\\top}EK^{-1}.$$\n**3. Epipolar line** of $p$ in image 2, in homogeneous coordinates:\n$$l=[a,b,c]^\\top=Fp.$$\n**4. Point-to-line distance:**\n$$d=\\frac{|a\\,x_q+b\\,y_q+c|}{\\sqrt{a^2+b^2}}.$$\n**5. Decision.** If $d>\\delta$ the correspondence $(p,q)$ is an **outlier**; otherwise it is an **inlier**.",
           "extend": "The division by $\\sqrt{a^2+b^2}$ is what turns the algebraic residual $l^\\top q$ into an actual **pixel** distance — without it the threshold $\\delta$ is meaningless.",
-          "tags": ["RANSAC", "Epipolar line", "Fundamental matrix", "Outliers"]
+          "tags": [
+            "RANSAC",
+            "Epipolar line",
+            "Fundamental matrix",
+            "Outliers"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23RLI 5b"],
+          "sources": [
+            "23RLI 5b"
+          ],
           "q": "RANSAC is combined with the five-point method to remove outliers from 2D-2D correspondences: $N$ iterations, sampling 5 points each, giving $N$ candidate essential matrices. (1) How do you determine the optimal essential matrix among the candidates? (2) After determining it, what is the common practice to improve its accuracy?",
           "answer": "**(1) Inlier-set maximisation.** For each candidate, count how many correspondences it explains — i.e. whose point-to-epipolar-line distance falls below the threshold. The **optimal essential matrix is the candidate with the largest number of inliers**.\n**(2) Refit on the inliers.** Take **all** the inlier correspondences associated with the winning model and compute a **least-squares** solution of the essential matrix from them (e.g. the eight-point algorithm followed by the projection onto the essential space). The minimal 5-point solution used inside RANSAC only had to find the right inlier set; the final accuracy comes from using all of the good data.",
           "extend": "RANSAC's job is **model selection**, not estimation. Always follow it with a refit — omitting that step is a standard half-mark loss.",
-          "tags": ["RANSAC", "Essential matrix", "Outliers"]
+          "tags": [
+            "RANSAC",
+            "Essential matrix",
+            "Outliers"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23RLI 5c"],
+          "sources": [
+            "23RLI 5c"
+          ],
           "q": "An EM algorithm is combined with DLT-based fundamental matrix estimation to remove outliers. State the main procedures of the E-step and the M-step at iteration $i>1$, assuming iteration $i-1$ is complete. (Hint: use the point-to-epipolar-line distance as inlier criterion; a diagonal weight matrix $W$ with the system $Ax=0$ gives $WAx=0$.)",
           "answer": "**E-step — update the inlier probabilities.** For each correspondence $(p_k,q_k)$: using the fundamental matrix estimated at iteration $i-1$, compute the epipolar line $l=Fp_k$ and then the point-to-line distance $d_k$ of $q_k$. Assign the correspondence a **weight inversely proportional to $d_k$** — correspondences close to their epipolar line are probably inliers and get a large weight; distant ones get a weight near zero.\n**M-step — update the fundamental matrix.** Collect the weights into a diagonal matrix $W$, build the DLT coefficient matrix $A$ from **all** correspondences, and solve the **weighted** linear system\n$$WAx=0$$\n(again as the right singular vector of the smallest singular value) to obtain the updated fundamental matrix. Iterate until convergence.",
           "extend": "This is soft RANSAC — instead of a hard inlier set it keeps every correspondence with a continuous weight, which is smoother but needs a decent initialisation.",
-          "tags": ["EM algorithm", "Fundamental matrix", "Outliers", "DLT"]
+          "tags": [
+            "EM algorithm",
+            "Fundamental matrix",
+            "Outliers",
+            "DLT"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23RLI 3a"],
+          "sources": [
+            "23RLI 3a"
+          ],
           "q": "The eight-point method computes the fundamental matrix from $N$ 2D-2D correspondences. (1) Compared with the classical version, what is the main advantage of the **normalised** version? (2) State the main steps of Hartley's normalised eight-point method, with the necessary mathematical expressions.",
           "answer": "**(1) Advantage.** Normalisation greatly improves the **numerical stability** of the linear system: raw pixel coordinates are of order $10^2$–$10^3$, so the columns of the coefficient matrix differ by many orders of magnitude and the smallest singular vector becomes dominated by round-off. After normalisation the solution is far **less sensitive to noise**.\n**(2) Steps.**\n**Step 1 — normalise each image's points** so that they have zero mean and average distance $\\sqrt2$ from the origin:\n$$\\hat p_i=\\frac{\\sqrt2}{\\sigma}(p_i-\\mu),\\qquad \\hat p_i=\\underbrace{\\begin{pmatrix}\\tfrac{\\sqrt2}{\\sigma}&0&-\\tfrac{\\sqrt2}{\\sigma}\\mu_x\\\\0&\\tfrac{\\sqrt2}{\\sigma}&-\\tfrac{\\sqrt2}{\\sigma}\\mu_y\\\\0&0&1\\end{pmatrix}}_{B_1}p_i,$$\nwhere $\\mu=[\\mu_x,\\mu_y]^\\top$ is the centroid and $\\sigma$ the standard deviation of the point set. Similarly $\\hat q_i=B_2q_i$ for the second image.\n**Step 2 — estimate the normalised fundamental matrix $\\hat F$** with the classical DLT / eight-point algorithm on the normalised correspondences $(\\hat p_i,\\hat q_i)$.\n**Step 3 — undo the normalisation:**\n$$F=B_2^\\top\\hat FB_1.$$",
           "extend": "Note the transposes: $B_2^\\top$ on the **left** (it acted on the second image's points, which sit on the left of $q^\\top Fp$) and $B_1$ on the right.",
-          "tags": ["Eight-point algorithm", "Fundamental matrix", "Normalisation"]
+          "tags": [
+            "Eight-point algorithm",
+            "Fundamental matrix",
+            "Normalisation"
+          ]
         },
         {
           "type": "ai",
@@ -193,6 +347,20 @@
             "EM",
             "Robust estimation"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23ELI 5c"
+          ],
+          "q": "In practice, 3D-3D point correspondences contain outliers. Name three methods for removing or reducing the influence of outliers.",
+          "answer": "**Expectation-maximisation (EM), RANSAC, and a robust M-estimator/kernel such as the Huber loss.** RANSAC searches for a consistent inlier set; EM assigns soft inlier probabilities; a robust kernel down-weights large residuals.",
+          "tags": [
+            "Outliers",
+            "RANSAC",
+            "Robust kernels"
+          ]
         }
       ]
     },
@@ -204,72 +372,156 @@
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23RLI 6a", "23RLI 6b", "23RLI 6c"],
-          "q": "(a) State two main types of SfM, and say which is more similar to SLAM. (b) What is the relationship between visual odometry (VO) and SLAM? (c) Name two representative feature-based SLAM/VO methods and two representative direct methods.",
-          "answer": "**(a)** **Hierarchical SfM** and **sequential (incremental) SfM**. **Sequential SfM is more similar to SLAM**, since it also processes images in temporal order, extending the reconstruction frame by frame.\n**(b)** **SLAM can be treated as a combination of VO and loop closure.** VO estimates the camera motion incrementally and therefore drifts; SLAM adds place recognition and global optimisation to keep the map consistent over long trajectories.\n**(c)** **Feature-based:** PTAM, ORB-SLAM. **Direct:** LSD-SLAM, DSO.",
+          "sources": [
+            "23RLI 6a"
+          ],
+          "q": "(1) State the two main types of structure from motion (SfM). (2) Which type is more similar to SLAM?",
+          "answer": "**(1)** Hierarchical SfM and sequential (incremental) SfM. **(2) Sequential SfM** is more similar to SLAM because it processes images in temporal order and extends the reconstruction frame by frame.",
+          "tags": [
+            "SLAM",
+            "Structure from motion"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23RLI 6b"
+          ],
+          "q": "What is the relationship between visual odometry (VO) and SLAM?",
+          "answer": "**SLAM can be treated as VO plus loop closure.** VO estimates motion incrementally and therefore drifts; SLAM additionally recognises revisited places and performs global optimisation to keep the trajectory and map consistent.",
           "extend": "The one-line definition worth memorising: SLAM = VO + loop closure (+ a globally consistent map).",
-          "tags": ["SLAM", "Structure from motion", "Visual odometry"]
+          "tags": [
+            "SLAM",
+            "Visual odometry",
+            "Loop closure"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23RLI 6d", "23RLI 6e"],
-          "q": "(a) For the loop-closure module of SLAM, which two types of data are commonly used to detect a trajectory loop? (b) What equipment or technology can be used to obtain ground-truth trajectories? Name two.",
-          "answer": "**(a)** **Images** and **point clouds**. Images are matched by appearance-based place recognition (e.g. bag-of-words over visual features); point clouds are matched by geometric registration. In practice a candidate loop is proposed by appearance and then **geometrically verified** before being accepted.\n**(b)** **Global positioning system (GPS)** and a **motion-tracking (motion-capture) system**. GPS is used outdoors; a marker-based tracking system provides millimetre-accurate indoor ground truth (this is how the TUM RGB-D and TUM VIE benchmarks are recorded).",
-          "extend": "A false loop closure is far more damaging than a missed one — it warps the whole map — which is why verification is mandatory.",
-          "tags": ["Loop closure", "SLAM", "Benchmark"]
+          "sources": [
+            "23RLI 6c"
+          ],
+          "q": "(1) Name two representative feature-based SLAM/VO methods. (2) Name two representative direct SLAM/VO methods.",
+          "answer": "**Feature-based:** PTAM and ORB-SLAM. **Direct:** LSD-SLAM and DSO.",
+          "tags": [
+            "SLAM",
+            "Feature-based",
+            "Direct methods"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23RLI 6f"],
+          "sources": [
+            "23RLI 6d"
+          ],
+          "q": "For the loop-closure module of SLAM, which two types of data are commonly used to detect a trajectory loop?",
+          "answer": "**Images and point clouds.** Images support appearance-based place recognition, while point clouds support geometric registration. A proposed loop should be geometrically verified before it is accepted.",
+          "extend": "A false loop closure can warp the entire map, which is why verification is mandatory.",
+          "tags": [
+            "Loop closure",
+            "SLAM"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23RLI 6e"
+          ],
+          "q": "Name two types of equipment or technology that can provide ground-truth trajectories.",
+          "answer": "**Global positioning system (GPS)** and a **motion-tracking or motion-capture system**. GPS is commonly used outdoors; a calibrated tracking system supplies accurate indoor ground truth.",
+          "tags": [
+            "SLAM",
+            "Benchmark",
+            "Ground truth"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23RLI 6f"
+          ],
           "q": "Given estimated and ground-truth trajectories associated by time stamp into $N$ position pairs $(c_k,\\hat c_k)$: (1) how do you align the estimated trajectory to the ground truth (objective function and the name of a method)? (2) After alignment, how is the accuracy evaluated (define the RMSE)?",
           "answer": "**(1) Alignment.** Denote by $R,t,s$ the rotation, translation and scale of the **similarity** transformation. The objective is\n$$\\tilde R,\\tilde t,\\tilde s=\\arg\\min_{R,t,s}\\sum_{k=1}^{N}\\big\\|\\hat c_k-s\\,Rc_k-t\\big\\|^2.$$\nIt is minimised in closed form by **Horn's method** or **Umeyama's method**.\n**(2) Accuracy.** With the optimal $\\tilde R,\\tilde t,\\tilde s$, the **absolute trajectory error** is reported as the root mean square error\n$$\\text{RMSE}=\\sqrt{\\frac{\\sum_{k=1}^{N}\\big\\|\\hat c_k-\\tilde s\\tilde Rc_k-\\tilde t\\big\\|^2}{N}}.$$",
           "extend": "The scale $s$ is included because a **monocular** trajectory is only defined up to scale — for stereo or RGB-D one aligns with a rigid ($SE(3)$) transform instead.",
-          "tags": ["SLAM", "Benchmark", "Absolute trajectory error"]
+          "tags": [
+            "SLAM",
+            "Benchmark",
+            "Absolute trajectory error"
+          ]
         },
         {
           "type": "ai",
           "freq": 0,
-          "sources": ["AI practice"],
+          "sources": [
+            "AI practice"
+          ],
           "q": "COLMAP is applied to uncalibrated images with substantial radial distortion. (a) Why can estimating a fundamental matrix absorb an unknown focal length but not arbitrary radial distortion? (b) What does PRaDA estimate, what does it deliberately leave for COLMAP, and where can it enter the pipeline?",
           "answer": "**(a)** Unknown focal length is part of the projective camera calibration and can be represented through the relationship between $F$, the intrinsics and the epipolar geometry. Radial distortion is a **nonlinear, radius-dependent warp of the measured pixels**; distorted correspondences no longer satisfy one linear epipolar constraint in the original image coordinates, so a pinhole $F$ cannot simply absorb it.\n**(b)** PRaDA separates calibration into **radial distortion** and **focal length**. It estimates the distortion parameters only and produces automatically undistorted images independently of the focal length; the focal length remains for COLMAP's ordinary calibration/reconstruction machinery. PRaDA can be used as an image-preprocessing/distortion-estimation step and inside distortion-aware geometric verification before the standard incremental SfM pipeline.",
           "extend": "The design principle is modular: remove the nonlinear distortion first, then let the established pinhole SfM system handle focal length, matching and reconstruction.",
-          "tags": ["PRaDA", "COLMAP", "Radial distortion", "Structure from motion"]
+          "tags": [
+            "PRaDA",
+            "COLMAP",
+            "Radial distortion",
+            "Structure from motion"
+          ]
         },
         {
           "type": "ai",
           "freq": 0,
-          "sources": ["AI practice"],
+          "sources": [
+            "AI practice"
+          ],
           "q": "Why are cameras and IMUs complementary for visual-inertial odometry? State the measurements and typical failure mode of each, then name the main state-variable and factor types in a VIO factor graph such as BASALT.",
           "answer": "**IMU.** A gyroscope measures three-axis angular velocity and an accelerometer measures three-axis specific force at roughly $200$–$1000$ Hz. It works without external light and gives low-latency motion, but it is noisy and biased; integrating acceleration and angular velocity makes pose error drift rapidly.\n**Camera.** Images arrive more slowly (roughly $15$–$60$ Hz) and fail under darkness, blur or weak texture, but visual reprojection constraints anchor the trajectory to the observed scene and correct long-term IMU drift. Stereo can additionally provide metric depth.\n**Factor graph.** Typical state nodes are keyframe poses, velocities, gyroscope/accelerometer biases and 3D landmarks (plus calibration parameters when estimated). **Visual reprojection factors** connect a pose to a landmark, **IMU preintegration factors** connect consecutive pose/velocity/bias states, and a **marginalisation prior** carries information from states removed from the active window. Joint optimisation fuses the high-rate relative motion with the slower geometric anchor.",
           "extend": "The sensors fail in different ways: the IMU is locally responsive but globally drifting; the camera is globally corrective but intermittently unreliable.",
-          "tags": ["Visual-inertial odometry", "IMU", "Factor graph", "SLAM"]
+          "tags": [
+            "Visual-inertial odometry",
+            "IMU",
+            "Factor graph",
+            "SLAM"
+          ]
         }
       ]
     },
     {
       "id": "vanishing-points",
       "title": "Single-View Geometry: Vanishing Points and the Manhattan World",
-      "recap": "**Vanishing point.** The image of the point at infinity of a 3D direction: all lines parallel to a direction $d$ project to lines meeting at $v\\sim Kd$. Conversely the **vanishing direction** is recovered by back-projection,\n$$d=K^{-1}v$$\n(up to scale). A vanishing point is a **point in the image**; a vanishing direction is a **3D unit vector** — treating $v$ itself as a direction is an explicitly penalised mistake.\n**Manhattan world assumption.** The scene is dominated by three **mutually orthogonal** directions (walls, floor, ceiling of a man-made environment). Hence the three vanishing directions form an orthonormal triad, and the third follows from the other two by a **cross product**:\n$$d_1=K^{-1}v_1,\\quad d_2=K^{-1}v_2,\\quad d_3=d_1\\times d_2,\\quad v_3=Kd_3.$$\n**Verifying a rotation from vanishing points.** If the vanishing points $\\{v'_i\\}$ of a second image are associated with $\\{v_i\\}$ of the first, then a candidate relative rotation $R_{1\\to2}$ is correct iff it maps the directions onto each other:\n$$d'_i=K^{-1}v'_i,\\qquad d''_i=R_{1\\to2}d_i,\\qquad d''_i\\ \\overset{!}{\\sim}\\ d'_i\\ \\ (i=1,2,3),$$\nwhere $\\sim$ means equal **up to scale** (the directions are only defined projectively; normalise, and allow a sign flip). Only the rotation is applied — translation does not move points at infinity, which is exactly why vanishing points give rotation without any depth information.\n**Practical value.** Three orthogonal vanishing points determine the camera rotation relative to the scene from a **single image**, and (with enough constraints) can even calibrate the focal length — the basis of many indoor layout and drift-free-rotation methods.",
+      "recap": "**Vanishing point.** The image of the point at infinity of a 3D direction: all lines parallel to a direction $d$ project to lines meeting at $v\\sim Kd$. Conversely the **vanishing direction** is recovered by back-projection,\n$$d=K^{-1}v$$\n(up to scale). A vanishing point is a **point in the image**; a vanishing direction is a **3D unit vector** — treating $v$ itself as a direction is an explicitly penalised mistake.\n**Manhattan world assumption.** The scene is dominated by three **mutually orthogonal** directions (walls, floor, ceiling of a man-made environment). Hence the three vanishing directions form an orthonormal triad, and the third follows from the other two by a **cross product**:\n$$d_1=K^{-1}v_1,\\quad d_2=K^{-1}v_2,\\quad d_3=d_1\\times d_2,\\quad v_3=Kd_3.$$\n**Verifying a rotation from vanishing points.** If the vanishing points $\\{v'_i\\}$ of a second image are associated with $\\{v_i\\}$ of the first, then a candidate relative rotation $R_{1\\to2}$ is correct iff it maps the directions onto each other:\n$$d'_i=K^{-1}v'_i,\\qquad d''_i=R_{1\\to2}d_i,\\qquad d''_i\\ \\overset{!}{\\sim}\\ d'_i\\ \\ (i=1,2,3),$$\nwhere $\\sim$ means equal **up to scale** (the directions are only defined projectively; normalise, and allow a sign flip). Only the rotation is applied — translation does not move points at infinity, which is exactly why vanishing points give rotation without any depth information.\n**Practical value.** Three orthogonal vanishing points determine the camera rotation relative to the scene from a **single image**, and (with enough constraints) can even calibrate the focal length — the basis of many indoor layout and drift-free-rotation methods.\n**2023 paper focus.** Vanishing points are projections of directions/points at infinity and may lie outside the image. Manhattan directions are orthogonal; the two horizontal vanishing points define the horizon. Translation does not move vanishing points.",
       "questions": [
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23ELI 6a"],
+          "sources": [
+            "23ELI 6a"
+          ],
           "q": "In a man-made environment satisfying the Manhattan world assumption with known intrinsics $K$, two vanishing points $v_1,v_2$ have been estimated in image $I_1$. State how to compute the third vanishing point $v_3$ in $I_1$.",
           "answer": "**Step 1 — back-project to vanishing directions.**\n$$d_1=K^{-1}v_1,\\qquad d_2=K^{-1}v_2.$$\n**Step 2 — use the Manhattan assumption.** The three dominant directions are mutually orthogonal, so the third vanishing direction is orthogonal to both:\n$$d_3=d_1\\times d_2.$$\n**Step 3 — project back into the image.**\n$$v_3=Kd_3.$$",
           "extend": "$v_i$ is a **pixel**, $d_i$ a **3D direction** — they are related by $K$. Treating the vanishing point itself as a direction scores zero for that step.",
-          "tags": ["Vanishing point", "Manhattan world", "Single-view geometry"]
+          "tags": [
+            "Vanishing point",
+            "Manhattan world",
+            "Single-view geometry"
+          ]
         },
         {
           "type": "open",
           "freq": 1,
-          "sources": ["23ELI 6b"],
+          "sources": [
+            "23ELI 6b"
+          ],
           "q": "In image $I_2$ three vanishing points $\\{v'_i\\}_{i=1}^3$ have been estimated, and $v'_i$ is known to correspond to $v_i$ in $I_1$. How can this be used to check whether a candidate relative rotation $R_{1\\to2}$ is correct (ignoring noise)?",
           "answer": "**Step 1 — vanishing directions in the second frame.**\n$$d'_i=K^{-1}v'_i,\\qquad i=1,2,3.$$\n**Step 2 — rotate the first frame's directions into the second frame.** Only the rotation is applied (a translation does not move points at infinity):\n$$d''_i=R_{1\\to2}\\,d_i.$$\n**Step 3 — compare.** If $\\{d''_i\\}_{i=1}^3$ are aligned with $\\{d'_i\\}_{i=1}^3$ respectively — i.e. corresponding vectors are **equal up to scale** — then $R_{1\\to2}$ is a correct rotation. Otherwise it is not.",
           "extend": "Because points at infinity are translation-invariant, vanishing points constrain the **rotation only** — which is precisely what makes them useful for drift-free orientation in man-made scenes.",
-          "tags": ["Vanishing point", "Manhattan world", "Rotation"]
+          "tags": [
+            "Vanishing point",
+            "Manhattan world",
+            "Rotation"
+          ]
         },
         {
           "type": "ai",
@@ -300,6 +552,70 @@
             "Rotation estimation",
             "SO(3) projection"
           ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23RLI 1b"
+          ],
+          "q": "Which statements about perspective projection are correct?",
+          "answer": "**Correct: 1 and 3.** Vanishing points need not lie inside the finite image. The optical centre-to-image-plane distance is focal length, not scene depth. In a Manhattan scene the line through the two horizontal vanishing points is the horizon. Field of view decreases as focal length increases for a fixed sensor size.",
+          "options": [
+            {
+              "text": "Vanishing points can lie inside or outside the image.",
+              "correct": true
+            },
+            {
+              "text": "The distance from the camera centre to the image plane is called depth.",
+              "correct": false
+            },
+            {
+              "text": "In a Manhattan world, the line through the two horizontal vanishing points is the horizon.",
+              "correct": true
+            },
+            {
+              "text": "Field of view is proportional to focal length.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Vanishing points",
+            "Horizon",
+            "Field of view"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23RLI 1j"
+          ],
+          "q": "Which statements about single-view geometry are correct?",
+          "answer": "**Correct: 2, 3 and 4.** A vanishing point is the meeting point of projected parallel 3D lines, not epipolar lines. Manhattan directions are mutually orthogonal. Projectively, a vanishing point is the image of a point at infinity. Under spherical projection, an image line lifts to a projection plane through the camera centre whose intersection with the unit sphere is a great circle.",
+          "options": [
+            {
+              "text": "A vanishing point is the intersection of a set of epipolar lines in an image.",
+              "correct": false
+            },
+            {
+              "text": "In a Manhattan world, vanishing directions are mutually orthogonal.",
+              "correct": true
+            },
+            {
+              "text": "A vanishing point is the perspective projection of a 3D point at infinity.",
+              "correct": true
+            },
+            {
+              "text": "A great circle is the intersection of the unit sphere and the projection plane associated with an image line.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Vanishing point",
+            "Manhattan world",
+            "Spherical projection"
+          ]
         }
       ]
     },
@@ -311,11 +627,17 @@
         {
           "type": "open",
           "freq": 0,
-          "sources": ["Lecture 8"],
+          "sources": [
+            "Lecture 8"
+          ],
           "q": "Compare explicit and implicit shape representations for dense multi-view reconstruction, and explain why the implicit formulation admits a convex relaxation.",
           "answer": "**Explicit representations** parameterise the surface itself — meshes, triangulations, splines, point clouds. They are compact and directly renderable, but the **topology is fixed** by the parameterisation, so splitting, merging or creating holes during the optimisation is difficult, and self-intersections must be prevented by hand.\n**Implicit representations** define the surface as a level set of a scalar field, e.g. $S=\\{x\\mid\\phi(x)=0\\}$ with $\\phi$ a signed distance or an indicator/occupancy function. **Topology changes come for free**, and set operations are trivial; the cost is memory proportional to the enclosing volume and an extra surface-extraction step (marching cubes).\n**Convex relaxation.** Writing multi-view reconstruction as a weighted minimal surface, $\\min_S\\int_Sg(x)\\,dA$ with $g$ a photoconsistency weight, and encoding $S$ by a **binary** indicator gives a combinatorial problem. Relaxing the indicator from $\\{0,1\\}$ to the interval $[0,1]$ makes the energy **convex**, so a global minimiser can be computed; **thresholding** the relaxed solution then returns a binary shape — with the guarantee that the thresholded result is optimal for the original problem in the standard formulation. Silhouette consistency can be added as a further convex constraint.",
           "extend": "This is the classical answer to the local-minimum problem: change the representation until the energy becomes convex, then threshold.",
-          "tags": ["Dense reconstruction", "Variational methods", "Shape representation"]
+          "tags": [
+            "Dense reconstruction",
+            "Variational methods",
+            "Shape representation"
+          ]
         },
         {
           "type": "ai",

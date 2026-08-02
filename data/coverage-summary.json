@@ -1,7 +1,7 @@
 {
-  "overall_pct": 65,
-  "cited": 286,
-  "detected": 439,
+  "overall_pct": 74,
+  "cited": 321,
+  "detected": 435,
   "per_exam": [
     {
       "exam": "25EDC",
@@ -29,15 +29,15 @@
     },
     {
       "exam": "23ELI",
-      "det": 29,
-      "cit": 7,
-      "pct": 24
+      "det": 25,
+      "cit": 25,
+      "pct": 100
     },
     {
       "exam": "23RLI",
       "det": 27,
-      "cit": 10,
-      "pct": 37
+      "cit": 27,
+      "pct": 100
     },
     {
       "exam": "21EFB",
