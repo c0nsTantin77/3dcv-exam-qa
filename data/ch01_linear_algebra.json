@@ -415,7 +415,7 @@
     {
       "id": "groups",
       "title": "Groups and the Matrix Groups of 3D Vision",
-      "recap": "**Group.** A set $G$ with an operation $\\circ:G\\times G\\to G$ satisfying exactly four axioms: **(1) closure** $g_1\\circ g_2\\in G$; **(2) associativity** $(g_1\\circ g_2)\\circ g_3=g_1\\circ(g_2\\circ g_3)$; **(3) neutral element** $\\exists e\\in G:\\ e\\circ g=g\\circ e=g$; **(4) inverse** $\\forall g\\ \\exists g^{-1}\\in G:\\ g\\circ g^{-1}=g^{-1}\\circ g=e$. **Commutativity is *not* an axiom** — that is the single most repeated MC trap.\n**$GL(n)$** — general linear group: all $A\\in\\mathbb{R}^{n\\times n}$ with $\\det(A)\\neq0$.\n**$SL(n)$** — special linear group: $\\det(A)=1$ (closed because $\\det(A^{-1})=\\det(A)^{-1}$).\n**$O(n)$** — orthogonal group: $R^\\top R=RR^\\top=I$, equivalently $\\langle Rx,Ry\\rangle=\\langle x,y\\rangle$. From $\\det(R^\\top R)=\\det(R)^2=1$ we get $\\det(R)\\in\\{-1,+1\\}$.\n**$SO(n)=O(n)\\cap SL(n)$** — rotations, $\\det(R)=+1$ only. $SO(3)$ = all 3D rotation matrices.\n**$A(n)$** — affine group: $L(x)=Ax+b$ with $A\\in GL(n)$. Not linear unless $b=0$; in homogeneous coordinates it becomes the linear $\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}\\in GL(n+1)$.\n**$E(n)$** — Euclidean group: $x\\mapsto Rx+T$ with $R\\in O(n)$. **$SE(n)$** — special Euclidean group, $R\\in SO(n)$; $SE(3)$ = the rigid-body motions.\n**Inclusions to memorise.** $SO(n)\\subset O(n)\\subset GL(n)$, $SO(n)\\subset SL(n)\\subset GL(n)$, and $SE(n)\\subset E(n)\\subset A(n)\\subset GL(n+1)$ — note the $n+1$: the affine/Euclidean groups only become matrix groups after homogenisation. $SL(n)\\subset O(n)$ is **false**.\n**Standard exam counterexamples.** $\\{A\\mid\\det A=-1\\}$ is not a group (no identity, not closed). $\\{A\\mid\\det A>0\\}$ *is* a group. Symmetric invertible matrices are not closed under multiplication since $(AB)^\\top=BA\\neq AB$. $\\left\\{\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}\\right\\}$ with $A\\in\\mathbb{R}^{n\\times n}$ **unrestricted** is not a group — invertibility fails unless $A\\in GL(n)$.\n**Matrix representation.** An injective $R:G\\to GL(n)$ with $R(e)=I$ and $R(g\\circ h)=R(g)R(h)$ — a group homomorphism, which is why abstract rotations can be studied as matrices.",
+      "recap": "**Group.** A set $G$ with an operation $\\circ:G\\times G\\to G$ satisfying exactly four axioms: **(1) closure** $g_1\\circ g_2\\in G$; **(2) associativity** $(g_1\\circ g_2)\\circ g_3=g_1\\circ(g_2\\circ g_3)$; **(3) neutral element** $\\exists e\\in G:\\ e\\circ g=g\\circ e=g$; **(4) inverse** $\\forall g\\ \\exists g^{-1}\\in G:\\ g\\circ g^{-1}=g^{-1}\\circ g=e$. **Commutativity is *not* an axiom** — that is the single most repeated MC trap.\n**$GL(n)$** — general linear group: all $A\\in\\mathbb{R}^{n\\times n}$ with $\\det(A)\\neq0$.\n**$SL(n)$** — special linear group: $\\det(A)=1$ (closed because $\\det(A^{-1})=\\det(A)^{-1}$).\n**$O(n)$** — orthogonal group: $R^\\top R=RR^\\top=I$, equivalently $\\langle Rx,Ry\\rangle=\\langle x,y\\rangle$. From $\\det(R^\\top R)=\\det(R)^2=1$ we get $\\det(R)\\in\\{-1,+1\\}$.\n**$SO(n)=O(n)\\cap SL(n)$** — rotations, $\\det(R)=+1$ only. $SO(3)$ = all 3D rotation matrices.\n**$A(n)$** — affine group: $L(x)=Ax+b$ with $A\\in GL(n)$. Not linear unless $b=0$; in homogeneous coordinates it becomes the linear $\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}\\in GL(n+1)$.\n**$E(n)$** — Euclidean group: $x\\mapsto Rx+T$ with $R\\in O(n)$. **$SE(n)$** — special Euclidean group, $R\\in SO(n)$; $SE(3)$ = the rigid-body motions.\n**Inclusions to memorise.** $SO(n)\\subset O(n)\\subset GL(n)$, $SO(n)\\subset SL(n)\\subset GL(n)$, and $SE(n)\\subset E(n)\\subset A(n)\\subset GL(n+1)$ — note the $n+1$: the affine/Euclidean groups only become matrix groups after homogenisation. $SL(n)\\subset O(n)$ is **false**.\n**Standard exam counterexamples.** $\\{A\\mid\\det A=-1\\}$ is not a group (no identity, not closed). $\\{A\\mid\\det A>0\\}$ *is* a group. Symmetric invertible matrices are not closed under multiplication since $(AB)^\\top=BA\\neq AB$. $\\left\\{\\begin{pmatrix}A&b\\\\0&1\\end{pmatrix}\\right\\}$ with $A\\in\\mathbb{R}^{n\\times n}$ **unrestricted** is not a group — invertibility fails unless $A\\in GL(n)$.\n**Matrix representation.** An injective $R:G\\to GL(n)$ with $R(e)=I$ and $R(g\\circ h)=R(g)R(h)$ — a group homomorphism, which is why abstract rotations can be studied as matrices.\n**2023 paper focus.** Both $SO(n)$ and $SE(n)$ are Lie groups. Their group operation is matrix multiplication, never matrix addition; for 3D motion, $SE(3)$ couples rotation and translation.",
       "questions": [
         {
           "type": "open",
@@ -872,6 +872,38 @@
           "tags": [
             "Groups and matrix groups",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23ELI 1a"
+          ],
+          "q": "Which statements about Lie groups and Lie algebras are correct?",
+          "answer": "**Correct: 1 and 2.** $SE(3)$ represents 3D rotations together with translations, and the exponential map $\\mathfrak{so}(3)\\to SO(3)$ is Rodrigues' formula. Rotation matrices form a group under matrix multiplication, not addition. Both $SO(n)$ and $SE(n)$ are Lie groups.",
+          "options": [
+            {
+              "text": "The special Euclidean group $SE(3)$ is commonly used to describe a 3D transformation with both rotation and translation.",
+              "correct": true
+            },
+            {
+              "text": "The exponential map from $\\mathfrak{so}(3)$ to $SO(3)$ corresponds to Rodrigues' formula.",
+              "correct": true
+            },
+            {
+              "text": "The set of rotation matrices with addition constitutes a special orthogonal group.",
+              "correct": false
+            },
+            {
+              "text": "$SO(n)$ is a Lie group, but $SE(n)$ is not.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Lie groups",
+            "SE(3)",
+            "Rodrigues"
           ]
         }
       ]

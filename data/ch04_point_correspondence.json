@@ -141,7 +141,7 @@
     {
       "id": "lucas-kanade",
       "title": "The Lucas–Kanade Method and the Structure Tensor",
-      "recap": "**Energy.** Assuming constant flow in a window $W(x)$ (optionally Gaussian-weighted by $G$),\n$$E(v)=\\int_{W(x)}\\big|\\nabla I(x',t)^\\top v+I_t(x',t)\\big|^2dx'.$$\n**Normal equations.** Expanding the square gives $E(v)=v^\\top Mv+2q^\\top v+c$ and $\\frac{dE}{dv}=2Mv+2q=0$, with\n$$M=\\int_{W(x)}\\nabla I\\,\\nabla I^\\top dx'=\\int_{W(x)}\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}dx',\\qquad q=\\int_{W(x)}I_t\\,\\nabla I\\,dx'=\\int_{W(x)}I_t\\begin{pmatrix}I_x\\\\I_y\\end{pmatrix}dx'.$$\n$M$ is the **structure tensor**. Keep the integral — dropping it costs marks.\n**Solution.** $\\hat v=-M^{-1}q$, explicitly $\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2}$, $\\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}$.\n**$M$ is symmetric positive semi-definite** — it is a sum/integral of outer products $\\nabla I\\nabla I^\\top$, so $u^\\top Mu=\\int(\\nabla I^\\top u)^2\\ge0$. Hence $\\lambda_1\\ge\\lambda_2\\ge0$. Note $M\\neq\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int I_x$: $\\int I_x^2\\neq(\\int I_x)^2$ — a favourite MC trap.\n**Rank deficiency.** Ignoring the integral, $M\\nabla I^\\perp=\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}\\begin{pmatrix}-I_y\\\\I_x\\end{pmatrix}=0$, so $\\nabla I^\\perp\\in\\ker(M)$ — a single gradient direction makes $M$ singular. More generally, if $\\nabla I(x')=\\alpha(x')u$ throughout the window then $M=(G*\\alpha^2)uu^\\top$ is rank 1.\n**True local motion vs the translational model.** For a pure translation $X_2=X_1+T$, in normalised coordinates $\\lambda_2x_2=\\lambda_1x_1+T$, so the exact motion is $x_2=\\frac{\\lambda_1}{\\lambda_2}x_1+\\frac{1}{\\lambda_2}T$. The translational model $x_2=x_1+v$ is therefore **exact** only if (i) $\\lambda_1=\\lambda_2=\\text{const}$ over the window — all 3D points on a plane parallel to the image plane — and (ii) $T_3=0$ — the translation is parallel to the image plane.",
+      "recap": "**Energy.** Assuming constant flow in a window $W(x)$ (optionally Gaussian-weighted by $G$),\n$$E(v)=\\int_{W(x)}\\big|\\nabla I(x',t)^\\top v+I_t(x',t)\\big|^2dx'.$$\n**Normal equations.** Expanding the square gives $E(v)=v^\\top Mv+2q^\\top v+c$ and $\\frac{dE}{dv}=2Mv+2q=0$, with\n$$M=\\int_{W(x)}\\nabla I\\,\\nabla I^\\top dx'=\\int_{W(x)}\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}dx',\\qquad q=\\int_{W(x)}I_t\\,\\nabla I\\,dx'=\\int_{W(x)}I_t\\begin{pmatrix}I_x\\\\I_y\\end{pmatrix}dx'.$$\n$M$ is the **structure tensor**. Keep the integral — dropping it costs marks.\n**Solution.** $\\hat v=-M^{-1}q$, explicitly $\\hat v_1=\\frac{m_{12}q_2-m_{22}q_1}{m_{11}m_{22}-m_{12}^2}$, $\\hat v_2=\\frac{m_{12}q_1-m_{11}q_2}{m_{11}m_{22}-m_{12}^2}$.\n**$M$ is symmetric positive semi-definite** — it is a sum/integral of outer products $\\nabla I\\nabla I^\\top$, so $u^\\top Mu=\\int(\\nabla I^\\top u)^2\\ge0$. Hence $\\lambda_1\\ge\\lambda_2\\ge0$. Note $M\\neq\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int I_x$: $\\int I_x^2\\neq(\\int I_x)^2$ — a favourite MC trap.\n**Rank deficiency.** Ignoring the integral, $M\\nabla I^\\perp=\\begin{pmatrix}I_x^2&I_xI_y\\\\I_xI_y&I_y^2\\end{pmatrix}\\begin{pmatrix}-I_y\\\\I_x\\end{pmatrix}=0$, so $\\nabla I^\\perp\\in\\ker(M)$ — a single gradient direction makes $M$ singular. More generally, if $\\nabla I(x')=\\alpha(x')u$ throughout the window then $M=(G*\\alpha^2)uu^\\top$ is rank 1.\n**True local motion vs the translational model.** For a pure translation $X_2=X_1+T$, in normalised coordinates $\\lambda_2x_2=\\lambda_1x_1+T$, so the exact motion is $x_2=\\frac{\\lambda_1}{\\lambda_2}x_1+\\frac{1}{\\lambda_2}T$. The translational model $x_2=x_1+v$ is therefore **exact** only if (i) $\\lambda_1=\\lambda_2=\\text{const}$ over the window — all 3D points on a plane parallel to the image plane — and (ii) $T_3=0$ — the translation is parallel to the image plane.\n**2023 paper focus.** KLT solves $Mv=b$ and is reliable only when both eigenvalues of $M$ are large. It is typically faster and denser than SIFT matching, but its small-motion and brightness-constancy assumptions make it less robust to large displacement and lighting changes.",
       "questions": [
         {
           "type": "open",
@@ -280,13 +280,59 @@
             "Lucas-Kanade and the aperture problem",
             "Cremers-style practice"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23ELI 2a"
+          ],
+          "q": "For a KLT tracker with a pure 2D patch translation $[u,v]^\\top$, how do you decide whether a pixel is good to track, and which linear system gives its motion? Use spatial derivatives $I'_x,I'_y$ in the second image and intensity difference $\\Delta I$.",
+          "answer": "Over the patch form the structure tensor\n$$M'=\\begin{pmatrix}\\sum I_x'^2&\\sum I'_xI'_y\\\\\\sum I'_xI'_y&\\sum I_y'^2\\end{pmatrix}.$$\nA pixel is reliable when **both eigenvalues of $M'$ are large**, so the patch has gradients in two independent directions. The translation is obtained from\n$$M'\\begin{pmatrix}u\\\\v\\end{pmatrix}=\\begin{pmatrix}\\sum I'_x\\Delta I\\\\\\sum I'_y\\Delta I\\end{pmatrix},$$\nthus $[u,v]^\\top=M'^{-1}b$ when $M'$ is well conditioned.",
+          "tags": [
+            "KLT",
+            "Structure tensor",
+            "Optical flow"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23RLI 1d"
+          ],
+          "q": "Which statements about 2D feature tracking are correct?",
+          "answer": "**Correct: 3 and 4.** KLT assumes small motion and brightness constancy, so it is less robust than SIFT matching to large motion and illumination changes. It can, however, track many more points and is normally faster because it performs local iterative alignment rather than descriptor extraction and matching.",
+          "options": [
+            {
+              "text": "KLT handles larger illumination changes than SIFT-based matching.",
+              "correct": false
+            },
+            {
+              "text": "KLT handles larger frame-to-frame motion than SIFT-based matching.",
+              "correct": false
+            },
+            {
+              "text": "KLT typically produces denser point correspondences than SIFT-based matching.",
+              "correct": true
+            },
+            {
+              "text": "KLT is typically faster than SIFT-based matching.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "KLT",
+            "SIFT",
+            "Feature tracking"
+          ]
         }
       ]
     },
     {
       "id": "structure-tensor",
       "title": "Reading the Structure Tensor: Flat, Edge, Corner",
-      "recap": "**$M$ is symmetric positive semi-definite,** so it has two real eigenvalues $\\lambda_1\\ge\\lambda_2\\ge0$ with orthogonal eigenvectors. The eigenvector of the **large** eigenvalue points along the dominant **gradient** direction, i.e. **perpendicular** to the edge.\n**The three regimes.**\n$\\bullet$ $\\lambda_1\\approx\\lambda_2\\approx0$ — no dominant gradient direction: a **flat / untextured** region. $M\\approx0$ is not invertible, Lucas–Kanade fails (nothing to track).\n$\\bullet$ $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$ — one dominant gradient direction: an **edge**. $M$ is rank 1 and singular; only the flow perpendicular to the edge can be recovered (aperture problem).\n$\\bullet$ $\\lambda_1\\gg0,\\ \\lambda_2\\gg0$ — more than one dominant gradient direction: a **corner** (or richly textured patch). $M$ is well conditioned and the flow estimate is reliable.\n**Reading off the orientation.** For an edge, the eigenvector $v_1$ of the large eigenvalue is the gradient direction: $v_1\\approx(0,1)^\\top$ (pointing along the image $y$-axis) ⇒ a **horizontal** edge; $v_1\\approx(1,0)^\\top$ ⇒ a **vertical** edge; a diagonal $v_1$ ⇒ a tilted edge.\n**Common MC trap.** $M$ is **not** $\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int_WI_x\\,dx'$, $Y=\\int_WI_y\\,dx'$ — because $\\int I_x^2\\,dx'\\neq\\big(\\int I_x\\,dx'\\big)^2$. The square is inside the integral, and that is exactly what makes $M$ informative.",
+      "recap": "**$M$ is symmetric positive semi-definite,** so it has two real eigenvalues $\\lambda_1\\ge\\lambda_2\\ge0$ with orthogonal eigenvectors. The eigenvector of the **large** eigenvalue points along the dominant **gradient** direction, i.e. **perpendicular** to the edge.\n**The three regimes.**\n$\\bullet$ $\\lambda_1\\approx\\lambda_2\\approx0$ — no dominant gradient direction: a **flat / untextured** region. $M\\approx0$ is not invertible, Lucas–Kanade fails (nothing to track).\n$\\bullet$ $\\lambda_1\\gg0,\\ \\lambda_2\\approx0$ — one dominant gradient direction: an **edge**. $M$ is rank 1 and singular; only the flow perpendicular to the edge can be recovered (aperture problem).\n$\\bullet$ $\\lambda_1\\gg0,\\ \\lambda_2\\gg0$ — more than one dominant gradient direction: a **corner** (or richly textured patch). $M$ is well conditioned and the flow estimate is reliable.\n**Reading off the orientation.** For an edge, the eigenvector $v_1$ of the large eigenvalue is the gradient direction: $v_1\\approx(0,1)^\\top$ (pointing along the image $y$-axis) ⇒ a **horizontal** edge; $v_1\\approx(1,0)^\\top$ ⇒ a **vertical** edge; a diagonal $v_1$ ⇒ a tilted edge.\n**Common MC trap.** $M$ is **not** $\\begin{pmatrix}X^2&XY\\\\XY&Y^2\\end{pmatrix}$ with $X=\\int_WI_x\\,dx'$, $Y=\\int_WI_y\\,dx'$ — because $\\int I_x^2\\,dx'\\neq\\big(\\int I_x\\,dx'\\big)^2$. The square is inside the integral, and that is exactly what makes $M$ informative.\n**2023 paper focus.** A good KLT feature has strong variation in two independent directions, hence two large eigenvalues. A flat patch has two small eigenvalues; an edge has only one large eigenvalue and suffers the aperture problem.",
       "questions": [
         {
           "type": "open",
@@ -403,13 +449,32 @@
             "Invariance and robust feature selection",
             "Cremers-style practice"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23ELI 2b"
+          ],
+          "q": "The figure shows three candidate pixels $a$, $b$ and $c$ for KLT tracking. Which pixel can be tracked most reliably? Explain either intuitively from the texture or mathematically from the structure tensor.",
+          "answer": "Pixel **$b$** is the intended answer because it lies in a richly textured area. Its structure tensor has two large eigenvalues, so motion is constrained in both image directions. The official solution also accepts $c$ with a reasonable explanation because the printed figure makes $b$ difficult to distinguish.",
+          "figure": {
+            "src": "23eli-2b.jpg",
+            "alt": "Three candidate KLT pixels a, b and c in a landscape image",
+            "caption": "2023 Endterm, Problem 2b"
+          },
+          "tags": [
+            "KLT",
+            "Good features to track",
+            "Eigenvalues"
+          ]
         }
       ]
     },
     {
       "id": "harris-corner",
       "title": "The Harris / Förstner Corner Detector",
-      "recap": "**Motivation.** The eigenvalues of $M$ classify the local structure, but computing them at every pixel needs a square root. Harris proposed the cheaper score\n$$C=\\det(M)-\\kappa\\,\\operatorname{trace}(M)^2=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2,$$\ncomputable directly from the entries, $\\det(M)=m_{11}m_{22}-m_{12}^2$ and $\\operatorname{trace}(M)=m_{11}+m_{22}$ — **no eigen-decomposition, no square root**.\n**Signs.** Flat: $\\lambda_1\\approx\\lambda_2\\approx0\\Rightarrow C\\approx0$. Edge: $\\lambda_1\\gg0,\\lambda_2\\approx0\\Rightarrow C\\approx-\\kappa\\lambda_1^2<0$. Corner: $\\lambda_1\\approx\\lambda_2\\approx\\lambda\\Rightarrow C\\approx\\lambda^2(1-4\\kappa)>0$ provided $\\kappa<\\tfrac14$. In general $C>0\\iff\\frac{\\lambda_1\\lambda_2}{(\\lambda_1+\\lambda_2)^2}>\\kappa$.\n**Role of $\\kappa$.** As $\\kappa\\to0$, $C\\to\\det(M)=\\lambda_1\\lambda_2$, which is positive whenever both eigenvalues are non-zero — even strong edges pass, so the detector becomes **less selective**. As $\\kappa\\to\\tfrac14$, only near-perfectly symmetric corners survive ($\\lambda_1=10,\\lambda_2=8$ already gives $C<0$) — **maximally selective**. Typical values are $\\kappa\\in[0.04,0.15]$.\n**Invariance.** Under an image rotation $R\\in SO(2)$: $\\nabla I\\to R\\nabla I$, hence $M\\to RMR^\\top$; since $\\det(RMR^\\top)=\\det M$ and $\\operatorname{trace}(RMR^\\top)=\\operatorname{trace}M$, the score $C$ is **unchanged** — Harris is **rotation invariant**. It is **not scale invariant**: $M$ is computed in a fixed-size window, so zooming changes how much of the scene the window covers — a corner can look like an edge (zoomed in) or like texture (zoomed out), changing the eigenvalues and $C$. Scale invariance requires a scale-space search (SIFT-style).\n**Feature tracking algorithm.** (1) Compute $M$ at every pixel. (2) Keep pixels where the smaller eigenvalue (or $C$) exceeds a threshold. (3) Apply non-maximum suppression. (4) Track each selected point with Lucas–Kanade over the sequence.",
+      "recap": "**Motivation.** The eigenvalues of $M$ classify the local structure, but computing them at every pixel needs a square root. Harris proposed the cheaper score\n$$C=\\det(M)-\\kappa\\,\\operatorname{trace}(M)^2=\\lambda_1\\lambda_2-\\kappa(\\lambda_1+\\lambda_2)^2,$$\ncomputable directly from the entries, $\\det(M)=m_{11}m_{22}-m_{12}^2$ and $\\operatorname{trace}(M)=m_{11}+m_{22}$ — **no eigen-decomposition, no square root**.\n**Signs.** Flat: $\\lambda_1\\approx\\lambda_2\\approx0\\Rightarrow C\\approx0$. Edge: $\\lambda_1\\gg0,\\lambda_2\\approx0\\Rightarrow C\\approx-\\kappa\\lambda_1^2<0$. Corner: $\\lambda_1\\approx\\lambda_2\\approx\\lambda\\Rightarrow C\\approx\\lambda^2(1-4\\kappa)>0$ provided $\\kappa<\\tfrac14$. In general $C>0\\iff\\frac{\\lambda_1\\lambda_2}{(\\lambda_1+\\lambda_2)^2}>\\kappa$.\n**Role of $\\kappa$.** As $\\kappa\\to0$, $C\\to\\det(M)=\\lambda_1\\lambda_2$, which is positive whenever both eigenvalues are non-zero — even strong edges pass, so the detector becomes **less selective**. As $\\kappa\\to\\tfrac14$, only near-perfectly symmetric corners survive ($\\lambda_1=10,\\lambda_2=8$ already gives $C<0$) — **maximally selective**. Typical values are $\\kappa\\in[0.04,0.15]$.\n**Invariance.** Under an image rotation $R\\in SO(2)$: $\\nabla I\\to R\\nabla I$, hence $M\\to RMR^\\top$; since $\\det(RMR^\\top)=\\det M$ and $\\operatorname{trace}(RMR^\\top)=\\operatorname{trace}M$, the score $C$ is **unchanged** — Harris is **rotation invariant**. It is **not scale invariant**: $M$ is computed in a fixed-size window, so zooming changes how much of the scene the window covers — a corner can look like an edge (zoomed in) or like texture (zoomed out), changing the eigenvalues and $C$. Scale invariance requires a scale-space search (SIFT-style).\n**Feature tracking algorithm.** (1) Compute $M$ at every pixel. (2) Keep pixels where the smaller eigenvalue (or $C$) exceeds a threshold. (3) Apply non-maximum suppression. (4) Track each selected point with Lucas–Kanade over the sequence.\n**2023 paper focus.** Harris selects points with two large structure-tensor eigenvalues. LoG/DoG instead finds blob extrema over space and scale; DoG is the efficient LoG approximation, and non-maximum suppression removes nearby duplicates. SIFT builds a vector descriptor from orientation histograms.",
       "questions": [
         {
           "type": "open",
@@ -468,6 +533,111 @@
             "Invariance and robust feature selection",
             "Cremers-style practice"
           ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23ELI 1d"
+          ],
+          "q": "Which statements about the Laplacian-of-Gaussian (LoG) kernel for blob detection are correct?",
+          "answer": "**Correct: 1, 2 and 4.** A scale-normalised LoG response reaches an extremum at the characteristic blob scale; the kernel parameter $\\sigma$ sets that scale. DoG is the efficient approximation to LoG, not the other way around. Non-maximum suppression removes nearby duplicate detections.",
+          "options": [
+            {
+              "text": "At a blob's optimal scale, the convolution response between the LoG kernel and the image patch reaches an extremum.",
+              "correct": true
+            },
+            {
+              "text": "The LoG-kernel parameter is associated with blob scale.",
+              "correct": true
+            },
+            {
+              "text": "The LoG kernel is more efficient than the Difference-of-Gaussians (DoG) kernel.",
+              "correct": false
+            },
+            {
+              "text": "Non-maximum suppression is commonly used to discard detections that are too close.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "LoG",
+            "Blob detection",
+            "NMS"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23RLI 1e"
+          ],
+          "q": "Which statements about the SIFT algorithm are correct?",
+          "answer": "**Correct: 1 and 3.** SIFT concatenates orientation-histogram bins into a vector descriptor. Extrema are searched across a DoG scale space, not in one DoG image. Gaussian convolution preserves the image dimensions before any optional downsampling. DoG is used mainly for scale-space keypoint/blob detection, not descriptor computation.",
+          "options": [
+            {
+              "text": "A histogram of oriented gradients produces a vector descriptor rather than a matrix descriptor.",
+              "correct": true
+            },
+            {
+              "text": "SIFT uses one Difference-of-Gaussians image to decide whether a pixel is an extremum.",
+              "correct": false
+            },
+            {
+              "text": "Blurring with a Gaussian kernel does not itself change image size.",
+              "correct": true
+            },
+            {
+              "text": "The DoG kernel is mainly used for descriptor computation rather than blob detection.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "SIFT",
+            "DoG",
+            "Scale space"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23RLI 2a"
+          ],
+          "q": "Derive the Harris decision for whether a pixel $(x,y)$ is a keypoint, starting from the patch sum of squared differences under displacement $(\\Delta x,\\Delta y)$. Show every step and use $I_x,I_y$.",
+          "answer": "Start with\n$$SSD(\\Delta x,\\Delta y)=\\sum\\big(I(x,y)-I(x+\\Delta x,y+\\Delta y)\\big)^2.$$\nFirst-order Taylor expansion gives\n$$I(x+\\Delta x,y+\\Delta y)\\approx I(x,y)+I_x\\Delta x+I_y\\Delta y,$$\nso\n$$SSD\\approx\\sum(I_x\\Delta x+I_y\\Delta y)^2\n=\\begin{pmatrix}\\Delta x&\\Delta y\\end{pmatrix}\n\\underbrace{\\begin{pmatrix}\\sum I_x^2&\\sum I_xI_y\\\\\\sum I_xI_y&\\sum I_y^2\\end{pmatrix}}_{M}\n\\begin{pmatrix}\\Delta x\\\\\\Delta y\\end{pmatrix}.$$\nThe pixel is a corner/keypoint when **both eigenvalues of $M$ are far from zero**.",
+          "tags": [
+            "Harris",
+            "SSD",
+            "Structure tensor"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23RLI 2b"
+          ],
+          "q": "Compared with Harris corner detection, does LoG blob detection additionally provide keypoint **scale** or **direction** information? Briefly justify.",
+          "answer": "**Scale information.** LoG searches for extrema over the scale parameter $\\sigma$, so the selected $\\sigma$ gives a characteristic blob scale. Harris can already provide a dominant local direction from the eigenvectors of the structure tensor.",
+          "tags": [
+            "LoG",
+            "Scale selection",
+            "Harris"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23RLI 2c"
+          ],
+          "q": "LoG blob detection may return keypoints that are too close to one another. Name the standard method used to discard redundant detections.",
+          "answer": "**Non-maximum suppression (NMS).** Keep only a local response maximum within a spatial/scale neighbourhood.",
+          "tags": [
+            "LoG",
+            "Non-maximum suppression"
+          ]
         }
       ]
     },
@@ -524,7 +694,7 @@
     {
       "id": "patch-matching",
       "title": "Patch Matching: NCC, SSD and Wide Baselines",
-      "recap": "**Small deformation vs wide baseline.** For consecutive video frames the displacement is small and a **translational** model plus Lucas–Kanade suffices. For a **wide baseline** the patch also rotates, scales and shears, so one must either use a full affine model or switch to invariant **descriptors** (SIFT-style) and match them.\n**Normalised cross-correlation (NCC).**\n$$\\text{NCC}=\\frac{\\int_{w(x)}\\big(I_1(x')-\\bar I_1\\big)\\big(I_2(x')-\\bar I_2\\big)dx'}{\\sqrt{\\int_{w(x)}\\big(I_1(x')-\\bar I_1\\big)^2dx'\\ \\int_{w(x)}\\big(I_2(x')-\\bar I_2\\big)^2dx'}}.$$\nIt is the cosine of the angle between the two mean-subtracted patches, so $\\text{NCC}\\in[-1,1]$: $+1$ = perfect match up to an affine intensity change, $0$ = uncorrelated, $-1$ = inverted. Subtracting the mean makes it invariant to additive brightness offsets; dividing by the standard deviations makes it invariant to multiplicative contrast changes. That is exactly why it beats raw SSD under illumination change.\n**Border handling.** With a $3\\times3$ window on a $3\\times3$ image, only the centre pixel has a full neighbourhood — so exactly **one** window contributes.\n**SSD vs inner product.** For $\\ell_2$-normalised descriptors ($\\|p\\|=\\|q\\|=1$),\n$$\\|p-q\\|^2=\\|p\\|^2+\\|q\\|^2-2p^\\top q=2-2p^\\top q,$$\nan affine, strictly decreasing function of $p^\\top q$. Hence $\\arg\\min_q\\|p-q\\|^2=\\arg\\max_qp^\\top q$: nearest-neighbour search under Euclidean distance and under cosine similarity return the **same ranking**, and implementations pick whichever is cheaper.\n**Learned correspondence.** FlowNet showed that a CNN can regress dense optical flow end to end; SuperGlue matches sparse keypoints with an attention-based graph neural network. Both replace hand-crafted descriptors and the brightness-constancy energy with learned matching, and dominate the modern benchmarks.",
+      "recap": "**Small deformation vs wide baseline.** For consecutive video frames the displacement is small and a **translational** model plus Lucas–Kanade suffices. For a **wide baseline** the patch also rotates, scales and shears, so one must either use a full affine model or switch to invariant **descriptors** (SIFT-style) and match them.\n**Normalised cross-correlation (NCC).**\n$$\\text{NCC}=\\frac{\\int_{w(x)}\\big(I_1(x')-\\bar I_1\\big)\\big(I_2(x')-\\bar I_2\\big)dx'}{\\sqrt{\\int_{w(x)}\\big(I_1(x')-\\bar I_1\\big)^2dx'\\ \\int_{w(x)}\\big(I_2(x')-\\bar I_2\\big)^2dx'}}.$$\nIt is the cosine of the angle between the two mean-subtracted patches, so $\\text{NCC}\\in[-1,1]$: $+1$ = perfect match up to an affine intensity change, $0$ = uncorrelated, $-1$ = inverted. Subtracting the mean makes it invariant to additive brightness offsets; dividing by the standard deviations makes it invariant to multiplicative contrast changes. That is exactly why it beats raw SSD under illumination change.\n**Border handling.** With a $3\\times3$ window on a $3\\times3$ image, only the centre pixel has a full neighbourhood — so exactly **one** window contributes.\n**SSD vs inner product.** For $\\ell_2$-normalised descriptors ($\\|p\\|=\\|q\\|=1$),\n$$\\|p-q\\|^2=\\|p\\|^2+\\|q\\|^2-2p^\\top q=2-2p^\\top q,$$\nan affine, strictly decreasing function of $p^\\top q$. Hence $\\arg\\min_q\\|p-q\\|^2=\\arg\\max_qp^\\top q$: nearest-neighbour search under Euclidean distance and under cosine similarity return the **same ranking**, and implementations pick whichever is cheaper.\n**Learned correspondence.** FlowNet showed that a CNN can regress dense optical flow end to end; SuperGlue matches sparse keypoints with an attention-based graph neural network. Both replace hand-crafted descriptors and the brightness-constancy energy with learned matching, and dominate the modern benchmarks.\n**2023 paper focus.** Rectification reduces stereo correspondence search from 2D to one scanline. Compare small patches only along the matching row and select the minimum SSD (or maximum NCC) candidate.",
       "questions": [
         {
           "type": "open",
@@ -603,6 +773,20 @@
           "tags": [
             "Patch matching and wide-baseline correspondence",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23RLI 4a"
+          ],
+          "q": "A stereo pair has already been rectified. For a pixel $p=[x_p,y_p]^\\top$ in the left image, describe an efficient way to find its corresponding pixel in the right image without brute-force 2D matching.",
+          "answer": "Rectification makes corresponding points share the same row, so search only candidates $q_i=[x_i,y_p]^\\top$ along the right-image epipolar line. Build a small $N\\times N$ patch $P$ around $p$ and patches $Q_i$ around each candidate. Compute a matching cost such as\n$$SSD(P,Q_i)=\\sum_{r\\in\\text{patch}}(P(r)-Q_i(r))^2,$$\nand choose the candidate whose patch gives the smallest SSD.",
+          "tags": [
+            "Stereo rectification",
+            "Patch matching",
+            "SSD"
           ]
         }
       ]

@@ -479,7 +479,7 @@
     {
       "id": "camera-motion-velocity",
       "title": "Camera Motion, Concatenation and the Adjoint Map",
-      "recap": "**Motion of the camera.** A moving camera is described by $g(t)=\\begin{pmatrix}R(t)&T(t)\\\\0&1\\end{pmatrix}$, mapping world coordinates $X_0$ to camera coordinates $X(t)=g(t)X_0$, i.e. $X(t)=R(t)X_0+T(t)$.\n**Concatenation over frames.** With $g(t_j,t_i)$ the motion from frame $i$ to frame $j$:\n$$g(t_3,t_1)=g(t_3,t_2)\\,g(t_2,t_1),\\qquad g(t_j,t_i)^{-1}=g(t_i,t_j),$$\nand the consistency rule $g(t_i,t_j)g(t_j,t_k)g(t_k,t_i)=I$ — the loop closes. Read chains right to left.\n**Velocity.** Differentiating $X(t)=g(t)X_0$ and substituting $X_0=g^{-1}X$ gives $\\dot X=\\dot gg^{-1}X=\\hat V X$, with the **twist in spatial (camera) coordinates**\n$$\\hat V(t)=\\dot g(t)g^{-1}(t)=\\begin{pmatrix}\\dot RR^\\top&\\dot T-\\dot RR^\\top T\\\\0&0\\end{pmatrix}\\in\\mathfrak{se}(3),$$\nwhose upper-left block $\\hat\\omega=\\dot RR^\\top$ is the angular velocity.\n**Adjoint map — transferring a twist between frames.** If two frames are related by $g$, a twist expressed in one frame becomes, in the other,\n$$\\hat V_2=g\\,\\hat V_1\\,g^{-1},\\qquad\\text{in coordinates}\\quad \\xi_2=\\operatorname{ad}_g(\\xi_1),\\ \\ \\operatorname{ad}_g=\\begin{pmatrix}R&\\hat TR\\\\0&R\\end{pmatrix}.$$\nSo velocities are **not** simply rotated — the translation between the frames couples the angular part into the linear part via $\\hat TR$. That coupling is the whole content of the adjoint.",
+      "recap": "**Motion of the camera.** A moving camera is described by $g(t)=\\begin{pmatrix}R(t)&T(t)\\\\0&1\\end{pmatrix}$, mapping world coordinates $X_0$ to camera coordinates $X(t)=g(t)X_0$, i.e. $X(t)=R(t)X_0+T(t)$.\n**Concatenation over frames.** With $g(t_j,t_i)$ the motion from frame $i$ to frame $j$:\n$$g(t_3,t_1)=g(t_3,t_2)\\,g(t_2,t_1),\\qquad g(t_j,t_i)^{-1}=g(t_i,t_j),$$\nand the consistency rule $g(t_i,t_j)g(t_j,t_k)g(t_k,t_i)=I$ — the loop closes. Read chains right to left.\n**Velocity.** Differentiating $X(t)=g(t)X_0$ and substituting $X_0=g^{-1}X$ gives $\\dot X=\\dot gg^{-1}X=\\hat V X$, with the **twist in spatial (camera) coordinates**\n$$\\hat V(t)=\\dot g(t)g^{-1}(t)=\\begin{pmatrix}\\dot RR^\\top&\\dot T-\\dot RR^\\top T\\\\0&0\\end{pmatrix}\\in\\mathfrak{se}(3),$$\nwhose upper-left block $\\hat\\omega=\\dot RR^\\top$ is the angular velocity.\n**Adjoint map — transferring a twist between frames.** If two frames are related by $g$, a twist expressed in one frame becomes, in the other,\n$$\\hat V_2=g\\,\\hat V_1\\,g^{-1},\\qquad\\text{in coordinates}\\quad \\xi_2=\\operatorname{ad}_g(\\xi_1),\\ \\ \\operatorname{ad}_g=\\begin{pmatrix}R&\\hat TR\\\\0&R\\end{pmatrix}.$$\nSo velocities are **not** simply rotated — the translation between the frames couples the angular part into the linear part via $\\hat TR$. That coupling is the whole content of the adjoint.\n**2023 paper focus.** Plane normals transform exactly like directions: translation has no effect. Thus a normal known in frame 2 is expressed in frame 1 by $n_1=R_{2\\to1}n_2=R_{1\\to2}^\\top n_2$.",
       "questions": [
         {
           "type": "ai",
@@ -542,13 +542,26 @@
             "Extrinsics",
             "Special Euclidean group"
           ]
+        },
+        {
+          "type": "open",
+          "freq": 1,
+          "sources": [
+            "23ELI 3b"
+          ],
+          "q": "A 3D plane has unit normal $n_2$ in camera frame 2. Given the relative rotation $R_{1\\to2}$ from camera frame 1 to frame 2, express the plane normal $n_1$ in camera frame 1.",
+          "answer": "The inverse rotation is $R_{2\\to1}=R_{1\\to2}^\\top$. A direction is unaffected by translation, so\n$$n_1=R_{2\\to1}n_2=R_{1\\to2}^\\top n_2.$$",
+          "tags": [
+            "Frame transformation",
+            "Plane normal"
+          ]
         }
       ]
     },
     {
       "id": "euler-quaternions",
       "title": "Alternative Representations: Euler Angles and Quaternions",
-      "recap": "**Why alternatives at all.** A rotation matrix has $9$ numbers with $6$ constraints — redundant and awkward to optimise over. The alternatives trade redundancy for singularities.\n**Comparison table (worth memorising).**\n$\\bullet$ **Rotation matrix** — $9$ parameters, $6$ constraints ($R^\\top R=I$, $\\det R=1$), **no** singularities.\n$\\bullet$ **Axis-angle / exponential coordinates** — $3$ parameters, $0$ constraints, singular at $\\theta=0$ and $\\theta=2\\pi$.\n$\\bullet$ **Euler angles** — $3$ parameters, $0$ constraints, singular at **gimbal lock**.\n$\\bullet$ **Unit quaternion** — $4$ parameters, $1$ constraint ($\\|q\\|=1$), **no** singularities.\n**Euler angles.** Many conventions; the ZYX one is $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$. **Gimbal lock:** at $\\theta=\\pi/2$ the matrix depends only on $(\\psi-\\phi)$, so one degree of freedom is lost — two of the three axes align and the parameterisation degenerates.\n**Quaternions.** $q=w+xi+yj+zk$ with $i^2=j^2=k^2=ijk=-1$, giving the cyclic rules $ij=k,\\ jk=i,\\ ki=j$ and the anti-cyclic $ji=-k,\\ kj=-i,\\ ik=-j$. Multiplication is **associative but not commutative**. Conjugate $q^*=w-xi-yj-zk$, norm $\\|q\\|=\\sqrt{w^2+x^2+y^2+z^2}$, and $\\|q_1q_2\\|=\\|q_1\\|\\|q_2\\|$ — hence the unit quaternions form a group with $q^{-1}=q^*$.\n**Rotating with quaternions.** Embed $v\\in\\mathbb{R}^3$ as a pure quaternion $p=v_xi+v_yj+v_zk$ and use the **sandwich product** $p\\mapsto qpq^*$. Left-multiplication alone does not work: it rotates the $(w,z)$-plane too and the result stops being pure. In $qpq^*$ the $(w,z)$ rotations of $L_q$ and $R_{q^*}$ cancel while the $(x,y)$ rotations add, so the imaginary part is rotated by $2\\alpha$ — which is exactly why the **half-angle** appears: $q=\\cos\\tfrac{\\theta}{2}+\\sin\\tfrac{\\theta}{2}(u_xi+u_yj+u_zk)$ for a rotation by $\\theta$ about the unit axis $u$.\n**Double cover.** $q$ and $-q$ give the same rotation, $(-q)p(-q)^*=qpq^*$: $S^3\\to SO(3)$ is a $2{:}1$ cover.\n**Why SLAM systems prefer quaternions.** Compact ($4$ vs $9$ numbers), singularity-free, trivially renormalised ($q/\\|q\\|$ instead of Gram–Schmidt), smooth interpolation via SLERP, and cheap composition.",
+      "recap": "**Why alternatives at all.** A rotation matrix has $9$ numbers with $6$ constraints — redundant and awkward to optimise over. The alternatives trade redundancy for singularities.\n**Comparison table (worth memorising).**\n$\\bullet$ **Rotation matrix** — $9$ parameters, $6$ constraints ($R^\\top R=I$, $\\det R=1$), **no** singularities.\n$\\bullet$ **Axis-angle / exponential coordinates** — $3$ parameters, $0$ constraints, singular at $\\theta=0$ and $\\theta=2\\pi$.\n$\\bullet$ **Euler angles** — $3$ parameters, $0$ constraints, singular at **gimbal lock**.\n$\\bullet$ **Unit quaternion** — $4$ parameters, $1$ constraint ($\\|q\\|=1$), **no** singularities.\n**Euler angles.** Many conventions; the ZYX one is $R=R_z(\\psi)R_y(\\theta)R_x(\\phi)$. **Gimbal lock:** at $\\theta=\\pi/2$ the matrix depends only on $(\\psi-\\phi)$, so one degree of freedom is lost — two of the three axes align and the parameterisation degenerates.\n**Quaternions.** $q=w+xi+yj+zk$ with $i^2=j^2=k^2=ijk=-1$, giving the cyclic rules $ij=k,\\ jk=i,\\ ki=j$ and the anti-cyclic $ji=-k,\\ kj=-i,\\ ik=-j$. Multiplication is **associative but not commutative**. Conjugate $q^*=w-xi-yj-zk$, norm $\\|q\\|=\\sqrt{w^2+x^2+y^2+z^2}$, and $\\|q_1q_2\\|=\\|q_1\\|\\|q_2\\|$ — hence the unit quaternions form a group with $q^{-1}=q^*$.\n**Rotating with quaternions.** Embed $v\\in\\mathbb{R}^3$ as a pure quaternion $p=v_xi+v_yj+v_zk$ and use the **sandwich product** $p\\mapsto qpq^*$. Left-multiplication alone does not work: it rotates the $(w,z)$-plane too and the result stops being pure. In $qpq^*$ the $(w,z)$ rotations of $L_q$ and $R_{q^*}$ cancel while the $(x,y)$ rotations add, so the imaginary part is rotated by $2\\alpha$ — which is exactly why the **half-angle** appears: $q=\\cos\\tfrac{\\theta}{2}+\\sin\\tfrac{\\theta}{2}(u_xi+u_yj+u_zk)$ for a rotation by $\\theta$ about the unit axis $u$.\n**Double cover.** $q$ and $-q$ give the same rotation, $(-q)p(-q)^*=qpq^*$: $S^3\\to SO(3)$ is a $2{:}1$ cover.\n**Why SLAM systems prefer quaternions.** Compact ($4$ vs $9$ numbers), singularity-free, trivially renormalised ($q/\\|q\\|$ instead of Gram–Schmidt), smooth interpolation via SLERP, and cheap composition.\n**2023 paper focus.** Extrinsic Euler rotations use fixed/world axes; intrinsic Euler rotations use body-attached axes. Quaternions contain one real and three imaginary components and avoid Euler-angle gimbal lock.",
       "questions": [
         {
           "type": "open",
@@ -667,6 +680,38 @@
           "tags": [
             "Euler angles, gimbal lock, and representation choice",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23RLI 1a"
+          ],
+          "q": "Which statements about rotation representations are correct?",
+          "answer": "**Correct: 4 only.** Extrinsic Euler rotations are about fixed/world axes, while intrinsic rotations are about body-attached axes. A rotation matrix satisfies $R^\\top R=RR^\\top=I$. Quaternions avoid Euler-angle gimbal lock and consist of one real and three imaginary components.",
+          "options": [
+            {
+              "text": "For Euler angles, the extrinsic rotation is defined with respect to axes attached to the moving body.",
+              "correct": false
+            },
+            {
+              "text": "A rotation matrix satisfies $RR^\\top=R^\\top R=0$.",
+              "correct": false
+            },
+            {
+              "text": "A quaternion may suffer from gimbal lock.",
+              "correct": false
+            },
+            {
+              "text": "A quaternion has four elements: one real component and three imaginary components.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Euler angles",
+            "Quaternions",
+            "Rotation matrix"
           ]
         }
       ]

@@ -146,7 +146,7 @@
     {
       "id": "intrinsics",
       "title": "The Intrinsic Parameter Matrix",
-      "recap": "**The matrix.** With no skew,\n$$K=\\begin{pmatrix}f_x&0&o_x\\\\0&f_y&o_y\\\\0&0&1\\end{pmatrix},\\qquad u=f_x\\frac{X}{Z}+o_x,\\quad v=f_y\\frac{Y}{Z}+o_y.$$\nIn full generality $K=\\begin{pmatrix}fs_x&fs_\\theta&o_x\\\\0&fs_y&o_y\\\\0&0&1\\end{pmatrix}$: $f$ the focal length, $s_x,s_y$ the pixel scaling, $s_\\theta$ the skew, $(o_x,o_y)$ the principal point.\n**Sensor size from $K$.** If the optical axis passes through the image centre then $(o_x,o_y)$ *is* the centre, so the sensor is about $2o_x\\times2o_y$ pixels. $o=(350,250)$ ⇒ $700\\times500$; $o=(320,240)$ ⇒ $640\\times480$. Aspect ratio $=2o_x:2o_y=o_x:o_y$.\n**Field of view.** $f$ and FOV move **oppositely**: a *narrower* FOV (more zoom, magnifying distant objects) means a **larger** focal length, so $K$'s $f_x,f_y$ grow while $(o_x,o_y)$ stays put. Halving the resolution halves **everything**: $K'=\\operatorname{diag}(\\tfrac12,\\tfrac12,1)K$, i.e. $f$ and $o$ are both halved.\n**Rotating the image by $90^\\circ$ clockwise** (with $x$ right, $y$ down) means $(u,v)\\mapsto(H-1-v,\\ u)$ in pixels, which pre-multiplies $K$ by the corresponding $2\\times2$ rotation and re-maps the principal point. For $K=\\begin{pmatrix}200&0&640\\\\0&200&480\\\\0&0&1\\end{pmatrix}$ the result is $K''=\\begin{pmatrix}0&-200&480\\\\200&0&640\\\\0&0&1\\end{pmatrix}$ — the two focal entries swap into the off-diagonal with **one** sign flip, and the principal-point entries swap.\n**Calibrating $K$ from correspondences.** Write $\\lambda_i(u_i,v_i,1)^\\top=K\\Pi_0X_i$ per point. The third row gives $\\lambda_i=Z_i$ immediately, then each point yields two linear equations $f_xX_i+o_xZ_i=u_iZ_i$ and $f_yY_i+o_yZ_i=v_iZ_i$. Two points therefore determine the four unknowns $f_x,f_y,o_x,o_y$ — a small linear system to solve by hand.",
+      "recap": "**The matrix.** With no skew,\n$$K=\\begin{pmatrix}f_x&0&o_x\\\\0&f_y&o_y\\\\0&0&1\\end{pmatrix},\\qquad u=f_x\\frac{X}{Z}+o_x,\\quad v=f_y\\frac{Y}{Z}+o_y.$$\nIn full generality $K=\\begin{pmatrix}fs_x&fs_\\theta&o_x\\\\0&fs_y&o_y\\\\0&0&1\\end{pmatrix}$: $f$ the focal length, $s_x,s_y$ the pixel scaling, $s_\\theta$ the skew, $(o_x,o_y)$ the principal point.\n**Sensor size from $K$.** If the optical axis passes through the image centre then $(o_x,o_y)$ *is* the centre, so the sensor is about $2o_x\\times2o_y$ pixels. $o=(350,250)$ ⇒ $700\\times500$; $o=(320,240)$ ⇒ $640\\times480$. Aspect ratio $=2o_x:2o_y=o_x:o_y$.\n**Field of view.** $f$ and FOV move **oppositely**: a *narrower* FOV (more zoom, magnifying distant objects) means a **larger** focal length, so $K$'s $f_x,f_y$ grow while $(o_x,o_y)$ stays put. Halving the resolution halves **everything**: $K'=\\operatorname{diag}(\\tfrac12,\\tfrac12,1)K$, i.e. $f$ and $o$ are both halved.\n**Rotating the image by $90^\\circ$ clockwise** (with $x$ right, $y$ down) means $(u,v)\\mapsto(H-1-v,\\ u)$ in pixels, which pre-multiplies $K$ by the corresponding $2\\times2$ rotation and re-maps the principal point. For $K=\\begin{pmatrix}200&0&640\\\\0&200&480\\\\0&0&1\\end{pmatrix}$ the result is $K''=\\begin{pmatrix}0&-200&480\\\\200&0&640\\\\0&0&1\\end{pmatrix}$ — the two focal entries swap into the off-diagonal with **one** sign flip, and the principal-point entries swap.\n**Calibrating $K$ from correspondences.** Write $\\lambda_i(u_i,v_i,1)^\\top=K\\Pi_0X_i$ per point. The third row gives $\\lambda_i=Z_i$ immediately, then each point yields two linear equations $f_xX_i+o_xZ_i=u_iZ_i$ and $f_yY_i+o_yZ_i=v_iZ_i$. Two points therefore determine the four unknowns $f_x,f_y,o_x,o_y$ — a small linear system to solve by hand.\n**2023 paper focus.** Calibration questions distinguish Zhang's planar multi-view method from non-coplanar DLT/Tsai calibration. Linear projection-matrix estimation needs a scale constraint; recovered rotations must be projected back onto $SO(3)$.",
       "questions": [
         {
           "type": "mc",
@@ -306,6 +306,69 @@
           "tags": [
             "Pinhole projection, intrinsics, and extrinsics",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23ELI 1c"
+          ],
+          "q": "Which statements about Zhang's camera-calibration method are correct?",
+          "answer": "**Correct: 3 only.** Zhang's method first obtains intrinsics from several views of a planar calibration target and then recovers extrinsics. It does not use QR/RQ decomposition for that separation, it needs multiple target images, and the recovered rotation is projected back onto $SO(3)$ to enforce orthogonality.",
+          "options": [
+            {
+              "text": "The method first determines extrinsic parameters and then intrinsic parameters.",
+              "correct": false
+            },
+            {
+              "text": "The method uses QR/RQ decomposition to obtain extrinsic and intrinsic parameters.",
+              "correct": false
+            },
+            {
+              "text": "After computing a rotation, the method needs post-processing to enforce the rotation's orthogonality constraint.",
+              "correct": true
+            },
+            {
+              "text": "The method uses a single image of a chessboard.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Camera calibration",
+            "Zhang method"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23RLI 1c"
+          ],
+          "q": "Which statements about Tsai's camera-calibration method are correct?",
+          "answer": "**Correct: 3 only.** Calibration uses known 3D points in a world/calibration frame and their 2D projections. The linear projection-matrix solve uses a scale or norm constraint to exclude the zero solution. The standard non-coplanar formulation needs at least six correspondences; the points are not all required to lie on a single chessboard plane.",
+          "options": [
+            {
+              "text": "The method measures the coordinates of 3D points in the camera frame.",
+              "correct": false
+            },
+            {
+              "text": "The method uses at least five 3D-2D point correspondences.",
+              "correct": false
+            },
+            {
+              "text": "When solving the linear system for the projection-matrix entries, a norm constraint is typically enforced.",
+              "correct": true
+            },
+            {
+              "text": "All 3D points used by the algorithm are coplanar on a single chessboard.",
+              "correct": false
+            }
+          ],
+          "tags": [
+            "Camera calibration",
+            "Tsai method",
+            "DLT"
           ]
         }
       ]
@@ -876,7 +939,7 @@
     {
       "id": "radial-distortion",
       "title": "Radial Distortion and Undistortion",
-      "recap": "**Cause.** Radial distortion is caused by **imperfect lenses** — not by non-rectangular pixels (that is skew/aspect, an intrinsic effect), not by sensor noise, and not by where the camera stands in the scene. It **can** be corrected in software.\n**Where it acts.** In the **normalised image plane**, after the generic projection $\\pi$ and before $K$: $\\tilde X\\xrightarrow{\\pi}\\pi(\\tilde X)\\xrightarrow{\\text{distort}}\\pi_d(\\tilde X)\\xrightarrow{K}(u_d,v_d,1)^\\top$. The distortion keeps a point on the same ray from the optical centre and only changes its radius $r_u=\\|\\pi(\\tilde X)\\|\\mapsto r_d=\\|\\pi_d(\\tilde X)\\|$.\n**General shape.** $x_d=g(r)\\frac{x}{\\|x\\|}$ with $r=\\|x\\|$. Inverting is purely radial: take norms to get $r_d=g(r)$, so the inverse is $x=f(r_d)\\frac{x_d}{\\|x_d\\|}$ with $f=g^{-1}$. E.g. $g(r)=s\\log(1+kr)\\Rightarrow f(r_d)=\\frac{\\exp(r_d/s)-1}{k}$, while $g(r)=s\\log\\!\\big(1+\\tfrac{r}{k}\\big)\\Rightarrow f(r_d)=k\\big(\\exp(r_d/s)-1\\big)$ — read the parameterisation carefully, the $k$ moves from denominator to factor.\n**FOV / ATAN model** (Devernay–Faugeras), one parameter $\\omega\\approx$ field of view in radians: $r_d=\\tfrac1\\omega\\arctan\\big(2r_u\\tan\\tfrac\\omega2\\big)$; undistortion $r_u=\\tfrac{\\tan(\\omega r_d)}{2\\tan(\\omega/2)}$; as $\\omega\\to0$ it degenerates to the identity.\n**FOV $>180^\\circ$ is impossible with this pipeline.** Because $r=\\|\\pi(\\tilde X)\\|=\\tan\\theta$, the radius diverges as $\\theta\\to90^\\circ$ and points with $Z<0$ are mapped incorrectly — no finite $g(r)$ can repair a defect that lives in $\\pi$ itself. The fix is to reparameterise by the incidence angle $\\theta=\\arccos(Z/\\|\\tilde X\\|)$, e.g. the equidistant/fisheye model $r_u=\\theta$ (Kannala–Brandt).\n**After perfect undistortion the image obeys the pinhole model,** so a straight 3D line appears as a **straight line — or as a point**, if the line happens to be aligned with the viewing ray. Conversely: three collinear 3D points that do **not** come out collinear in the undistorted image prove the undistortion was imperfect.\n**Division model and calibration from lines.** $x_u=\\frac{x_d}{1+kr_d^2}$ ($k<0$ barrel, $k>0$ pincushion). Collinearity of three undistorted points is a $3\\times3$ determinant; multiplying row $i$ by $(1+kr_{di}^2)\\neq0$ preserves the zero condition and — by multilinearity in the third column — yields the **linear** constraint $A+kB=0$ with $A=\\det[x_d\\ y_d\\ 1]$, $B=\\det[x_d\\ y_d\\ r_d^2]$. Stacking $M$ triplets gives $\\hat k=-\\frac{\\sum_mA_mB_m}{\\sum_mB_m^2}$. One line with three points suffices for one coefficient; $n$ coefficients need $n$ triplets, and the constraint stays linear in all of them.",
+      "recap": "**Cause.** Radial distortion is caused by **imperfect lenses** — not by non-rectangular pixels (that is skew/aspect, an intrinsic effect), not by sensor noise, and not by where the camera stands in the scene. It **can** be corrected in software.\n**Where it acts.** In the **normalised image plane**, after the generic projection $\\pi$ and before $K$: $\\tilde X\\xrightarrow{\\pi}\\pi(\\tilde X)\\xrightarrow{\\text{distort}}\\pi_d(\\tilde X)\\xrightarrow{K}(u_d,v_d,1)^\\top$. The distortion keeps a point on the same ray from the optical centre and only changes its radius $r_u=\\|\\pi(\\tilde X)\\|\\mapsto r_d=\\|\\pi_d(\\tilde X)\\|$.\n**General shape.** $x_d=g(r)\\frac{x}{\\|x\\|}$ with $r=\\|x\\|$. Inverting is purely radial: take norms to get $r_d=g(r)$, so the inverse is $x=f(r_d)\\frac{x_d}{\\|x_d\\|}$ with $f=g^{-1}$. E.g. $g(r)=s\\log(1+kr)\\Rightarrow f(r_d)=\\frac{\\exp(r_d/s)-1}{k}$, while $g(r)=s\\log\\!\\big(1+\\tfrac{r}{k}\\big)\\Rightarrow f(r_d)=k\\big(\\exp(r_d/s)-1\\big)$ — read the parameterisation carefully, the $k$ moves from denominator to factor.\n**FOV / ATAN model** (Devernay–Faugeras), one parameter $\\omega\\approx$ field of view in radians: $r_d=\\tfrac1\\omega\\arctan\\big(2r_u\\tan\\tfrac\\omega2\\big)$; undistortion $r_u=\\tfrac{\\tan(\\omega r_d)}{2\\tan(\\omega/2)}$; as $\\omega\\to0$ it degenerates to the identity.\n**FOV $>180^\\circ$ is impossible with this pipeline.** Because $r=\\|\\pi(\\tilde X)\\|=\\tan\\theta$, the radius diverges as $\\theta\\to90^\\circ$ and points with $Z<0$ are mapped incorrectly — no finite $g(r)$ can repair a defect that lives in $\\pi$ itself. The fix is to reparameterise by the incidence angle $\\theta=\\arccos(Z/\\|\\tilde X\\|)$, e.g. the equidistant/fisheye model $r_u=\\theta$ (Kannala–Brandt).\n**After perfect undistortion the image obeys the pinhole model,** so a straight 3D line appears as a **straight line — or as a point**, if the line happens to be aligned with the viewing ray. Conversely: three collinear 3D points that do **not** come out collinear in the undistorted image prove the undistortion was imperfect.\n**Division model and calibration from lines.** $x_u=\\frac{x_d}{1+kr_d^2}$ ($k<0$ barrel, $k>0$ pincushion). Collinearity of three undistorted points is a $3\\times3$ determinant; multiplying row $i$ by $(1+kr_{di}^2)\\neq0$ preserves the zero condition and — by multilinearity in the third column — yields the **linear** constraint $A+kB=0$ with $A=\\det[x_d\\ y_d\\ 1]$, $B=\\det[x_d\\ y_d\\ r_d^2]$. Stacking $M$ triplets gives $\\hat k=-\\frac{\\sum_mA_mB_m}{\\sum_mB_m^2}$. One line with three points suffices for one coefficient; $n$ coefficients need $n$ triplets, and the constraint stays linear in all of them.\n**2023 paper focus.** Barrel and pincushion describe radial distortion. Tangential distortion comes mainly from lens/sensor misalignment. Radial models use even powers such as $r^2,r^4$ rather than a displacement linear in radius.",
       "questions": [
         {
           "type": "mc",
@@ -1128,6 +1191,37 @@
           "tags": [
             "Distortion estimation from straight lines",
             "Cremers-style practice"
+          ]
+        },
+        {
+          "type": "mc",
+          "freq": 1,
+          "sources": [
+            "23ELI 1b"
+          ],
+          "q": "Which statements about image distortion are **wrong**?",
+          "answer": "**Wrong: 1, 3 and 4.** Barrel and pincushion are types of **radial**, not tangential, distortion. Tangential distortion is mainly caused by lens/sensor misalignment. A limited radial model commonly uses terms in $r^2$ and $r^4$, so the displacement is not simply linear in radius; describing the model itself as a generic quartic polynomial is not the standard statement expected here.",
+          "options": [
+            {
+              "text": "Tangential distortion can be classified into barrel distortion and pincushion distortion.",
+              "correct": true
+            },
+            {
+              "text": "Tangential distortion is mainly caused by misalignment of the lens.",
+              "correct": false
+            },
+            {
+              "text": "For an ordinary lens with limited radial distortion, we typically use a quartic polynomial function as the distortion model.",
+              "correct": true
+            },
+            {
+              "text": "The amount of radial distortion is typically a linear function of the distance from the principal point.",
+              "correct": true
+            }
+          ],
+          "tags": [
+            "Radial distortion",
+            "Tangential distortion"
           ]
         }
       ]
